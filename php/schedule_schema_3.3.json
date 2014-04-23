@@ -1,0 +1,74 @@
+{
+    "title": "schedule",
+    "properties": {
+        "or": {
+            "description": "union - valid when any of subschedules is valid",
+            "type": "array",
+            "items": {
+            "$ref": "#"
+            }
+        },
+        "and": {
+            "description": "intersection - valid when all of subschedules are valid",
+            "type": "array",
+            "items": {
+            "$ref": "#"
+            }
+        },
+        "not": {
+            "description": "complement - valid when the subschedule is not valid",
+            "$ref": "#"
+        },
+        "wd": {
+            "description": "weekday: valid on listed weekdays, 1=monday,...,7=sunday",
+            "type": "array",
+            "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7
+            }
+        },
+        "bhr": {
+            "description": "begin hour [hour-integer, minute-integer, second-number]. End zeros can be omitted.",
+            "type": "array",
+            "items": {
+            "type": "integer"
+            }
+        },
+        "ehr": {
+            "description": "end hour [hour-integer, minute-integer, second-number]. End zeros can be omitted.",
+            "type": "array",
+            "items": {
+            "type": "integer"
+            }
+        },
+        "bev": {
+            "description": "begin event [year, month, day, hour, minute -integers, second-number]. End zeros can be omitted.",
+            "type": "array",
+            "items": {
+            "type": "integer"
+            }
+        },
+        "eev": {
+            "description": "end event [year, month, day, hour, minute -integers, second-number]. End zeros can be omitted.",
+            "type": "array",
+            "items": {
+            "type": "integer"
+            }
+        },
+        "bdate": {
+            "description": "begin date [ month, day] until the end of the year",
+            "type": "array",
+            "items": {
+            "type": "integer"
+            }
+        },
+        "edate": {
+            "description": "end date [ month, day] from the beginning of the year",
+            "type": "array",
+            "items": {
+            "type": "integer"
+            }
+        }
+    }
+}

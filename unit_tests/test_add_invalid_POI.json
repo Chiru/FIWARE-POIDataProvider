@@ -1,0 +1,17 @@
+{
+    "fw_core": {
+        "location": {
+            "wgs84": {
+                "latitude": "1",
+                "longitude": 1
+            }
+        },
+        "name": {
+            "": "Test POI invalid"
+        },
+        "category": "test_poi",
+        "description": {
+            "": "Test POI with invalid data (latitude is a string, should be a number)"
+        }
+    }
+}

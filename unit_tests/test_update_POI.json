@@ -1,0 +1,25 @@
+{
+    "ae01d34a-d0c1-4134-9107-71814b4805af": {
+        "fw_core": {
+            "location": {
+                "wgs84": {
+                    "latitude": 1,
+                    "longitude": 1
+                }
+            },
+            "category": "test_poi",
+            "name": {
+                "": "Test POI 1 updated"
+            },
+            "last_update": {
+                "timestamp": 1390985438
+            }
+        },
+        "fw_contact": {
+            "visit": "Santa Claus Village‎ 2, Napapiiri, 96930 Rovaniemi, Finland",
+            "postal": ["Santa Claus Village‎","Napapiiri","96930 Rovaniemi","Finland"],
+            "email": "travel.info@rovaniemi.fi",
+            "phone": "+358 16 346270"
+        }
+    }
+}

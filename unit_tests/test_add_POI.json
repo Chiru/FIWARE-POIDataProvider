@@ -1,0 +1,17 @@
+{
+    "fw_core": {
+        "location": {
+            "wgs84": {
+                "latitude": -2.0,
+                "longitude": -2.0
+            }
+        },
+        "name": {
+            "": "Test POI add"
+        },
+        "category": "test_poi",
+        "description": {
+            "": "Test POI for testing add_poi functionality"
+        }
+    }
+}
