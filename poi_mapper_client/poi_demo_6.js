@@ -1,5 +1,7 @@
 /* POI Demo 3 modified for Component POI data */
-"use strict"
+
+ "use strict"; // useful in debugging
+
 /* HTML elements */
 
 var elemCategoriesBox = document.getElementById("categories_box");
@@ -1326,18 +1328,22 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
     function categories_by_langs(categories, langs) {
         var result = '';
         for (var i = 0; i < categories.length; i++) {
-            var category = categories[i];
-            for (var j = 0; j < categories.length && category != null; j++) {
-                var sub_item = poi_categories[ontology][categories[j]];
-                if (sub_item._parents && sub_item._parents.indexOf(category) >= 0) {
-                    category == null;
+            try {
+                var category = categories[i];
+                for (var j = 0; j < categories.length && category != null; j++) {
+                    var sub_item = poi_categories[ontology][categories[j]];
+                    if (sub_item._parents && sub_item._parents.indexOf(category) >= 0 ) {
+                        category == null;
+                    }
                 }
-            }
-            if (category) {
-                var category_name = text_by_langs(poi_categories[ontology][category]._label, langs);
-                if (category_name) {
-                    result += ", " + category_name;
+                if (category) {
+                    var category_name 
+                        = text_by_langs(poi_categories[ontology][category]._label, langs);
+                    if (category_name) {
+                        result += ", " + category_name;
+                    }
                 }
+            } catch (e) {
             }
         }
         if (result.length > 2) {
@@ -1400,6 +1406,8 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
         poi_data = miwi_poi_pois[uuid] || {"label": "No information available"};
         poi_core = poi_data.fw_core;
         name = text_by_langs(poi_core["name"], languages);
+
+        category = categories_by_langs(poi_core["categories"], languages) || "";
         thumbnail = poi_core["thumbnail"] || "";
         label = text_by_langs(poi_core["label"], languages) || "";
         description = text_by_langs(poi_core["description"], languages);
@@ -1409,25 +1417,22 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
         found_label = (label != "");
         found_thumbnail = (thumbnail != "");
         //map.setZoom(15);
-        poiWindow.content = '<div id="infoTitle">' + str2html(name) + 
-                ' &#32;</div>' +
-                '<div id="infoText">' +
-                ((found_thumbnail || found_label) ? "<p>" : "") + 
-                  (found_thumbnail ? ('<img src="' + 
-                      str2html(thumbnail) + '" height="120px"/>') : "") +
-                  ((found_thumbnail && found_label) ? "<br/>" : "") + 
-                  (found_label ? str2html(label) : "") +
-                ((found_thumbnail || found_label) ? "</p>" : "") + 
-                ((description != "") ? 
-                    ("<p>" + str2html(description) + "</p>") : "") +
-                ((url != "") ?
-                    ("<p><a target=\"_blank\" href=\"" + str2html(url) + "\">" +
-                    str2html(url) + "</a></p>") : "") +
-                
-                '</div>';
-
+        poiWindow.content
+                = '<div id="infoCategory">' + str2html(category) + ' &#32;</div>'
+                + '<div id="infoTitle">' + str2html(name) + ' &#32;</div>'
+                + '<div id="infoText">'
+                + ((found_thumbnail || found_label) ? "<p>" : "")
+                + (found_thumbnail ? ('<img src="'
+                    + str2html(thumbnail) + '" height="120px"/>') : "")
+                + ((found_thumbnail && found_label) ? "<br/>" : "")
+                + (found_label ? str2html(label) : "")
+                + ((found_thumbnail || found_label) ? "</p>" : "")
+                + ((description != "") ? ("<p>" + str2html(description) + "</p>") : "")
+                + ((url != "") ?
+                    ("<p><a target=\"_blank\" href=\"" + str2html(url) + "\">"
+                        + str2html(url) + "</a></p>") : "")
+                + '</div>';
         poiWindow.open( map, poiMarker );
-        
     }
         
     function POI_onClick(poiMarker, uuid) {
@@ -1460,7 +1465,8 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
         name = data["name"] || "N.N.";
         categories = data["categories"] || [data["category"]] || ["_OTHER"];
         // Default icon is star !
-        icon_string = miwi_poi_icon_strings[categories[0]] || "star";
+        icon_string = (categories.length == 1 && miwi_poi_icon_strings[categories[0]])
+                      || "star";
         poi_data.icon_string = icon_string;
         local_name = text_by_langs(name, languages);
         local_categories = (categories && categories_by_langs(categories, languages)) || null;

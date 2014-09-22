@@ -208,11 +208,16 @@ div#log {
 */
 }
 
+div#infoCategory {
+    font-size: 0.8em;
+	max-width: 400px;
+}
 
 div#infoTitle {
     font-size: 0.9em; 
     font-weight: bold; 
     white-space: nowrap;
+    min-width: 60px;
 	width: auto;
 }
 

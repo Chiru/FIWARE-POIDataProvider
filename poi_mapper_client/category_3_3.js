@@ -7,11 +7,7 @@ category_type_handler = {
   ontology: "fw_osm",
 
   default_value: function(schema) {
-    for (var cat in poi_categories[ontology]) {
-        if (cat.charAt(0) != '_') {
-            return cat;
-        }
-    }
+    return '_OTHER';
   },
   
   set_input_field: function(input_field, value) {
@@ -64,6 +60,9 @@ category_type_handler = {
             '" value="' + data_item + '" onchange="sbje.field_changed(' +
             'this.id, this.value)" ' + 
             (eff_schema.title ? 'title="' + eff_schema.title + '" ' : '') + '/>' +
+            '<option value="_OTHER"' + (data_item == '_OTHER' ? ' selected="true"' : '') + '>'
+                + ((poi_categories._OTHER && poi_categories._OTHER._label.en) || 'Other')
+                + '</option>' +
             this.make_category_options(data_item) +
             '</select>';
   }
