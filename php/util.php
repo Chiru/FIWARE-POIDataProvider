@@ -18,7 +18,7 @@ function handle_common_search_params()
     if (isset($_GET['category']))
     {
         $category = $_GET['category'];
-        $esc_categories = escape_csv($category);
+        $esc_categories = escape_csv($category, "\"");
         $params['categories'] = $esc_categories;
     }
   
@@ -116,13 +116,13 @@ function handle_common_search_params()
     return $params;
 }
     
-function escape_csv($csv_string)
+function escape_csv($csv_string, $quote_type)
 {
     $esc_str = pg_escape_string($csv_string);
     $str_values = explode(",", $esc_str);
     foreach ($str_values as &$val)
     {
-        $val = "'".$val."'";
+        $val = $quote_type.$val.$quote_type;
     }
     $esc_csv = implode(",", $str_values);
     return $esc_csv;

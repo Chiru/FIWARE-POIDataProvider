@@ -55,13 +55,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
 //             print "fw_core found!";
             $fw_core = $request_array["fw_core"];
             
-            if (!isset($fw_core['name']) or !isset($fw_core['category']) or !isset($fw_core['location']))
+            if (!isset($fw_core['name']) or !isset($fw_core['categories']) or !isset($fw_core['location']))
             {
-                die ("Error: 'name', 'category' and 'location' are mandatory fields in fw_core!");
+                die ("Error: 'name', 'categories' and 'location' are mandatory fields in fw_core!");
             }
             
-            $name = pg_escape_string($fw_core['name']['']);
-            $category = pg_escape_string($fw_core['category']);
+            $categories = $fw_core['categories'];
+            foreach($categories as &$category)
+            {
+                $category = pg_escape_string($category);
+            }
+            
+            $pg_categories = "{". implode(",", $categories). "}";
             
             $location = $fw_core['location'];
             $lat = NULL;
@@ -83,9 +88,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
             if (isset($fw_core['thumbnail']))
                 $thumbnail = pg_escape_string($fw_core['thumbnail']);
             $timestamp = time();
+            
+            if (isset($fw_core['source']))
+            {
+                $src = $fw_core['source'];
+                if (isset($src['name']))
+                    $source_name = pg_escape_string($src['name']);
+                if (isset($src['website']))
+                    $source_website = pg_escape_string($src['website']);
+                if (isset($src['id']))
+                    $source_id = pg_escape_string($src['id']);
+                if (isset($src['license']))
+                    $source_license = pg_escape_string($src['license']);
+            }
+            
             $fw_core_tbl = $db_opts['fw_core_table_name'];
-            $insert = "INSERT INTO $fw_core_tbl (uuid, category, location, thumbnail, timestamp) " . 
-            "VALUES('$uuid', '$category', ST_GeogFromText('POINT($lon $lat)'), '$thumbnail', $timestamp);";
+            $insert = "INSERT INTO $fw_core_tbl (uuid, categories, location, thumbnail, timestamp, source_name, source_website, source_license, source_id) " . 
+            "VALUES('$uuid', '$pg_categories', ST_GeogFromText('POINT($lon $lat)'), '$thumbnail', $timestamp, '$source_name', '$source_website', '$source_license', '$source_id');";
             
             $insert_result = pg_query($insert);
             if (!$insert_result)

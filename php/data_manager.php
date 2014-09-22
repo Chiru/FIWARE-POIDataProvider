@@ -18,6 +18,7 @@ function validate_poi_data($poi_data)
     $temp = json_encode($poi_data);
     $poi_data = json_decode($temp);
     
+    
     // Validate
     $validator = new JsonSchema\Validator();
     $validator->check($poi_data, $poi_schema);
@@ -36,7 +37,7 @@ function validate_poi_data($poi_data)
 }
 
 //Loads the POI schema from file to a PHP object structure
-function load_poi_schema($poi_schema_file = 'poi_schema_3.3.json')
+function load_poi_schema($poi_schema_file = 'poi_schema_3.5.json')
 {
     $retriever = new JsonSchema\Uri\UriRetriever;
     $poi_schema = $retriever->retrieve('file://' . realpath($poi_schema_file));
@@ -74,9 +75,10 @@ function find_intl_properties($schema_obj, $base_path = '')
             $path = $base_path;
         }
 //          echo $path . "\n";
-        if (isset($value->title))
+        if (isset($value->id) and gettype($value->id) == "string")
         {
-            if ($value->title == "Internationalized string" or $value->title == "Internationalized URI")
+            //if ($value->title == "Internationalized string" or $value->title == "Internationalized URI")
+            if (strpos($value->id, "intl_string") != FALSE or strpos($value->id, "intl_uri") != FALSE)
             {
 //                echo "MultiLanguage value found from path: " . $path . "\n";
                $intl_properties[] = $path;

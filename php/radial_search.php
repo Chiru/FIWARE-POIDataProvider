@@ -52,14 +52,14 @@ if (isset ($_GET['lat']) and isset ($_GET['lon']))
     
     if (isset($common_params['categories']))
     {
-        $query = "SELECT uuid, category, thumbnail, st_x(location::geometry) as lon, st_y(location::geometry) as lat, st_astext(geometry) as geometry, timestamp, ".
-        "source_name, source_website, source_id, source_licence " .
-        "FROM $fw_core_tbl WHERE ST_DWithin(location, ST_GeogFromText('POINT($lon $lat)'), $radius) AND category in (" . $common_params['categories'] . ") LIMIT " . $common_params['max_results'];
+        $query = "SELECT uuid, array_to_string(categories, ',') as categories, thumbnail, st_x(location::geometry) as lon, st_y(location::geometry) as lat, st_astext(geometry) as geometry, timestamp, ".
+        "source_name, source_website, source_id, source_license " .
+        "FROM $fw_core_tbl WHERE ST_DWithin(location, ST_GeogFromText('POINT($lon $lat)'), $radius) AND categories && '{" . $common_params['categories'] . "}' LIMIT " . $common_params['max_results'];
     }
     
     else {
-        $query = "SELECT uuid, category, thumbnail, st_x(location::geometry) as lon, st_y(location::geometry) as lat, st_astext(geometry) as geometry, timestamp, " .
-        "source_name, source_website, source_id, source_licence " .
+        $query = "SELECT uuid, array_to_string(categories, ',') as categories, thumbnail, st_x(location::geometry) as lon, st_y(location::geometry) as lat, st_astext(geometry) as geometry, timestamp, " .
+        "source_name, source_website, source_id, source_license " .
         "FROM $fw_core_tbl WHERE ST_DWithin(location, ST_GeogFromText('POINT($lon $lat)'), $radius) LIMIT " . $common_params['max_results'];
     }
 //     echo "<br>" . $query;

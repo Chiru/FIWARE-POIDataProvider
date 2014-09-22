@@ -36,15 +36,15 @@ if (isset ($_GET['north']) and isset ($_GET['south']) and isset ($_GET['east']) 
     
     if (isset($esc_categories))
     {
-        $query = "SELECT uuid, category, thumbnail, st_x(location::geometry) as lon, st_y(location::geometry) as lat, st_astext(geometry) as geometry, timestamp, " .
-        "source_name, source_website, source_id, source_licence " .
+        $query = "SELECT uuid, array_to_string(categories, ',') as categories, thumbnail, st_x(location::geometry) as lon, st_y(location::geometry) as lat, st_astext(geometry) as geometry, timestamp, " .
+        "source_name, source_website, source_id, source_license " .
         "FROM $fw_core_tbl WHERE ST_Intersects(ST_Geogfromtext('POLYGON(($west $south, $east $south, $east $north, $west $north, $west $south))'), location) " .
         "AND category in (" . $common_params['categories'] . ") LIMIT " . $common_params['max_results'];
     }
     
     else {
-        $query = "SELECT uuid, category, thumbnail, st_x(location::geometry) as lon, st_y(location::geometry) as lat, st_astext(geometry) as geometry, timestamp, " .
-        "source_name, source_website, source_id, source_licence " .
+        $query = "SELECT uuid, array_to_string(categories, ',') as categories, thumbnail, st_x(location::geometry) as lon, st_y(location::geometry) as lat, st_astext(geometry) as geometry, timestamp, " .
+        "source_name, source_website, source_id, source_license " .
         "FROM $fw_core_tbl WHERE ST_Intersects(ST_Geogfromtext('POLYGON(($west $south, $east $south, $east $north, $west $north, $west $south))'), location) LIMIT " . $common_params['max_results'];
     }
 //     echo "<br>" . $query;

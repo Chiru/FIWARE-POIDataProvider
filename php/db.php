@@ -60,6 +60,7 @@ function fw_core_pgsql2array($core_result, $incl_fw_core)
         if ($incl_fw_core == TRUE) {
             $core_component = array();
             $core_component["location"] = array("wgs84" => array("latitude" => floatval($row['lat']), "longitude" => floatval($row['lon'])));
+            $core_component["categories"] = explode(',', $row['categories']);
             
             if ($row['timestamp'] != NULL)
             {
@@ -74,7 +75,7 @@ function fw_core_pgsql2array($core_result, $incl_fw_core)
             foreach (array_keys($row) as $key)
             {
                 #Skip these attributes, as they are handled differently
-                if ($key == 'uuid' or $key == 'lat' or $key == 'lon' or $key == 'timestamp' or $key == 'userid')
+                if ($key == 'uuid' or $key == 'lat' or $key == 'lon' or $key == 'timestamp' or $key == 'userid' or $key == 'categories')
                     continue;
                 
                 if ($row[$key] != NULL)

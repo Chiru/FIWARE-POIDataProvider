@@ -14,7 +14,7 @@ $components = get_supported_components();
 if (isset ($_GET['poi_id']))
 {
     $poi_id = $_GET['poi_id'];
-    $esc_ids = escape_csv($poi_id);
+    $esc_ids = escape_csv($poi_id, "'");
     
     if (isset($_GET['component']))
     {
@@ -49,8 +49,8 @@ if (isset ($_GET['poi_id']))
         $pgcon = connectPostgreSQL($db_opts["sql_db_name"]);
         $fw_core_tbl = $db_opts['fw_core_table_name'];
         
-        $query = "SELECT uuid, category, thumbnail, st_x(location::geometry) as lon, st_y(location::geometry) as lat, st_astext(geometry) as geometry, timestamp, " .
-            "source_name, source_website, source_id, source_licence FROM $fw_core_tbl WHERE uuid IN ($esc_ids)";
+        $query = "SELECT uuid, array_to_string(categories, ',') as categories, thumbnail, st_x(location::geometry) as lon, st_y(location::geometry) as lat, st_astext(geometry) as geometry, timestamp, " .
+            "source_name, source_website, source_id, source_license FROM $fw_core_tbl WHERE uuid IN ($esc_ids)";
 
         $core_result = pg_query($query);
         

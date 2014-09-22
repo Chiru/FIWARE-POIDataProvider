@@ -64,8 +64,6 @@
         }
       },
       "required": [
-        "category",
-        "location"
       ],
       "additionalProperties": false
     },
@@ -102,8 +100,6 @@
         }
       },
       "required": [
-        "type",
-        "schedule"
       ],
       "additionalProperties": false
     },
@@ -210,8 +206,6 @@
               }
             },
             "required": [
-              "type",
-              "url"
             ],
             "additionalProperties": false
           }
@@ -695,8 +689,6 @@
         }
       },
       "required": [
-        "timestamp",
-        "responsible"
       ],
       "additionalProperties": false
     }

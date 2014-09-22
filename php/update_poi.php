@@ -65,9 +65,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
 //             print "fw_core found!";
             $fw_core = $poi_data["fw_core"];
             
-            if (!isset($fw_core['name']) or !isset($fw_core['category']) or !isset($fw_core['location']))
+            if (!isset($fw_core['name']) or !isset($fw_core['categories']) or !isset($fw_core['location']))
             {
-                die ("Error: 'name', 'category' and 'location' are mandatory fields in fw_core!");
+                die ("Error: 'name', 'categories' and 'location' are mandatory fields in fw_core!");
             }
             
             $update_timestamp = 0;
@@ -114,8 +114,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
 
             update_fw_core_intl_properties($pgcon, $fw_core_intl_tbl, $uuid, $fw_core);
                       
-            $category = pg_escape_string($fw_core['category']);
+            $categories = $fw_core['categories'];
+            foreach($categories as &$category)
+            {
+                $category = pg_escape_string($category);
+            }
             
+            $pg_categories = "{". implode(",", $categories). "}";
+                       
             $location = $fw_core['location'];
             $lat = NULL;
             $lon = NULL;
@@ -143,17 +149,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
                     $source_website = pg_escape_string($src['website']);
                 if (isset($src['id']))
                     $source_id = pg_escape_string($src['id']);
-                if (isset($src['licence']))
-                    $source_licence = pg_escape_string($src['licence']);
+                if (isset($src['license']))
+                    $source_license = pg_escape_string($src['license']);
             }
             $new_timestamp = time();
             
 //             $update = "UPDATE $fw_core_tbl SET name='$name', category='$category', location=ST_GeogFromText('POINT($lon $lat)'), description='$description', " .
 //             "label='$label', url='$url', thumbnail='$thumbnail', timestamp=$new_timestamp WHERE uuid='$uuid';";
 
-            $update = "UPDATE $fw_core_tbl SET category='$category', location=ST_GeogFromText('POINT($lon $lat)'), " .
+            $update = "UPDATE $fw_core_tbl SET categories='$pg_categories', location=ST_GeogFromText('POINT($lon $lat)'), " .
             "thumbnail='$thumbnail', timestamp=$new_timestamp, source_name='$source_name', source_website='$source_website', " .
-            "source_id='$source_id', source_licence='$source_licence' WHERE uuid='$uuid';";
+            "source_id='$source_id', source_license='$source_license' WHERE uuid='$uuid';";
             
             $update_result = pg_query($update);
             if (!$update_result)
