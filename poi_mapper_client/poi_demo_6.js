@@ -1,6 +1,6 @@
 /* POI Demo 3 modified for Component POI data */
 
- "use strict"; // useful in debugging
+// "use strict"; // useful in debugging
 
 /* HTML elements */
 
