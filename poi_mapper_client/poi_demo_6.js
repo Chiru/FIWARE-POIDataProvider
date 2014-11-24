@@ -1460,7 +1460,7 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
         var languages = [miwi_languages[0].value, miwi_languages[1].value, "*"];
         var true_category, true_categories;
         var cat_item;
-
+        removePOI_UUID_FromMap(uuid);
         data = data || {};
         name = data["name"] || "N.N.";
         categories = data["categories"] || [data["category"]] || ["_OTHER"];
