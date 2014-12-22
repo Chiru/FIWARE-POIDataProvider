@@ -1,0 +1,1 @@
+{"Siri":{"version":"1.3","ServiceDelivery":{"ResponseTimestamp":1419245480184,"ProducerRef":{"value":"HSL"},"Status":true,"MoreData":false,"VehicleMonitoringDelivery":[{"version":"1.3","ResponseTimestamp":1419245480184,"Status":true,"VehicleActivity":[]}]}}}

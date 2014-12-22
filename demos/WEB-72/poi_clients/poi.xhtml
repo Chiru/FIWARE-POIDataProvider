@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>Dynamic Polling POIs on Map Demo</title>
+
+    <!-- Style -->
+    <link rel="stylesheet" type="text/css" media="all" href="layout.css" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script>
+var fw_versionInfo = "FIWARE Poi Mapper\n2014-12-17 aok";
+</script>    
+<script>
+// configuration
+    var CONFIG = {
+      BACKEND_ADDRESS_POI: "../vehicle_poi_server/",
+    };
+</script>
+<script>
+var fw_editAllowed = !(!parent || !parent.window || !parent.window.fw_editAllowed);
+    // if this is loaded to a frame, the containing page may allow editing
+    // double negation normalizes the result to true or false
+</script>
+    
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript" src="poi_schema_3_5.jsonp"/>
+<script type="text/javascript" src="category_3_3.js"></script>
+<script type="text/javascript" src="poi_categories_33.jsonp"></script>
+<script type="text/javascript" src="sbje_json_edit.js"/>
+<script type="text/javascript" src="WKT.js"/>
+
+</head>
+
+<body>
+
+<div id="container">
+    <div id="top">
+        <h1 id="top_header">Dynamic Polling POIs on Map Demo<font size="-1"> 
+           2014-12-17 aok</font></h1>
+      
+    </div>
+    <div id="info-buttons" style="position:absolute;top:20px;right:10px">
+        <img src="help_icon.png" onclick="show_help()"/>
+        <img src="info_icon.gif" onclick="alert(fw_versionInfo)"/>
+    </div>
+    
+    <div id="loadingScreen">
+        Loading Demo... <br />
+        <span id="progress"></span>
+    </div>
+
+    <div id="content_wrapper">
+        <div id="left">
+            <div id="no_control_panel" class="no_control_panel_control">
+              <img src="right_angle_icon.png"
+                    id="control_panel_open_icon"
+              alt="&lt;" onclick="set_control_visibility(true)" title="close control"/>
+            </div>
+            <div id="control_panel" class="control_panel_control">
+              <img src="left_angle_icon.png"
+                    id="control_panel_close_icon"
+              alt="&gt;" onclick="set_control_visibility(false)" title="open control"/>
+              <h3>Categories</h3>
+              <div id="categories_box">
+                <div id="categories">
+                </div>
+              </div>
+                  
+            </div>
+        </div>
+        <div id="middle" class="middle_normal">
+            <div id="map-canvas"></div>
+        </div>
+        <div id="right">
+            <div id="log"></div>
+        </div>
+    </div>
+    <div id="footer">
+	        <a href="http://www.cie.fi/" target="_blank">
+			  <img src="cie_landscape.png" 
+			    width="200px" align="left" style="margin-left: 4px;margin-top:4px;"/>
+		    </a>
+        <div id="buttons">
+            Position:
+            <input type="text" id="address" style="width:300px;" value="address/lat lon"/>
+            <button id="button2">Go to position</button>
+            <button id="button1" title="Find my true location">Locate me</button>
+<!--			
+            <button id="button3">Map Auto-Update Off</button>
+            <button id="button4">Update</button>
+-->
+        </div>
+        <div id="languages">
+          1<sup>st</sup>
+          <select id="lang_sel_1" title="Select primary language">
+            <option value="en" selected="selected">English</option>
+            <option value="fi">suomi</option>
+            <option value="de">Deutsch</option>
+            <option value="es">espa&#xf1;ol</option>
+          </select>
+          <br/>
+          2<sup>nd</sup>
+          <select id="lang_sel_2" title="Select secondary language">
+            <option value="*" selected="selected">[ any ]</option>
+            <option value="en">English</option>
+            <option value="fi">suomi</option>
+            <option value="de">Deutsch</option>
+            <option value="es">espa&#xf1;ol</option>
+            <option value="">-</option>
+          </select>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="Util.js"></script>
+<script type="text/javascript" src="poi_demo_6.js"></script>
+<script type="text/javascript" src="icon_strings.js"/>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=true&amp;callback=demo4.initialize"></script>
+
+<script type="text/javascript">
+
+function set_control_visibility(value) {
+  var html_element = {
+        top: document.getElementById("top"),
+        content_wrapper: document.getElementById("content_wrapper"),
+        control_panel: document.getElementById("control_panel"),
+        no_control_panel: document.getElementById("no_control_panel"),
+        footer: document.getElementById("footer"),
+        middle: document.getElementById("middle") };
+  var mode = (value ? "_control" : "_map");
+  var key;
+  for (key in html_element) {
+    html_element[key].className = key+mode;
+  }
+  var map = demo4.getMap();
+  map.setOptions({mapTypeControl: value});
+  google.maps.event.trigger(map, "resize");
+}
+
+var loaded = function() {
+  console.log("B");
+  if (fw_editAllowed) {
+    var elem_header = document.getElementById("top_header");
+    elem_header.innerHTML = elem_header.innerHTML.replace("Browser", "Editor");
+  }
+  sbje.type_handler["poi_category"] = category_type_handler;
+
+  console.log("startti");
+}
+
+function show_help() {
+  window.open("readme.txt", "_blank",
+    "location=no, titlebar=no, toolbar=no, menubar=no, status=no, "
+    +"scrollbars=yes, resizable=yes, top=200, left=500, width=610, height=400");
+}
+
+window.onload = loaded;
+
+</script>
+
+
+</body>
+</html>

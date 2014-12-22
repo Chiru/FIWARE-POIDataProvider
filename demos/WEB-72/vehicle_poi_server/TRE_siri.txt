@@ -1,0 +1,1 @@
+{"Siri":{"ServiceDelivery":{"ResponseTimestamp":1419245490531,"ProducerRef":{"value":"IJ2010"},"Status":true,"MoreData":false,"VehicleMonitoringDelivery":[{"VehicleActivity":[],"version":"1.3","ResponseTimestamp":1419245490531,"Status":true}]},"version":"1.3"}}

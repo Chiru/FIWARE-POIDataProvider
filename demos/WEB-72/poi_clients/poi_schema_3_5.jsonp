@@ -1,0 +1,691 @@
+var poi_schema = {
+  "title": "Point of Interest",
+  "type": "object",
+  "properties": {
+    "fw_core": {
+      "title": "Core information",
+      "description": "For spatial search and finding that interesting one",
+      "type": "object",
+      "properties": {
+        "categories": {
+          "title": "Categories",
+          "description": "Descriptive tags for narrowing the search: cafe, museum, etc.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "fw_type": "poi_category"
+          },
+          "minItems": 1
+        },
+        "location": {
+          "title": "Location",
+          "description": "Location of the POI",
+          "$ref": "#/definitions/location"
+        },
+        "geometry": {
+          "title": "Geometrical form of the POI",
+          "description": "Format: Open Geospatial Consortium's 'Well-known text' ISO/IEC 13249-3:2011",
+          "type": "string"
+        },
+        "short_name": {
+          "title": "Short name",
+          "description": "Short name (max. 31 chars) to be shown on the map or in a narrow list",
+          "$ref": "#/definitions/intl_string_31"
+        },
+        "name": {
+          "title": "Name",
+          "description": "Descriptive name",
+          "$ref": "#/definitions/intl_string"
+        },
+        "label": {
+          "title": "Label",
+          "description": "More info to complement the name, if enough space",
+          "$ref": "#/definitions/intl_string_127"
+        },
+        "description": {
+          "title": "Description",
+          "description": "Text to facilitate decision to be interested or not",
+          "$ref": "#/definitions/intl_string"
+        },
+        "thumbnail": {
+          "title": "Thumbnail",
+          "description": "Link to a small picture to be shown on a list, scene or map. Preferably max. 256x256 pixels, e.g. 120x160.",
+          "type": "string",
+          "format": "uri"
+        },
+        "url": {
+          "title": "Web address",
+          "description": "URL to get more info, preferably official website of the POI",
+          "$ref": "#/definitions/intl_uri"
+        },
+        "source": {
+          "title": "Source of information",
+          "$ref": "#/definitions/source"
+        },
+        "last_update": {
+          "title": "Last update",
+          "description": "DO NOT EDIT! Information to identify the version of the data component.",
+          "$ref": "#/definitions/update_stamp"
+        }
+      },
+      "required": [
+        "categories",
+        "location"
+      ],
+      "additionalProperties": false
+    },
+    "fw_time": {
+      "title": "fw_time",
+      "description": "Temporal availability of the place or the associated service",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "",
+          "description": "Open - available thru open time, show_times - available at beginnings of shows",
+          "enum": [
+            "open",
+            "show_times"
+          ]
+        },
+        "time_zone": {
+          "title": "Time zone, - under development -",
+          "description": "TBD. Local time is assumed. Standardized notation including daylight savings time reference is needed."
+        },
+        "schedule": {
+          "title": "Schedule",
+          "description": "Definition of times of availability",
+          "$ref": "#/definitions/schedule"
+        },
+        "source": {
+          "title": "Source of information",
+          "$ref": "#/definitions/source"
+        },
+        "last_update": {
+          "title": "Last update",
+          "description": "DO NOT EDIT! Information to identify the version of the data component.",
+          "$ref": "#/definitions/update_stamp"
+        }
+      },
+      "required": [
+        "type",
+        "schedule"
+      ],
+      "additionalProperties": false
+    },
+    "fw_xml3d": {
+      "description": "3D description",
+      "type": "object",
+      "properties": {
+        "model_id": {
+          "description": "ID for XML3D engine",
+          "type": "string"
+        },
+        "model": {
+          "description": "Model for XML3D engine",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source of information",
+          "$ref": "#/definitions/source"
+        },
+        "last_update": {
+          "title": "Last update",
+          "description": "DO NOT EDIT! Information to identify the version of the data component.",
+          "$ref": "#/definitions/update_stamp"
+        }
+      },
+      "additionalProperties": false
+    },
+    "fw_contact": {
+      "properties": {
+        "visit": {
+          "description": "Visiting address good for a taxi driver or Google Maps",
+          "type": "string"
+        },
+        "postal": {
+          "description": "Postal address. One string per line",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "mailto": {
+          "description": "Email address",
+          "type": "string"
+        },
+        "phone": {
+          "description": "Phone number",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source of information",
+          "$ref": "#/definitions/source"
+        },
+        "last_update": {
+          "$ref": "#/definitions/update_stamp"
+        }
+      },
+      "additionalProperties": false
+    },
+    "fw_media": {
+      "description": "Media items related to this POI item",
+      "type": "object",
+      "properties": {
+        "entities": {
+          "description": "",
+          "type": "array",
+          "items": {
+            "description": "",
+            "type": "object",
+            "properties": {
+              "type": {
+                "description": "what kind of media item this is",
+                "enum": [
+                  "folder",
+                  "photo",
+                  "video",
+                  "audio"
+                ]
+              },
+              "short_label": {
+                "description": "To be shown along the item",
+                "$ref": "#/definitions/intl_string_31"
+              },
+              "caption": {
+                "description": "To be shown along the item",
+                "$ref": "#/definitions/intl_string_127"
+              },
+              "description": {
+                "description": "More info about the item",
+                "$ref": "#/definitions/intl_string"
+              },
+              "thumbnail": {
+                "description": "A small picture to be shown in the list",
+                "type": "string",
+                "format": "uri"
+              },
+              "url": {
+                "description": "URL of the actual media item",
+                "type": "string",
+                "format": "uri"
+              },
+              "copyright": {
+                "description": "Copyright clause and/or attribution of the item",
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "url"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "last_update": {
+          "title": "Last update",
+          "description": "DO NOT EDIT! Information to identify the version of the data component.",
+          "$ref": "#/definitions/update_stamp"
+        }
+      },
+      "additionalProperties": false
+    },
+    "fw_relationships": {
+      "description": "List of relationships the POI is connected to.",
+      "type": "object",
+      "additionalProperties": {
+        "description": "specifies relations between POIs and possibly something else. Key is the UUID of the relationship.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "UUID of the relation",
+            "type": "string"
+          },
+          "subject": {
+            "description": "UUID of the source of the relation",
+            "type": "string"
+          },
+          "predicate": {
+            "description": "type of the relation",
+            "type": "object",
+            "additionalProperties": {
+              "description": "defines the type of the relation within ontology defined by the key",
+              "type": "string"
+            }
+          },
+          "object": {
+            "description": "UUID of the target of the relation",
+            "type": "string"
+          },
+          "last_update": {
+            "$ref": "#/definitions/update_stamp"
+          }
+        }
+      }
+    },
+    "fw_tags": {
+      "title": "Tags",
+      "description": "Texts for tagging the place",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "fw_marker": {
+      "title": "fw_marker",
+      "description": "Marker choices for different tracking techniques",
+      "type": "object",
+      "properties": {
+        "alvar_3x3": {
+          "title": "Alvar 3x3",
+          "description": "3x3 marker used in Alvar (VTT Oulu) marker tracking system is used as an example here.",
+          "type": "object",
+          "properties": {
+            "code": {
+              "description": "code embedded to marker as defined by Alvar",
+              "type": "integer"
+            },
+            "image_ref": {
+              "description": "image of the marker e.g. for printing",
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "additionalProperties": false
+        },
+        "alvar_5x5": {
+          "title": "Alvar 5x5",
+          "description": "5x5 marker used in Alvar (VTT Oulu) marker tracking system is used as an example here.",
+          "type": "object",
+          "properties": {
+            "code": {
+              "description": "code embedded to marker as defined by Alvar",
+              "type": "integer"
+            },
+            "image_ref": {
+              "description": "image of the marker e.g. for printing",
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "additionalProperties": false
+        },
+        "image": {
+          "title": "Image",
+          "description": "Image-only marker for generic use",
+          "type": "object",
+          "properties": {
+            "image_ref": {
+              "description": "image of the marker e.g. for printing",
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "additionalProperties": false
+        },
+        "source": {
+          "title": "Source of information",
+          "$ref": "#/definitions/source"
+        },
+        "last_update": {
+          "title": "Last update",
+          "description": "DO NOT EDIT! Information to identify the version of the data component.",
+          "$ref": "#/definitions/update_stamp"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "definitions": {
+    "location": {
+      "type": "object",
+      "properties": {
+        "wgs84": {
+          "title": "World Geodetic System",
+          "description": "",
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "description": "degrees north",
+              "type": "number"
+            },
+            "longitude": {
+              "description": "degrees east",
+              "type": "number"
+            },
+            "height": {
+              "description": "meters up from sea level, optional",
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "intl_string": {
+      "type": "object",
+      "properties": {
+        "_def": {
+          "title": "Default language override",
+          "description": "Optional key of the default language for this string",
+          "type": "string"
+        },
+        "": {
+          "title": "Language independent text",
+          "description": "",
+          "type": "string"
+        },
+        "de": {
+          "title": "Text in German",
+          "description": "",
+          "type": "string"
+        },
+        "en": {
+          "title": "Text in English",
+          "description": "",
+          "type": "string"
+        },
+        "es": {
+          "title": "Text in Spanish",
+          "description": "",
+          "type": "string"
+        },
+        "fi": {
+          "title": "Text in Finnish",
+          "description": "",
+          "type": "string"
+        }
+      },
+      "additionalProperties": {
+        "title": "Text in language <key>",
+        "description": "The key is ISO 639-1 Language Code",
+        "type": "string"
+      }
+    },
+    "intl_string_31": {
+      "type": "object",
+      "properties": {
+        "_def": {
+          "title": "Default language override",
+          "description": "Optional key of the default language for this string",
+          "type": "string"
+        },
+        "": {
+          "title": "Language independent text",
+          "description": "",
+          "type": "string",
+          "maxLength": 31
+        },
+        "de": {
+          "title": "Text in German",
+          "description": "",
+          "type": "string",
+          "maxLength": 31
+        },
+        "en": {
+          "title": "Text in English",
+          "description": "",
+          "type": "string",
+          "maxLength": 31
+        },
+        "es": {
+          "title": "Text in Spanish",
+          "description": "",
+          "type": "string",
+          "maxLength": 31
+        },
+        "fi": {
+          "title": "Text in Finnish",
+          "description": "",
+          "type": "string",
+          "maxLength": 31
+        }
+      },
+      "additionalProperties": {
+        "title": "Text in language <key>",
+        "description": "The key is ISO 639-1 Language Code",
+        "type": "string",
+        "maxLength": 31
+      }
+    },
+    "intl_string_127": {
+      "type": "object",
+      "properties": {
+        "_def": {
+          "title": "Default language override",
+          "description": "Optional key of the default language for this string",
+          "type": "string"
+        },
+        "": {
+          "title": "Language independent text",
+          "description": "",
+          "type": "string",
+          "maxLength": 127
+        },
+        "de": {
+          "title": "Text in German",
+          "description": "",
+          "type": "string",
+          "maxLength": 127
+        },
+        "en": {
+          "title": "Text in English",
+          "description": "",
+          "type": "string",
+          "maxLength": 127
+        },
+        "es": {
+          "title": "Text in Spanish",
+          "description": "",
+          "type": "string",
+          "maxLength": 127
+        },
+        "fi": {
+          "title": "Text in Finnish",
+          "description": "",
+          "type": "string",
+          "maxLength": 127
+        }
+      },
+      "additionalProperties": {
+        "title": "Text in language <key>",
+        "description": "The key is ISO 639-1 Language Code",
+        "type": "string",
+        "maxLength": 127
+      }
+    },
+    "intl_uri": {
+      "type": "object",
+      "properties": {
+        "_def": {
+          "title": "Default language override",
+          "description": "Optional key of the default language for this link",
+          "type": "string"
+        },
+        "": {
+          "title": "Language independent URI",
+          "description": "",
+          "type": "string",
+          "format": "uri"
+        },
+        "de": {
+          "title": "URI for German",
+          "description": "",
+          "type": "string",
+          "format": "uri"
+        },
+        "en": {
+          "title": "URI for English",
+          "description": "",
+          "type": "string",
+          "format": "uri"
+        },
+        "es": {
+          "title": "URI for Spanish",
+          "description": "",
+          "type": "string",
+          "format": "uri"
+        },
+        "fi": {
+          "title": "URI for Finnish",
+          "description": "",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": {
+        "title": "URI for language <key>",
+        "description": "The key is ISO 639-1 Language Code",
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "date": {
+      "type": "array",
+      "description": "[yy, MM, dd]",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "time": {
+      "type": "array",
+      "description": "[hh, mm, ss.decimals]",
+      "items": {
+          "type": "number"
+      },
+      "maxItems": 3
+    },
+    "date_time": {
+      "type": "array",
+      "description": "[yy, MM, dd, hh, mm, ss.decimals]",
+      "items": {
+          "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 6
+    },
+    "schedule": {
+      "type": "object",
+      "properties": {
+        "or": {
+          "title": "Any of",
+          "description": "union - valid when any of sub-schedules is valid",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/schedule"
+          }
+        },
+        "and": {
+          "title": "All of",
+          "description": "intersection - valid when all of sub-schedules are valid",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/schedule"
+          }
+        },
+        "not": {
+          "title": "Those not in",
+          "description": "complement - valid when the sub schedule is not valid",
+          "$ref": "#/definitions/schedule"
+        },
+        "wd": {
+          "title": "Weekdays",
+          "description": "weekday: valid on listed weekdays, 1=Monday,...,7=Sunday",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7
+          }
+        },
+        "bhr": {
+          "title": "Begin time",
+          "description": "begin hour [hour-integer, minute-integer, second-number]. End zeros can be omitted.",
+          "$ref": "#/definitions/time"
+        },
+        "ehr": {
+          "title": "End time",
+          "description": "end hour [hour-integer, minute-integer, second-number]. End zeros can be omitted.",
+          "$ref": "#/definitions/time"
+        },
+        "bev": {
+          "title": "Since date, time",
+          "description": "begin event [year, month, day, hour, minute -integers, second-number]. End zeros can be omitted.",
+          "$ref": "#/definitions/date_time"
+        },
+        "eev": {
+          "title": "Until date, time",
+          "description": "end event [year, month, day, hour, minute -integers, second-number]. End zeros can be omitted.",
+          "$ref": "#/definitions/date_time"
+        },
+        "bdate": {
+          "title": "First month, day",
+          "description": "starting [ month, day] until the end of the year",
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "edate": {
+          "title": "Last month, day",
+          "description": "from the beginning of the year ending [ month, day] ",
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Source of the component information",
+          "type": "string"
+        },
+        "website": {
+          "description": "Link to a related webpage",
+          "type": "string",
+          "format": "uri"
+        },
+        "id": {
+          "description": "UUID of the source profile",
+          "type": "string"
+        },
+        "license": {
+          "description": "Link to applied license",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false
+    },
+    "update_stamp": {
+      "type": "object",
+      "fw_read_only": true,
+      "properties": {
+        "timestamp": {
+          "description": "When updated - to catch conflicts (unix timestamp format)",
+          "type": "integer"
+        },
+        "responsible": {
+          "description": "Who updated, UUID of the profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "timestamp",
+        "responsible"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+};

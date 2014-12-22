@@ -1,0 +1,1 @@
+*/2 * * * * wget --spider http://localhost/FI-WARE/demos/WEB-72/orion_adapter/write_orion.php 1> /dev/null 2> /dev/null 
