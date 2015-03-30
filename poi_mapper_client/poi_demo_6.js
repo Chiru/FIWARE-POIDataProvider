@@ -408,11 +408,8 @@ console.log(JSON.stringify(updating_data));
         centerChangedTimeout,
         oldMapCenter,
         CENTER_CHANGED_THRESHOLD = 130,
-//        BACKEND_ADDRESS_POI = "http://localhost:8000/poi_demo_5/",
-        BACKEND_ADDRESS_POI = "http://dev.cie.fi/FI-WARE/poi_dp_new/",
-//        BACKEND_ADDRESS_POI = "http://130.231.12.82/FI-WARE/php/deployment/",
-//        BACKEND_ADDRESS_3D = "http://localhost:8000/poi_demo_5/",
-//        BACKEND_ADDRESS_3D = "http://chiru.cie.fi:8085/",
+
+        BACKEND_ADDRESS_POI = "http://localhost/poi_dp/",
 
         searchRadius = 600,
         searchRadiusScaling = 2.0;
@@ -1417,8 +1414,8 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
         found_label = (label != "");
         found_thumbnail = (thumbnail != "");
         //map.setZoom(15);
-        poiWindow.content
-                = '<div id="infoCategory">' + str2html(category) + ' &#32;</div>'
+        poiWindow.setContent(
+                  '<div id="infoCategory">' + str2html(category) + ' &#32;</div>'
                 + '<div id="infoTitle">' + str2html(name) + ' &#32;</div>'
                 + '<div id="infoText">'
                 + ((found_thumbnail || found_label) ? "<p>" : "")
@@ -1431,7 +1428,7 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
                 + ((url != "") ?
                     ("<p><a target=\"_blank\" href=\"" + str2html(url) + "\">"
                         + str2html(url) + "</a></p>") : "")
-                + '</div>';
+                + '</div>' );
         poiWindow.open( map, poiMarker );
     }
         
