@@ -3,7 +3,7 @@
 CREATE TABLE fw_core
 (
   uuid uuid NOT NULL,
-  category character varying(64),
+  categories character varying(64)[],
   location geography,
   geometry geometry,
   osm_id integer, -- OpenStreetMap ID (for POIs imported from OSM)
