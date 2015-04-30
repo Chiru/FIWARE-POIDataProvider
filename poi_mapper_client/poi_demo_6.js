@@ -40,6 +40,172 @@ var miwi_poi_pois_by_category = {}; // "schema" follows
 
 /**/
 
+/* NOTE: The following is needed to filter strings for Google InfoWindows. */
+
+/*  html_ent2xml - convert html entities to xml
+    ============
+   
+    This converts entities not allowed in xml to well behaving
+    xml numeric character entities.           
+    
+    html_ent2xml(rawstr: string): string;
+        rawstr - string possibly containing html character entities
+        
+        *result - input string where html entities converted to numeric
+        
+    Example: "Acme&reg;" -> "Acme&#174;"    
+*/        
+        
+var html_ent2xml_table = {
+  // NOTE: max length of the key is 6
+  // these XML entities are not changed
+  "quot": "quot", // quotation mark (APL quote)
+  "amp": "amp", // ampersand
+  "apos": "apos", // apostrophe (apostrophe-quote)
+  "lt": "lt", // less-than sign
+  "gt": "gt", // greater-than sign
+  // these HTML entities are changed to numeric
+  "nbsp": "#160", // no-break space (non-breaking space)[d]
+  "iexcl": "#161", // inverted exclamation mark
+  "cent": "#162", // cent sign
+  "pound": "#163", // pound sign
+  "curren": "#164", // currency sign
+  "yen": "#165", // yen sign (yuan sign)
+  "brvbar": "#166", // broken bar (broken vertical bar)
+  "sect": "#167", // section sign
+  "uml": "#168", // diaeresis (spacing diaeresis); see Germanic umlaut
+  "copy": "#169", // copyright symbol
+  "ordf": "#170", // feminine ordinal indicator
+  "laquo": "#171", // left-pointing double angle quotation mark (left pointing guillemet)
+  "not": "#172", // not sign
+  "shy": "#173", // soft hyphen (discretionary hyphen)
+  "reg": "#174", // registered sign (registered trademark symbol)
+  "macr": "#175", // macron (spacing macron, overline, APL overbar)
+  "deg": "#176", // degree symbol
+  "plusmn": "#177", // plus-minus sign (plus-or-minus sign)
+  "sup2": "#178", // superscript two (superscript digit two, squared)
+  "sup3": "#179", // superscript three (superscript digit three, cubed)
+  "acute": "#180", // acute accent (spacing acute)
+  "micro": "#181", // micro sign
+  "para": "#182", // pilcrow sign (paragraph sign)
+  "middot": "#183", // middle dot (Georgian comma, Greek middle dot)
+  "cedil": "#184", // cedilla (spacing cedilla)
+  "sup1": "#185", // superscript one (superscript digit one)
+  "ordm": "#186", // masculine ordinal indicator
+  "raquo": "#187", // right-pointing double angle quotation mark (right pointing guillemet)
+  "frac14": "#188", // vulgar fraction one quarter (fraction one quarter)
+  "frac12": "#189", // vulgar fraction one half (fraction one half)
+  "frac34": "#190", // vulgar fraction three quarters (fraction three quarters)
+  "iquest": "#191", // inverted question mark (turned question mark)
+  "Agrave": "#192", // Latin capital letter A with grave accent (Latin capital letter A grave)
+  "Aacute": "#193", // Latin capital letter A with acute accent
+  "Acirc": "#194", // Latin capital letter A with circumflex
+  "Atilde": "#195", // Latin capital letter A with tilde
+  "Auml": "#196", // Latin capital letter A with diaeresis
+  "Aring": "#197", // Latin capital letter A with ring above (Latin capital letter A ring)
+  "AElig": "#198", // Latin capital letter AE (Latin capital ligature AE)
+  "Ccedil": "#199", // Latin capital letter C with cedilla
+  "Egrave": "#200", // Latin capital letter E with grave accent
+  "Eacute": "#201", // Latin capital letter E with acute accent
+  "Ecirc": "#202", // Latin capital letter E with circumflex
+  "Euml": "#203", // Latin capital letter E with diaeresis
+  "Igrave": "#204", // Latin capital letter I with grave accent
+  "Iacute": "#205", // Latin capital letter I with acute accent
+  "Icirc": "#206", // Latin capital letter I with circumflex
+  "Iuml": "#207", // Latin capital letter I with diaeresis
+  "ETH": "#208", // Latin capital letter Eth
+  "Ntilde": "#209", // Latin capital letter N with tilde
+  "Ograve": "#210", // Latin capital letter O with grave accent
+  "Oacute": "#211", // Latin capital letter O with acute accent
+  "Ocirc": "#212", // Latin capital letter O with circumflex
+  "Otilde": "#213", // Latin capital letter O with tilde
+  "Ouml": "#214", // Latin capital letter O with diaeresis
+  "times": "#215", // multiplication sign
+  "Oslash": "#216", // Latin capital letter O with stroke (Latin capital letter O slash)
+  "Ugrave": "#217", // Latin capital letter U with grave accent
+  "Uacute": "#218", // Latin capital letter U with acute accent
+  "Ucirc": "#219", // Latin capital letter U with circumflex
+  "Uuml": "#220", // Latin capital letter U with diaeresis
+  "Yacute": "#221", // Latin capital letter Y with acute accent
+  "THORN": "#222", // Latin capital letter THORN
+  "szlig": "#223", // Latin small letter sharp s (ess-zed); see German Eszett
+  "agrave": "#224", // Latin small letter a with grave accent
+  "aacute": "#225", // Latin small letter a with acute accent
+  "acirc": "#226", // Latin small letter a with circumflex
+  "atilde": "#227", // Latin small letter a with tilde
+  "auml": "#228", // Latin small letter a with diaeresis
+  "aring": "#229", // Latin small letter a with ring above
+  "aelig": "#230", // Latin small letter ae (Latin small ligature ae)
+  "ccedil": "#231", // Latin small letter c with cedilla
+  "egrave": "#232", // Latin small letter e with grave accent
+  "eacute": "#233", // Latin small letter e with acute accent
+  "ecirc": "#234", // Latin small letter e with circumflex
+  "euml": "#235", // Latin small letter e with diaeresis
+  "igrave": "#236", // Latin small letter i with grave accent
+  "iacute": "#237", // Latin small letter i with acute accent
+  "icirc": "#238", // Latin small letter i with circumflex
+  "iuml": "#239", // Latin small letter i with diaeresis
+  "eth": "#240", // Latin small letter eth
+  "ntilde": "#241", // Latin small letter n with tilde
+  "ograve": "#242", // Latin small letter o with grave accent
+  "oacute": "#243", // Latin small letter o with acute accent
+  "ocirc": "#244", // Latin small letter o with circumflex
+  "otilde": "#245", // Latin small letter o with tilde
+  "ouml": "#246", // Latin small letter o with diaeresis
+  "divide": "#247", // division sign (obelus)
+  "oslash": "#248", // Latin small letter o with stroke (Latin small letter o slash)
+  "ugrave": "#249", // Latin small letter u with grave accent
+  "uacute": "#250", // Latin small letter u with acute accent
+  "ucirc": "#251", // Latin small letter u with circumflex
+  "uuml": "#252", // Latin small letter u with diaeresis
+  "yacute": "#253", // Latin small letter y with acute accent
+  "thorn": "#254", // Latin small letter thorn
+  "yuml": "#255" // Latin small letter y with diaeresis
+  // other entities are ignored 
+};
+
+function html_ent2xml (rawstr) {
+  var result = "";
+  var code;
+  var rawlen; // rawstr length
+  var elen; // entity length
+  var sename, tename; // source and target entity names
+  var i;
+  
+  if (!rawstr) {
+      rawstr = "";
+  }
+  
+  rawlen = rawstr.length;
+  i = 0;
+  while ( i < rawlen) {
+    code = rawstr.charCodeAt(i);
+    if (code == 0x26) { // ampersand, possible html-only entity
+      elen = rawstr.indexOf(";", i) - i - 1;
+      if ((elen > 0) && (elen < 7)) { // max entity length == 6
+        sename = rawstr.substr(i + 1, elen);
+        tename = html_ent2xml_table[sename];
+        if(tename != undefined) { // if replacement found
+          result += "&" + tename + ";";
+          i += elen + 1; // skip source entity
+          code = -1; // mark processed
+        }
+      }
+    }
+    if (code > -1) {
+      if (code < 0x7f) {
+          result = result + (str2html_table[rawstr[i]] ? 
+      (str2html_table[rawstr[i]]) : (rawstr[i]));
+      } else {
+          result = result + "&#x" + code.toString(16) + ";";
+      }
+    }
+    i++;
+	}
+	return result;
+}
+/*-------------*/
+
 /*  str2html - convert any string for safe display in html
     ========
    
@@ -81,6 +247,30 @@ function str2html (rawstr) {
 	}
 	return result;
 }
+/*-----------------*/
+
+var safe_html_table = {
+	"<": "&lt;"
+};
+
+function safe_html (rawstr) {
+	var result = "";
+    var code;
+    if (!rawstr) {
+        rawstr = "";
+    }
+	for (var i = 0; i < rawstr.length; i++) {
+        code = rawstr.charCodeAt(i);
+        if (code < 0x7f) {
+            result = result + (safe_html_table[rawstr[i]] ? 
+				(safe_html_table[rawstr[i]]) : (rawstr[i]));
+        } else {
+            result = result + "&#x" + code.toString(16) + ";";
+        }
+	}
+	return result;
+}
+
 /**/
 
 (function ( namespace ) {
@@ -191,7 +381,7 @@ function isValidPOI(poi_data) {
     try {
         if (!poi_data.fw_core.categories[0]) return false;
         for (var lang in poi_data.fw_core.name) {
-            if (lang.length > 0 && lang.charAt(0) != '_') {
+            if (lang.length == 0 || lang.charAt(0) != '_') {
                 if (poi_data.fw_core.name[lang]) return true;
             }
         }
@@ -238,17 +428,18 @@ function updatePOI( poi_data, uuid ) {
     miwi_poi_xhr = new XMLHttpRequest();
     
     miwi_poi_xhr.overrideMimeType("application/json");
-    
     miwi_poi_xhr.onreadystatechange = function () {
         var data;
         var poiMarker;
         if(miwi_poi_xhr.readyState === 4) {
             if(miwi_poi_xhr.status  === 200) { 
 //                alert( "success: " + miwi_poi_xhr.responseText);
-                removePOI_UUID_FromMap(uuid);
                 POI_edit_cancel();
+// Todo: Combine the following 3 operations everywhere!   
+                removePOI_UUID_FromMap(uuid);
                 delete miwi_poi_pois[uuid];
                 unstorePoi(uuid);
+// end to be combined                
                 data = {pois:{}};
                 data.pois[uuid] = poi_data;
                 processPoiData(data);
@@ -351,6 +542,39 @@ console.log(JSON.stringify(updating_data));
 
    }
     
+    function get_full_POI(uuid, cont_func, cont_data) {
+        var restQueryURL, poi_data, poi_core;
+        var poiMarker = getPoiLocal(uuid, 'marker');
+
+//        show_POI_window(poiMarker, uuid);
+        
+        restQueryURL = BACKEND_ADDRESS_POI + "get_pois?poi_id=" + uuid;
+        
+        miwi_3d_xhr = new XMLHttpRequest();
+        
+        miwi_3d_xhr.onreadystatechange = function () {
+            if(miwi_3d_xhr.readyState === 4) {
+                if(miwi_3d_xhr.status  === 200) { 
+                    var json = JSON.parse(miwi_3d_xhr.responseText);
+                    processPoiData(json);
+console.log("get_full_POI: " + miwi_3d_xhr.responseText);
+                    cont_func(cont_data); // and continue
+                    
+                }
+                else if (miwi_3d_xhr.status === 404) { 
+                    log("failed: " + miwi_3d_xhr.responseText);
+                }
+            }
+        };
+
+        miwi_3d_xhr.onerror = function (e) {
+            log("failed to get 3d");
+        };
+        miwi_3d_xhr.open("GET", restQueryURL, true);
+        miwi_3d_xhr.send();
+
+    }
+    
     function POI_delete(uuid) {
         var poiMarker = getPoiLocal(uuid, 'marker');
         show_POI_window(poiMarker, uuid);
@@ -370,7 +594,9 @@ console.log(JSON.stringify(updating_data));
             miwi_3d_xhr.onreadystatechange = function () {
                 if(miwi_3d_xhr.readyState === 4) {
                     if(miwi_3d_xhr.status  === 200) {
+                        poiWindow.close();
                         poiWindow.setMap(null);
+                        poiWindow_uuid = null;
                         removePOI_UUID_FromMap(uuid);
                         delete miwi_poi_pois[uuid];
                         unstorePoi(uuid);
@@ -395,7 +621,9 @@ console.log(JSON.stringify(updating_data));
     
    
     var log = wex.Util.log, map, geocoder, homeMarker, positionMarker, 
-        poiWindow, i,
+        poiWindow,
+        poiWindow_uuid,
+        i,
         poiStorage = {},
         poiStorageLocal = {},
         markers = [],
@@ -408,11 +636,7 @@ console.log(JSON.stringify(updating_data));
         centerChangedTimeout,
         oldMapCenter,
         CENTER_CHANGED_THRESHOLD = 130,
-//        BACKEND_ADDRESS_POI = "http://localhost:8000/poi_demo_5/",
-        BACKEND_ADDRESS_POI = "http://dev.cie.fi/FI-WARE/poi_dp_new/",
-//        BACKEND_ADDRESS_POI = "http://130.231.12.82/FI-WARE/php/deployment/",
-//        BACKEND_ADDRESS_3D = "http://localhost:8000/poi_demo_5/",
-//        BACKEND_ADDRESS_3D = "http://chiru.cie.fi:8085/",
+        BACKEND_ADDRESS_POI = "http://dev.cie.fi/FI-WARE/poi_dp_dyn/",
 
         searchRadius = 600,
         searchRadiusScaling = 2.0;
@@ -634,6 +858,15 @@ ContextMenu.prototype.show=function(latLng){
 /* end ContextMenu.js
    ================== */
 
+function adjust_search_radius() {
+  var bounds = map.getBounds();
+  var NE = bounds.getNorthEast();
+  var SW = bounds.getSouthWest();
+
+  searchRadius = distHaversine(NE, SW) / 1.5;
+  console.log("searchRadius = " + searchRadius);
+}
+   
         document.querySelector( '#button1' ).onclick = locate;
         document.querySelector( '#button2' ).onclick = codeAddress;
  //       document.querySelector( '#categories' ).onchange = category_changed;
@@ -669,23 +902,16 @@ ContextMenu.prototype.show=function(latLng){
                 "<p>Category: DefaultCategory </p>" +
                 '</div>'
         } );
+        poiWindow_uuid = null;
 
         oldMapCenter = map.getCenter();
+        
 
-        google.maps.event.addListener( map, 'zoom_changed', function () {
-            var zoomLevel = map.getZoom();
+        google.maps.event.addListener( map, 'bounds_changed',
+            adjust_search_radius);
 
-            if ( zoomLevel <= 10 ) {
-                searchRadius = 5000;
-            } else if ( zoomLevel <= 14 && zoomLevel > 10 ) {
-                searchRadius = 5000 + (10 - zoomLevel) * 1000;
-            } else if ( zoomLevel > 5 && zoomLevel < 20 ) {
-                searchRadius = 1000 - (zoomLevel - 10) * 100;
-            } else if ( zoomLevel >= 20 ) {
-                searchRadius = 50;
-            }
-            searchRadius *= searchRadiusScaling; // Scaling factor
-        } );
+        google.maps.event.addListener( map, 'zoom_changed',
+            adjust_search_radius);
 
         google.maps.event.addListener( map, 'center_changed', function () {
             var mapCenter = map.getCenter(), dist, minDist = Infinity, i, len,
@@ -1032,6 +1258,28 @@ ContextMenu.prototype.show=function(latLng){
         }
     }
 
+    function removeLeftOutPois(data){
+      var pois = data['pois'];
+      var uuid;
+      var to_remove = [];
+      var i;
+
+      for ( uuid in miwi_poi_pois ) {
+        if ( !pois[uuid]) {
+          to_remove.push(uuid);
+        };
+      };
+      for ( i = 0; i < to_remove.length; i++ ) {
+        uuid = to_remove[i];
+        removePOI_UUID_FromMap(uuid);
+        delete miwi_poi_pois[uuid];
+        unstorePoi(uuid);
+      };
+      console.log("removed " + to_remove.length + " POIs.");
+    };
+        
+
+
     function searchPOIs( lat, lng ) {
         var center, searchPoint;
         var restQueryURL;
@@ -1054,6 +1302,7 @@ ContextMenu.prototype.show=function(latLng){
             if(miwi_poi_xhr.readyState === 4) {
                 if(miwi_poi_xhr.status  === 200) { 
                     var json = JSON.parse(miwi_poi_xhr.responseText);
+                    removeLeftOutPois(json);
                     processPoiData(json);
                 }
                 else if (miwi_poi_xhr.status === 404) { 
@@ -1110,12 +1359,20 @@ ContextMenu.prototype.show=function(latLng){
     }
 
     function unstorePoi(uuid) {
-        if (poiStorage.hasOwnProperty(uuid)) {
-            delete poiStorage[uuid];
-        }
-        if (poiStorageLocal.hasOwnProperty(uuid)) {
-            delete poiStorageLocal[uuid];
-        }
+      // don't leave info window hanging
+      if (poiWindow_uuid == uuid) {
+        console.log("Removed poiWindow.");
+        poiWindow.close();
+        poiWindow.setMap(null);
+        poiWindow_uuid = null;
+      };
+
+      if (poiStorage.hasOwnProperty(uuid)) {
+        delete poiStorage[uuid];
+      }
+      if (poiStorageLocal.hasOwnProperty(uuid)) {
+        delete poiStorageLocal[uuid];
+      }
     }
     
     function setPoiLocal( uuid, key, value ) {
@@ -1197,9 +1454,12 @@ ContextMenu.prototype.show=function(latLng){
         var categories;
         var visible;
         var marker;
+        var geometry;
         var cat_item;
         var i;
+        poiWindow.close();
         poiWindow.setMap(null);
+        poiWindow_uuid = null;
 
         for (uuid in miwi_poi_pois) {
             categories = getPoiLocal(uuid, 'categories');
@@ -1210,6 +1470,12 @@ ContextMenu.prototype.show=function(latLng){
                 visible = cat_item.selected;
             }
             marker.setVisible(visible);
+            geometry = getPoiLocal(uuid, 'geometry');
+            if (geometry) {
+                for (i = 0; i < geometry.length; i++) {
+                    geometry[i].setVisible(visible);
+                }
+            }
         }
     }
 
@@ -1233,23 +1499,40 @@ ContextMenu.prototype.show=function(latLng){
         for ( uuid in pois ) {
             poiData = pois[uuid];
             poiCore = poiData.fw_core;
+// Todo: What if there is both category and categories? 
 if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("categories")) {
   poiCore.categories = [poiCore.category];
   delete poiCore.category;
 }
-            if ( poiCore && poiCore.hasOwnProperty( "location" ) ) {
-                location = poiCore['location'];
-                wgs84 = location.wgs84;
-                if ( wgs84 ) {
-                    pos = new google.maps.LatLng( wgs84['latitude'], 
-                        wgs84['longitude'] );
-                    miwi_poi_pois[uuid] = poiData;
-                    addPOI_UUID_ToMap( pos, poiCore, uuid );
-                    counter++;
-               }
-            }
 
-            storePoi( uuid, poiCore );
+            if ( poiCore ) {
+
+                var geos = poiCore.geometry;
+                if (typeof(geos) == 'string') {
+                    if (geos.charAt(0) == '{') {
+                        poiCore.geom_obj = JSON.parse(poiCore.geometry);
+                    } else {
+                        poiCore.geom_obj = WKT.parse(poiCore.geometry);
+                    }
+                } else if (geos) {
+                    poiCore.geom_obj = geos;
+                }
+
+                if ( poiCore.hasOwnProperty( "location" ) ) {
+                    location = poiCore['location'];
+                    wgs84 = location.wgs84;
+                    if ( wgs84 ) {
+                        pos = new google.maps.LatLng( wgs84['latitude'], 
+                            wgs84['longitude'] );
+                        miwi_poi_pois[uuid] = poiData;
+                        addPOI_UUID_ToMap( pos, poiCore, uuid );
+                        counter++;
+                    }
+                }
+                
+                storePoi( uuid, poiCore );
+
+            }
         }
 
         if ( data.hasOwnProperty( "queryID" ) ) {
@@ -1397,28 +1680,58 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
         }
     }
 
+    '<tr><td>L&#228;mp&#246;tila:</td><td>5.4</td><td>&#176;C</td></tr>'
+    
+    function sensor_data_to_str(sensor_data_rec, languages) {
+      return '<tr><td>' + html_ent2xml( text_by_langs(sensor_data_rec.name, 
+          languages)) + ":</td><td>" + html_ent2xml(sensor_data_rec.value) + "</td><td>" 
+          + html_ent2xml(sensor_data_rec.unit) + '</td></tr>';
+    }
+    
     function show_POI_window(poiMarker, uuid) {
         var poi_data, poi_core, name, label, category, icon_string,
             description, url,
             thumbnail, found_label, found_thumbnail;
         var languages = [miwi_lang_sel_1.value, miwi_lang_sel_2.value];
+        var sensor_data_displ = "", key, i, sd;
+        var new_content;
         
         poi_data = miwi_poi_pois[uuid] || {"label": "No information available"};
         poi_core = poi_data.fw_core;
         name = text_by_langs(poi_core["name"], languages);
+console.log("* name='" + name + "'");        
 
         category = categories_by_langs(poi_core["categories"], languages) || "";
+console.log("* category='" + category + "'");        
         thumbnail = poi_core["thumbnail"] || "";
         label = text_by_langs(poi_core["label"], languages) || "";
+console.log("* label='" + label + "'");
         description = text_by_langs(poi_core["description"], languages);
         url = text_by_langs(poi_core["url"], languages);
         // Default icon is star !
-        icon_string = miwi_poi_icon_strings[category] || "star";
+        icon_string = miwi_poi_icon_strings[category] || "star"; // ???
         found_label = (label != "");
         found_thumbnail = (thumbnail != "");
+        // Set sensor data
+        if(poi_data.fw_sensor) {
+          for(key in poi_data.fw_sensor) {
+            if(key == "last_update") { // not sensor value, ignored
+            } else if(key == "data") { // generic data
+              for(i = 0; i < poi_data.fw_sensor.data.length; i++) {
+                sensor_data_displ += sensor_data_to_str( 
+                    poi_data.fw_sensor.data[i], languages);
+              }
+            } else { // specific data
+              sensor_data_displ += sensor_data_to_str( 
+                  poi_data.fw_sensor[key], languages);
+            }
+          }
+          
+          
+        }
         //map.setZoom(15);
-        poiWindow.content
-                = '<div id="infoCategory">' + str2html(category) + ' &#32;</div>'
+        poiWindow_uuid = uuid;
+        new_content = '<div id="infoCategory">' + str2html(category) + ' &#32;</div>'
                 + '<div id="infoTitle">' + str2html(name) + ' &#32;</div>'
                 + '<div id="infoText">'
                 + ((found_thumbnail || found_label) ? "<p>" : "")
@@ -1428,19 +1741,37 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
                 + (found_label ? str2html(label) : "")
                 + ((found_thumbnail || found_label) ? "</p>" : "")
                 + ((description != "") ? ("<p>" + str2html(description) + "</p>") : "")
-                + ((url != "") ?
+                + ((url && url != "") ?
                     ("<p><a target=\"_blank\" href=\"" + str2html(url) + "\">"
                         + str2html(url) + "</a></p>") : "")
+                + ((sensor_data_displ != "") ? ("<br/><table>" + sensor_data_displ + "</table>") : "")
                 + '</div>';
+        poiWindow.setContent(new_content);
+/* 
+        poiWindow.setContent('<div id="infoCategory">cat1</div><br/>'
+                + '<div id="infoTitle">Title1</div>'
+                + '<div id="infoText"><table>'
+                + '<tr><td>L&#228;mp&#246;tila:</td><td>5.4</td><td>&#176;C</td></tr>'
+                + '<tr><td>tuuli:</td><td>3.2</td><td>m/s</td></tr>'
+                + '</table></div>');
+*/
+//console.log("setContent: " + new_content);
         poiWindow.open( map, poiMarker );
     }
         
-    function POI_onClick(poiMarker, uuid) {
-        var restQueryURL, poi_data, poi_core;
-        
-        show_POI_window(poiMarker, uuid); // Show existing data immediately
+    function POI_window_refresh(data) {
+      show_POI_window(data.poiMarker, data.uuid);
+console.log("POI_window_referesh: " + data.uuid);      
     }
 
+    function POI_onClick(poiMarker, uuid) {
+        
+      show_POI_window(poiMarker, uuid); // Show existing data immediately
+        
+      // and refresh with full data
+      get_full_POI(uuid, POI_window_refresh, {poiMarker: poiMarker,
+        uuid: uuid})
+    }
 
     function addPOI_UUID_ToMap_addListener(poiMarker, op, uuid) {
         /* Anonymous function declaration here creates a closure that binds
@@ -1453,14 +1784,15 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
     }	
         
     function addPOI_UUID_ToMap( pos, data, uuid ) {
-        var poiMarker, contents, content, i, len, poi_data,
+        var poiMarker, contents, content, i, j, len, poi_data,
             name, label, categories, icon_string, description;
+        var poiGeometry = null;
         var poi_data = miwi_poi_pois[uuid];
         var local_name, local_categories;
         var languages = [miwi_languages[0].value, miwi_languages[1].value, "*"];
         var true_category, true_categories;
         var cat_item;
-        removePOI_UUID_FromMap(uuid);
+        var visible;
         data = data || {};
         name = data["name"] || "N.N.";
         categories = data["categories"] || [data["category"]] || ["_OTHER"];
@@ -1471,18 +1803,78 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
         local_name = text_by_langs(name, languages);
         local_categories = (categories && categories_by_langs(categories, languages)) || null;
         poi_data.title = (local_categories ? (local_categories + ": ") : "") + local_name;
-        poiMarker = new google.maps.Marker(
-            {
+
+//      Do we already have the POI?
+
+        poiMarker = getPoiLocal(uuid, 'marker'); // in case we already have one?
+        if(poiMarker) {
+
+          // Yes, reused
+
+          cleanPoiMarker(poiMarker, uuid);
+          poiMarker.setPosition( pos );
+
+          poiMarker.setOptions(
+             {
                 icon: (icon_string == "") ? ("http://" + 
                 "chart.apis.google.com/chart?chst=d_map_pin_letter&" + 
-                "chld=P|7CFF00|000000") : 
+                "chld=P|7CFF00|000000") :
+                (icon_string.charAt(0) == "#") ? ("http://" +
+                "chart.apis.google.com/chart?chst=d_map_pin_letter&" +
+                "chld=%20|"+icon_string.substring(1)+"|000000") :
+                ("http://chart.apis.google.com/chart?chst=" + 
+                "d_map_pin_icon&chld=" + icon_string + 
+                "|7CFF00|000000F"),
+                title: poi_data.title,
+                visible: true,
+              } 
+          );
+          
+        } else {
+
+          // No, create new
+
+          poiMarker = new google.maps.Marker(
+              {
+                icon: (icon_string == "") ? ("http://" + 
+                "chart.apis.google.com/chart?chst=d_map_pin_letter&" + 
+                "chld=P|7CFF00|000000") :
+                (icon_string.charAt(0) == "#") ? ("http://" +
+                "chart.apis.google.com/chart?chst=d_map_pin_letter&" +
+                "chld=%20|"+icon_string.substring(1)+"|000000") :
                 ("http://chart.apis.google.com/chart?chst=" + 
                 "d_map_pin_icon&chld=" + icon_string + 
                 "|7CFF00|000000F"),
                 title: poi_data.title,
                 visible: false,
-            } );
-
+              } 
+          );
+        };
+        var geom = poi_data.fw_core.geom_obj;
+        if (geom) {
+            poiGeometry = [];
+            if (geom.type == 'MultiLineString') {
+                var coordss = geom.coordinates;
+                for (i = 0; i < coordss.length; i++) {
+                    var coords = coordss[i];
+                    var path = [];
+                    for (j = 0; j < coords.length; j++) {
+                        var coord = coords[j];
+                        path.push(new google.maps.LatLng(coord[1], coord[0]));
+                    }
+                    poiGeometry.push(new google.maps.Polyline({
+                        path: path,
+                        strokeColor: (icon_string.charAt(0) == '#' ? icon_string : "#7CFF00"),
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2,
+                        visible: false,
+                        map: map,
+                    }));
+                }
+            }
+            if (poiGeometry.length == 0) poiGeometry = null;
+        }
+            
         /*
           Add poi to category list for visibility control
         */
@@ -1501,6 +1893,7 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
         }
         setPoiLocal(uuid, 'categories', true_categories);
 
+        visible = false;
         for (i = 0; i < true_categories.length; i++) {
             true_category = true_categories[i];
             cat_item = miwi_poi_pois_by_category[true_category];
@@ -1510,10 +1903,16 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
                     cat_item.markers.push(poiMarker);
                 }
                 if (cat_item.selected) {
-                    poiMarker.setVisible(true);
+                    visible = true;
                 }
             }
         }        
+        poiMarker.setVisible(visible);
+        if (poiGeometry) {
+            for (i = 0; i < poiGeometry.length; i++) {
+                poiGeometry[i].setVisible(visible);
+            }
+        }
 
         google.maps.event.addListener( poiMarker, "click", function () {
             POI_onClick(poiMarker, uuid);
@@ -1527,13 +1926,35 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
 
         updateMarker( pos, poiMarker );
         setPoiLocal(uuid, 'marker', poiMarker);
+        setPoiLocal(uuid, 'geometry', poiGeometry);
         
         poi_data.selected = false;
 
     }
 
+    function cleanPoiMarker(poiMarker, uuid) {
+        var true_categories;
+        var markers;
+        var i;
+        var j;
+        if (poiMarker) {
+//            poiMarker.setVisible(false); // hide
+            google.maps.event.clearInstanceListeners(poiMarker);
+            true_categories = getPoiLocal(uuid, 'categories');
+            for (j = 0; j < true_categories; j++) {
+                markers = miwi_poi_pois_by_category[true_categories[j]].markers;
+                for (i = markers.length; i-- > 0;) {
+                    if (markers[i] == poiMarker) {
+                        markers.splice(i,1); // remove from visibility control
+                    }
+                }
+            }
+        }
+    }
+
     function removePOI_UUID_FromMap( uuid ) {
         var poiMarker = getPoiLocal(uuid, 'marker');
+        var poiGeometry = getPoiLocal(uuid, 'geometry');
         var true_categories;
         var markers;
         var i;
@@ -1552,10 +1973,14 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
             }
             poiMarker.setMap(null); // remove from map
         }
+        if (poiGeometry) {
+            for (i = 0; i < poiGeometry.length; i++) {
+                poiGeometry[i].setVisible(visible);
+            }
+        }
     }
 
-
-function updateMap() {
+    function updateMap() {
         searchPOIs();
     }
 
@@ -1877,8 +2302,11 @@ function updateMap() {
 
     namespace.getMap = function() {
         return map;
-    }
-    
+    };
+
+// For dynamic POIs enable this
+//    setInterval(searchPOIs, 10000);
+
   //window.onload = loadScript;
  
 }( window['demo4'] = window.demo4 || {} ));

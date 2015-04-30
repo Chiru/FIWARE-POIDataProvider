@@ -22,7 +22,8 @@ function get_db_options()
 function get_supported_components()
 {
     $components = array("fw_core", "fw_contact", "fw_xml3d", "fw_media", 
-        "fw_time", "fw_sensor", "fw_marker", "fw_relationships");
+        "fw_time", "fw_sensor", "fw_marker", "fw_relationships", "fw_tags",
+        "fw_marker", "fw_generic", "fw_sensor", "fw_dynamic");
 
     return $components;
 }

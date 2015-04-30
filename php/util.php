@@ -3,7 +3,7 @@
 /*
 * Project: FI-WARE
 * Copyright (c) 2014 Center for Internet Excellence, University of Oulu, All Rights Reserved
-* For conditions of distribution and use, see copyright notice in LICENCE
+* For conditions of distribution and use, see copyright notice in LICENCE.
 */
 
 require 'data_manager.php';
@@ -151,5 +151,29 @@ function parse_accept_language($accept_language_str)
 //     var_dump($langs);
     return $langs;
 }
-
+/*
+  array_merge_r - recursive array merge
+  
+  Replaces if same keys.
+  
+  According to original idea by Daniel Smedegaard Buus
+    http://danielsmedegaardbuus.dk/2009-03-19/phps-array_merge_recursive-as-it-should-be/
+  
+*/
+function &array_merge_r(array &$array1, &$array2 = null)
+{
+  $merged = $array1;
+  
+  if (is_array($array2)) {
+    foreach ($array2 as $key => $val) {
+      if (is_array($val)) {
+        $merged[$key] = (isset($merged[$key]) && is_array($merged[$key])) ? 
+            array_merge_r($merged[$key], $val) : $val;
+      } else {
+        $merged[$key] = $val;
+      }
+    }
+  }
+  return $merged;
+}
 ?>

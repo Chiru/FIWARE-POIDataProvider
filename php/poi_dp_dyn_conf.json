@@ -1,0 +1,204 @@
+{
+"host_type":
+	{
+	"filab_orion_1026":
+		{
+		"method": "REST_GET",
+		"params":
+			{
+			"url": "http://orion.lab.fi-ware.org:1026/ngsi10/contextEntities/",
+			"params": "?attributeFormat=object",
+			"headers": {"Content-Type":"application/json","Accept":"application/json","X-Auth-Token":"Og6ZF8igc8yAZPl-no0i2_LIp9I7cELKUcChe9NBjgI6SRBfBlZbl0HesknTo3prhAj9ACQ8LgHrgfSDkJJBDQ"}
+			}
+		},
+	"willab":
+		{
+		"method": "REST_GET",
+		"params":
+			{
+			"url": "http://weather.willab.fi/weather.html.fi",
+			"params": "",
+			"headers": {"Content-Type":"text/html","Accept":"text/html"}
+			}
+		},
+	"willab_json":
+		{
+		"method": "REST_GET",
+		"params":
+			{
+			"url": "http://weather.willab.fi/weather.json",
+			"params": "",
+			"headers": {"Content-Type":"application/json","Accept":"application/json"}
+			}
+		},
+	"kelikamerat":
+		{
+		"method": "REST_GET",
+		"params":
+			{
+			"url": "https://services1.arcgis.com/rhs5fjYxdOG1Et61/ArcGIS/rest/services/RWS_station/FeatureServer/0/query?f=json&where=NUMERO%3D",
+			"params": "&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=windSpeed%2CwindDirection%2CTSA_NIMI%2CmeasurementTime%2CairTemperature%2CroadTemperature",
+			"headers": {"Content-Type":"application/json","Accept":"application/json"}
+			}
+		}
+	},
+"data_mapping":
+	{
+	"orion_sound_sensor":
+		{
+		"fw_sensor":
+			{ 
+			"data":
+				[
+					{
+					"name": {"en":"Santander sound"},
+					"type": "noise",
+					"value": ["_fw_json", {"contextElement":{"type":"santander:sound","attributes":{"sound":{"value":"?"}}}}],
+					"unit":  ["_fw_json", {"contextElement":{"attributes":{"sound":{"metadatas":[{"value":"?"}]}}}}]
+					}
+				]
+			}
+		},
+	"orion_soundacc_sensor":
+		{
+		"fw_sensor":
+			{ 
+			"data":
+				[
+					{
+					"name":	{"en":"Santander soundacc"},
+					"type":	"noise",
+					"value":["_fw_json", {"contextElement":{"type":"santander:soundacc","attributes":{"sound":{"value":"?"}}}}],
+					"unit":	["_fw_json", {"contextElement":{"attributes":{"sound":{"metadatas":[{"value":"?"}]}}}}]
+					}
+				]
+			}
+		},
+	"orion_traffic_sensor":
+		{
+		"fw_sensor":
+			{ 
+			"data":
+				[
+					{
+					"name": {"en":"Santander traffic"},
+					"type": "occupation",
+					"value":["_fw_json", {"contextElement":{"type":"santander:traffic","attributes":{"occupancy":{"value":"?"}}}}],
+					"unit":	["_fw_json", {"contextElement":{"attributes":{"occupancy":{"metadatas":[{"value":"?"}]}}}}]
+					}
+				]
+			}
+		},
+	"willab_status":
+		{
+		"fw_sensor":
+			{ 
+			"data":
+				[
+					{
+					"name": {"en":"Linnanmaa temperature"},
+					"type": "temp",
+					"value": ["_fw_match", "<p class=\"tempnow\">? &deg"],
+					"unit": "C"
+					},
+					{
+					"name": {"en":"Linnanmaa wind"},
+					"type": "wind",
+					"value": ["_fw_match", "<tr><th>Tuulen nopeus:</th><td>? m/s"],
+					"unit": "m/s"
+					},
+					{
+					"name": {"en":"Linnanmaa wind direction"},
+					"type": "winddir",
+					"value": ["_fw_match", "<tr><th>Tuulen suunta:</th><td>?&deg"],
+					"unit": "&deg;"
+					},
+					{
+					"name": {"en":"Linnanmaa humidity"},
+					"type": "humidity",
+					"value": ["_fw_match", "<tr><th>Ilmankosteus:</th><td>? %"],
+					"unit": "%"
+					},
+					{
+					"name": {"en":"Linnanmaa air pressure"},
+					"type": "pressure",
+					"value": ["_fw_match", "<tr><th>Ilmanpaine:</th><td>? hPa"],
+					"unit": "hPa"
+					}
+				]				
+			}
+		},
+	"willab_status_json":
+		{
+		"fw_sensor":
+			{ 
+			"data":
+				[
+					{
+					"name": {"en":"Linnanmaa temperature"},
+					"type": "temp",
+					"value": ["_fw_json", {"tempnow":"?"}],
+					"unit": "C"
+					},
+					{
+					"name": {"en":"Linnanmaa wind"},
+					"type": "wind",
+					"value": ["_fw_json", {"windspeed":"?"}],
+					"unit": "m/s"
+					},
+					{
+					"name": {"en":"Linnanmaa wind direction"},
+					"type": "winddir",
+					"value": ["_fw_json", {"winddir":"?"}],
+					"unit": "&deg;"
+					},
+					{
+					"name": {"en":"Linnanmaa humidity"},
+					"type": "humidity",
+					"value": ["_fw_json", {"humidity":"?"}],
+					"unit": "%"
+					},
+					{
+					"name": {"en":"Linnanmaa air pressure"},
+					"type": "pressure",
+					"value": ["_fw_json", {"airpressure":"?"}],
+					"unit": "hPa"
+					}
+				]				
+			}
+		},
+	"kelikamerat_sensors":
+		{
+		"fw_sensor":
+			{ 
+			"data":
+				[
+					{
+					"name": {"en":"Air_temperature"},
+					"type": "temp",
+					"value": ["_fw_json", {"features":[{"attributes":{"airTemperature":"?"}}]}],
+					"unit": "C"
+					},
+					{
+					"name": {"en":"Road_temperature"},
+					"type": "temp",
+					"value": ["_fw_json", {"features":[{"attributes":{"roadTemperature":"?"}}]}],
+					"unit": "C"
+					},
+					{
+					"name": {"en":"Wind_speed"},
+					"type": "wind",
+					"value": ["_fw_json", {"features":[{"attributes":{"windSpeed":"?"}}]}],
+					"unit": "m/s"
+					},
+					{
+					"name": {"en":"Wind_direction"},
+					"type": "winddir",
+					"value": ["_fw_json", {"features":[{"attributes":{"windDirection":"?"}}]}],
+					"unit": "°"
+					}
+				]			
+			}
+		}
+	}
+}

@@ -36,4 +36,5 @@ var miwi_poi_icon_strings =
 "clinic": "medical",
 "university": "civic-building",
 "cinema": "cinema",
+"sensor": "glyphish_thermometer",
 };

@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     
     if ($request_array != NULL)
     {
+        $new_timestamp = time();
         $uuid = pg_escape_string(key($request_array));
         $poi_data = $request_array[$uuid];
         
@@ -152,7 +153,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
                 if (isset($src['license']))
                     $source_license = pg_escape_string($src['license']);
             }
-            $new_timestamp = time();
             
 //             $update = "UPDATE $fw_core_tbl SET name='$name', category='$category', location=ST_GeogFromText('POINT($lon $lat)'), description='$description', " .
 //             "label='$label', url='$url', thumbnail='$thumbnail', timestamp=$new_timestamp WHERE uuid='$uuid';";
@@ -164,8 +164,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
             $update_result = pg_query($update);
             if (!$update_result)
             {
-                echo "A database error has occured!";
-                echo pg_last_error();
+                echo "*ERROR: A database error has occured!\n";
+                echo "  " . pg_last_error() . "\n";
                 exit;
             }
         }
@@ -241,7 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
                     {
                         $relationship['last_update'] = array();
                     }
-                    $relationship['last_update']['timestamp'] = time();
+                    $relationship['last_update']['timestamp'] = $new_timestamp;
                     
                     if ($rel_id != "")
                     {
@@ -263,6 +263,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
                 if ($existing_component != NULL)
                 {
                     $update_timestamp = 0;
+                    $curr_timestamp = 0;
                     
                     if (isset($comp_data['last_update']))
                     {
@@ -273,23 +274,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
                         }
                     }
                     
-                    if ($update_timestamp == 0)
-                    {
-                        header("HTTP/1.0 400 Bad Request");
-                        die("No valid 'last_update:timestamp' value was found for '$comp_name' component!");
-                    }
-                    
                     
                     if (isset($existing_component['last_update']))
                     {
                         if (isset($existing_component['last_update']['timestamp']))
                         {
                             $curr_timestamp = $existing_component['last_update']['timestamp'];
-                            if ($curr_timestamp != $update_timestamp) {
-                                header("HTTP/1.0 400 Bad Request");
-                                die("The given last_update:timestamp (". $update_timestamp .") does not match the value in the database (". $curr_timestamp .") in $comp_name!");
-                            }
                         }   
+                    }
+                    if ($curr_timestamp != $update_timestamp) {
+                        header("HTTP/1.0 400 Bad Request");
+                        if ($update_timestamp == 0)
+                        {
+                            die("No valid 'last_update:timestamp' value was ' .
+                                'found for '$comp_name' component!");
+                        } else {
+                            die("The given last_update:timestamp (". 
+                                $update_timestamp .") does not match the ' .
+                                'value in the database (". $curr_timestamp .
+                                ") in $comp_name!");
+                        }
                     }
                 }                
                 
@@ -297,12 +301,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
                 {
                     $comp_data['last_update'] = array();
                 }
-                $comp_data['last_update']['timestamp'] = time();
+                $comp_data['last_update']['timestamp'] = $new_timestamp;
                 
                 $comp_data["_id"] = $uuid;               
                 $upd_criteria = array("_id" => $uuid);
+                try {
                 $collection->update($upd_criteria, $comp_data, array("upsert" => true));
-            }
+                } catch(Exception $e) {
+                  echo "*ERROR: Exception when updating " . $uuid . "." . $comp_name . "\n";
+                  echo "  message: " . $e->getMessage() . "\n";
+                  echo "  code: " . $e->getCode() . "\n";
+                  
+                }
+                  
+            } else echo "*ERROR: Data component " . $comp_name . " not supported\n";
         }
         
         header("Access-Control-Allow-Origin: *");

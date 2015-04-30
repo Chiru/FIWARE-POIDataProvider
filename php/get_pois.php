@@ -8,7 +8,7 @@
 
 require 'db.php';
 require 'util.php';
-
+require 'get_dyn_pois.php';
 $components = get_supported_components();
 
 if (isset ($_GET['poi_id']))
@@ -89,14 +89,40 @@ if (isset ($_GET['poi_id']))
         {
                        
 //             print $uuid;
+            try {
             $comp_data = getComponentMongoDB($mongodb, $component, $uuid, $fetch_for_update);
+            } catch(Exception $e) {
+              echo "*ERROR: Exception when getting " . $uuid . "." . $comp_name . "\n";
+              echo "  message: " . $e->getMessage() . "\n";
+              echo "  code: " . $e->getCode() . "\n";
+              
+            }
             if ($comp_data != NULL)
             {
                 $data[$uuid][$component] = $comp_data;
+                
             }
         }
     }
-    
+
+    /* Include dynamic data */
+    /*
+       ToDo: 
+         1. Refresh dynamic data only when it expires. See 'valid_duration'
+            and 'timestamp'.
+         2. Remember to protect at least 'fw_dynamic' against dynamic 
+            modifications.
+    */
+    foreach(array_keys($data) as $uuid)
+    {
+      if (isset($data[$uuid]['fw_dynamic'])) {
+      $dyn_data = get_dyn_pois($data[$uuid]['fw_dynamic']);
+        // avoid garbling dynamic definitions
+        if (isset($dyn_data['fw_dynamic'])) unset($dyn_data['fw_dynamic']);
+        // merge dynamic data to static data
+        $data[$uuid] = array_merge_r($data[$uuid], $dyn_data);
+      }
+    }
     $pois_data = array("pois" => $data);
     
     $get_for_update = false;
@@ -113,6 +139,7 @@ if (isset ($_GET['poi_id']))
         $accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
         $langs = parse_accept_language($accept_lang);  
         filter_poi_intl_properties($pois_data, array_keys($langs));
+
         
     }
     
