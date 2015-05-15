@@ -43,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
 //         print "Generated UUID: ". $uuid;
         
         $supported_components = get_supported_components();
+        $timestamp = time();
         
         //process fw_core component
         if ($request_array["fw_core"])
@@ -87,7 +88,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
 
             if (isset($fw_core['thumbnail']))
                 $thumbnail = pg_escape_string($fw_core['thumbnail']);
-            $timestamp = time();
             
             if (isset($fw_core['source']))
             {
@@ -131,6 +131,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
             if (in_array($comp_name, $supported_components))
             {
                 $comp_data["_id"] = $uuid;
+                // Set timestamp, if not prepared
+                if (!isset($comp_data['last_update']))
+                {
+                    $comp_data['last_update'] = array();
+                }
+                $comp_data['last_update']['timestamp'] = $timestamp;
+                
+
                 $collection = $mongodb->$comp_name;
                 $collection->insert($comp_data);
             }

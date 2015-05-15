@@ -10,10 +10,7 @@ function validate_poi_data($poi_data)
     
     $poi_schema = load_poi_schema();
     
-//     var_dump($poi_schema);
-    
     $intl_props = find_intl_properties($poi_schema->properties);
-    //var_dump($intl_props);
     
     $temp = json_encode($poi_data);
     $poi_data = json_decode($temp);
@@ -24,7 +21,6 @@ function validate_poi_data($poi_data)
     $validator->check($poi_data, $poi_schema);
 
     if ($validator->isValid()) {
-//         echo "The supplied JSON validates against the schema.\n";
         $result = true;
     } else {
         echo "JSON does not validate. Violations:\n";
@@ -74,13 +70,11 @@ function find_intl_properties($schema_obj, $base_path = '')
         {
             $path = $base_path;
         }
-//          echo $path . "\n";
         if (isset($value->id) and gettype($value->id) == "string")
         {
             //if ($value->title == "Internationalized string" or $value->title == "Internationalized URI")
             if (strpos($value->id, "intl_string") != FALSE or strpos($value->id, "intl_uri") != FALSE)
             {
-//                echo "MultiLanguage value found from path: " . $path . "\n";
                $intl_properties[] = $path;
                continue;
             }
@@ -116,19 +110,12 @@ function get_arr_value_by_path($array, $path)
     foreach($path_elems as $elem)
     {
         $remaining_path = substr($remaining_path, strlen($elem)+1);
-//                         echo $remaining_path."\n";
         
         if ($elem == "*")
         {
             foreach($curr_node as $arr_item)
             {
-//                 var_dump($arr_item);
-//                 echo "Rem path: " . $remaining_path."\n";
                 $values = get_arr_value_by_path($arr_item, $remaining_path);
-//                 echo "Values:\n";
-//                 var_dump($values);
-//                 echo "Found values:\n";
-//                 var_dump($found_values);
                 
                 if (is_array($values))
                 {
@@ -152,8 +139,6 @@ function get_arr_value_by_path($array, $path)
             return NULL;
         }
     }
-//     echo "Returning:\n";
-//     var_dump($found_values);
     return $found_values;
 }
 
@@ -212,7 +197,6 @@ function set_arr_value_by_path(&$array, $path, $new_val)
     $path_elems = explode(".", $path);
     $path_elem = $path_elems[0];
     $remaining_path = substr($path, strlen($path_elem)+1);
-//                         echo $remaining_path."\n";
         
     if (isset($array[$path_elem]))
     {
@@ -240,7 +224,6 @@ function filter_poi_intl_properties(&$pois_data, $langs)
     $pois = &$pois_data['pois'];
     $schema = load_poi_schema();
     $intl_properties = find_intl_properties($schema->properties);
-//     var_dump($intl_properties);
     
     foreach($pois as &$poi)
     {

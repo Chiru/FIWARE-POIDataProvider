@@ -6,7 +6,6 @@
 * For conditions of distribution and use, see copyright notice in LICENCE
 */
 
-
 require 'db.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET' )

@@ -1,0 +1,36 @@
+{
+
+    "71ad6aa4-61cd-4395-91c6-f04112875a53": {
+        "fw_core": {
+            "location": {
+                "wgs84": {
+                    "latitude": 65.061049,
+                    "longitude": 25.4680896
+                }
+            },
+            "categories": [
+                "restaurant",
+                "cafe"
+            ],
+            "last_update": {
+                "timestamp": 1411043958
+            },
+            "source": {
+                "name": "OpenStreetMap11",
+                "website": "http://www.openstreetmap.orgggiiii",
+                "license": "http://www.openstreetmap.org/copyright123"
+            },
+            "name": {
+                "": "Snellu",
+                "fi": "Ravintola Snellmania"
+            },
+            "description": {
+                "fi": "Unirestan ravintola Snellmania Oulun yliopistolla"
+            },
+            "url": {
+                "fi": "http://www.uniresta.fi/ravintolat/kaikki-ravintolat/linnanmaa/snellmania.html"
+            }
+        }
+    }
+
+}

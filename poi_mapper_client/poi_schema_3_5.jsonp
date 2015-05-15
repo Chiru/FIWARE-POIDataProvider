@@ -137,6 +137,7 @@ var poi_schema = {
       "additionalProperties": false
     },
     "fw_contact": {
+      "type": "object",
       "properties": {
         "visit": {
           "description": "Visiting address good for a taxi driver or Google Maps",
@@ -265,9 +266,17 @@ var poi_schema = {
     "fw_tags": {
       "title": "Tags",
       "description": "Texts for tagging the place",
-      "type": "array",
-      "items": {
-        "type": "string"
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "last_update": {
+          "$ref": "#/definitions/update_stamp"
+        }
       }
     },
     "fw_marker": {
@@ -333,6 +342,123 @@ var poi_schema = {
         }
       },
       "additionalProperties": false
+    },
+    "fw_generic": {
+      "title": "Generic data",
+      "description": "For experiments and small scale use. Any key-value pairs accepted.",
+      "type": "object"
+    },
+    "fw_sensor": {
+      "title": "Sensor data",
+      "description": "Read-only data fetched elsewhere according to fw_dynamic",
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "description": "generic data and label copied from fw_sensor_desc, others elsewhere",
+            "type": "object",
+            "properties": {
+              "name": {
+                "description": "to be shown in a list",
+                "$ref": "#/definitions/intl_string_31"
+              },
+              "label": {
+                "title": "Label",
+                "description": "More info to complement the name, if enough space",
+                "$ref": "#/definitions/intl_string_127"
+              },
+              "type": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              },
+              "unit": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "valid_duration": {
+          "description": "validity of data in seconds",
+          "type": "number"
+        },
+        "last_update": {
+          "title": "Last update",
+          "description": "DO NOT EDIT! Information to identify the version of the data component.",
+          "$ref": "#/definitions/update_stamp"
+        }
+      },        
+      "additionalProperties": {
+        "description": "specific data items copied from elsewhere",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "to be shown in a list",
+            "$ref": "#/definitions/intl_string_31"
+          },
+          "label": {
+            "title": "Label",
+            "description": "More info to complement the name, if enough space",
+            "$ref": "#/definitions/intl_string_127"
+          },
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "fw_dynamic": {
+      "title": "dynamic data descriptor",
+      "description": "describes where to find data and what to do with it",
+      "type": "object",
+      "properties": {
+        "components": {
+          "type": "array",
+          "items": {
+            "description": "names of the components with dynamic content",
+            "type": "string"
+          }
+        },
+        "host_type": {
+            "description": "Id of the host access configuration",
+            "type": "string"
+        },
+        "host_id": {
+          "type": "array",
+          "items": {
+            "description": "parameter to host access configuration, e.g. url",
+            "type": "string"
+          }
+        },
+        "data_type": {
+            "description": "Id of the data mapping descriptor",
+            "type": "string"
+        },
+        "data_params": {
+          "type": "array",
+          "items": {
+            "description": "parameter to data mapping, e.g. a constant value",
+            "type": "string"
+          }
+        },
+        "last_update": {
+          "title": "Last update",
+          "description": "DO NOT EDIT! Information to identify the version of the data component.",
+          "$ref": "#/definitions/update_stamp"
+        },
+        "valid_duration": {
+          "description": "validity of data in seconds",
+          "type": "number"
+        }
+      }
     }
   },
   "definitions": {
@@ -681,8 +807,7 @@ var poi_schema = {
         }
       },
       "required": [
-        "timestamp",
-        "responsible"
+        "timestamp"
       ],
       "additionalProperties": false
     }
