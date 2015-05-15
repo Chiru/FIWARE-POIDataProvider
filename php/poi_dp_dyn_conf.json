@@ -8,7 +8,7 @@
 			{
 			"url": "http://orion.lab.fi-ware.org:1026/ngsi10/contextEntities/",
 			"params": "?attributeFormat=object",
-			"headers": {"Content-Type":"application/json","Accept":"application/json","X-Auth-Token":"Og6ZF8igc8yAZPl-no0i2_LIp9I7cELKUcChe9NBjgI6SRBfBlZbl0HesknTo3prhAj9ACQ8LgHrgfSDkJJBDQ"}
+			"headers": {"Content-Type":"application/json","Accept":"application/json","X-Auth-Token":"<MyAuthenticationToken>"}
 			}
 		},
 	"willab":
@@ -36,8 +36,18 @@
 		"method": "REST_GET",
 		"params":
 			{
-			"url": "https://services1.arcgis.com/rhs5fjYxdOG1Et61/ArcGIS/rest/services/RWS_station/FeatureServer/0/query?f=json&where=NUMERO%3D",
+			"url": "https://services1.arcgis.com/<Id>/ArcGIS/rest/services/RWS_station/FeatureServer/0/query?f=json&where=NUMERO%3D",
 			"params": "&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=windSpeed%2CwindDirection%2CTSA_NIMI%2CmeasurementTime%2CairTemperature%2CroadTemperature",
+			"headers": {"Content-Type":"application/json","Accept":"application/json"}
+			}
+		},
+	"itsfactory":
+		{
+		"method": "REST_GET",
+		"params":
+			{
+			"url": "http://data.itsfactory.fi/siriaccess/vm/json?vehicleRef=",
+			"params": "",
 			"headers": {"Content-Type":"application/json","Accept":"application/json"}
 			}
 		}
@@ -198,6 +208,20 @@
 					"unit": "°"
 					}
 				]			
+			}
+		},
+	"siri_location":
+		{
+		"fw_core":
+			{
+			"location":
+				{
+				"wgs84":
+					{
+					"latitude" :["_fw_json",{"Siri": {"ServiceDelivery": {"VehicleMonitoringDelivery": [{"VehicleActivity": [{"MonitoredVehicleJourney": {"VehicleLocation": {"Latitude" : "?"}}}]}]}}}],
+					"longitude":["_fw_json",{"Siri": {"ServiceDelivery": {"VehicleMonitoringDelivery": [{"VehicleActivity": [{"MonitoredVehicleJourney": {"VehicleLocation": {"Longitude": "?"}}}]}]}}}]
+					}
+				}
 			}
 		}
 	}

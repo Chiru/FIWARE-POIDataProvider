@@ -3,6 +3,17 @@
 header('Content-Type: application/json');
 $poi_id = $_GET["poi_id"];
 */
+
+function get_dyn_fields($fw_dynamic){
+
+	$conf_data = file_get_contents("poi_dp_dyn_conf.json");
+	$conf = json_decode($conf_data,true);
+
+	$type = $fw_dynamic["data_type"];
+	$field_list = array_keys($conf["data_mapping"][$type]);
+	return  ($field_list ? $field_list : array());
+}
+
 function get_dyn_pois($fw_dynamic){
 
 	$conf_data = file_get_contents("poi_dp_dyn_conf.json");
@@ -10,10 +21,24 @@ function get_dyn_pois($fw_dynamic){
 
 	$host = $fw_dynamic["host_type"];
 	$type = $fw_dynamic["data_type"];
+	$ids  = $fw_dynamic["host_id"];
 	$id   = $fw_dynamic["host_id"][0];
 
-	$output = http_get($conf["host_type"][$host]["params"]["url"].$id.$conf["host_type"][$host]["params"]["params"],
+	switch ($conf["host_type"][$host]["method"])
+		{
+		case "REST_GET":  	
+			$output = http_get($conf["host_type"][$host]["params"]["url"].$id.$conf["host_type"][$host]["params"]["params"],
 			array('headers' => $conf["host_type"][$host]["params"]["headers"]));
+			break;
+		case "REST_POST": 
+			$i = 0;
+			$data = $conf["host_type"][$host]["params"]["params"];
+			foreach ($ids as $id) $data = str_replace('$'.$i++,$id,$data);
+			if (is_array($data)) $data = json_encode($data);
+			$output = http_post_data($conf["host_type"][$host]["params"]["url"],$data,
+			array('headers' => $conf["host_type"][$host]["params"]["headers"]));
+			break;
+		}
 
 	$data = http_parse_message($output)->body;
 	return map_data($conf["data_mapping"][$type], $data);

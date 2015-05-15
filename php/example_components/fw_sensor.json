@@ -1,0 +1,150 @@
+{"fw_sensor": {
+    "440cd2d8c18d7d3a": {
+        "actuators": [
+            {
+                "configuration": [
+                    {
+                        "unit": "percent",
+                        "name": "viewsize",
+                        "value": "100"
+                    }
+                ],
+                "callbacks": [
+                    {
+                        "return_type": "boolean",
+                        "target": "viewstate"
+                    }
+                ],
+                "attributes": {
+                    "dimensions": "[480,800]"
+                },
+                "actions": [
+                    {
+                        "unit": "string",
+                        "primitive": "array",
+                        "parameter": "viewstate",
+                        "value": "[marker1,marker2,marker3,marker4,marker6,marker7,marker8,marker9,marker10,marker11,marker12,marker13,marker14,marker15,marker15,marker16,marker17,marker18,marker19]"
+                    }
+                ]
+            }
+        ],
+        "sensors": [
+            {
+                "configuration": [
+                    {
+                        "toggleable": "boolean",
+                        "interval": "ms"
+                    }
+                ],
+                "values": [
+                    {
+                        "unit": "rads",
+                        "primitive": "3DPoint",
+                        "values": [
+                            21.117462158203125,
+                            -0.9801873564720154,
+                            -0.6045787930488586
+                        ],
+                        "time": "2013-12-10 10:07:30"
+                    }
+                ],
+                "attributes": {
+                    "vendor": "Invensense",
+                    "name": "MPL Gyro",
+                    "power": 0.5,
+                    "type": "gyroscope"
+                }
+            },
+            {
+                "configuration": [
+                    {
+                        "toggleable": "boolean",
+                        "interval": "ms"
+                    }
+                ],
+                "values": [
+                    {
+                        "unit": "ms2",
+                        "primitive": "3DPoint",
+                        "values": [
+                            149.10000610351562,
+                            420.20001220703125,
+                            -1463.9000244140625
+                        ],
+                        "time": "2013-12-10 10:07:30"
+                    }
+                ],
+                "attributes": {
+                    "vendor": "Invensense",
+                    "name": "MPL accel",
+                    "power": 0.5,
+                    "type": "accelerometer"
+                }
+            },
+            {
+                "configuration": [
+                    {
+                        "toggleable": "boolean",
+                        "interval": "ms"
+                    }
+                ],
+                "values": [
+                    {
+                        "unit": "uT",
+                        "primitive": "3DPoint",
+                        "values": [
+                            -0.08577163517475128,
+                            0.16211289167404175,
+                            9.922416687011719
+                        ],
+                        "time": "2013-12-10 10:07:30"
+                    }
+                ],
+                "attributes": {
+                    "vendor": "Invensense",
+                    "name": "MPL magnetic field",
+                    "power": 0.5,
+                    "type": "magneticfield"
+                }
+            },
+            {
+                "configuration": [
+                    {
+                        "toggleable": "boolean",
+                        "interval": "ms"
+                    }
+                ],
+                "values": [
+                    {
+                        "unit": "orientation",
+                        "primitive": "3DPoint",
+                        "values": [
+                            -0.004261057823896408,
+                            -0.017044231295585632,
+                            0.019174760207533836
+                        ],
+                        "time": "2013-12-10 10:07:30"
+                    }
+                ],
+                "attributes": {
+                    "vendor": "Invensense",
+                    "name": "MPL Orientation (android deprecated format)",
+                    "power": 9.699999809265137,
+                    "type": "orientation"
+                }
+            }
+        ],
+        "attributes": {
+            "name": "Android device"
+        }
+    }, 
+     "last_update": {
+    "timestamp": "1390203898"
+    },"source": {
+    "website": "http://www.cie.fi",
+    "name": "CIE, University of Oulu",
+    "id": "7c32c67d-cf00-4d11-9acc-2471141e03a3",
+    "license": "http://www.gnu.org/licenses/gpl.html"
+}
+}
+}

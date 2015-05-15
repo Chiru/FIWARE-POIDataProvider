@@ -1,0 +1,15 @@
+{"fw_group": {
+   "entities": [
+     "8e57d2e6-f98f-4404-b075-112049e72346",
+     "30ddf703-59f5-4448-8918-0f625a7e1122"
+   ],
+"last_update": {
+    "timestamp": "1390203898"
+},"source": {
+    "website": "http://www.cie.fi",
+    "name": "CIE, University of Oulu",
+    "id": "7c32c67d-cf00-4d11-9acc-2471141e03a3",
+    "license": "http://www.gnu.org/licenses/gpl.html"
+}
+ }
+}

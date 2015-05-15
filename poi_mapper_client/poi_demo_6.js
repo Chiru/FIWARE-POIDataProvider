@@ -23,6 +23,8 @@ var miwi_3d_xhr = null; // http request
 var miwi_lang_sel_1 = null;
 var miwi_lang_sel_2 = null;
 var miwi_languages;
+var miwi_active_categories = null; // contains comma separated list of 
+                                   // selected categories
 var miwi_poi_pois_by_category = {}; // "schema" follows
 /*  {
       <category>: {
@@ -315,7 +317,6 @@ var POIEditWindow = null;
 function OpenPOIEditWindow(title, heading, cancel_callback) { // false, if not to use
   var result;
   
-console.log('entering OpenPOIEditWindow');
   if (POIEditWindow && !POIEditWindow.closed) {
     POIEditWindow.focus();
     POIEditWindow.alert("Only one POI under editing allowed!");
@@ -420,8 +421,6 @@ function updatePOI( poi_data, uuid ) {
     }
 */
 
-    console.log('Updating ' + uuid);
-    
     updating_data[uuid] = poi_data;
     
     restQueryURL = BACKEND_ADDRESS_POI + "update_poi";
@@ -458,11 +457,8 @@ function updatePOI( poi_data, uuid ) {
     };
 
     miwi_poi_xhr.open("POST", restQueryURL, true);
-//        miwi_poi_xhr.setRequestHeader('Content-Type', 'application/json');
-console.log(JSON.stringify(updating_data));
     miwi_poi_xhr.send(JSON.stringify(updating_data));
     
-    console.log('Update sent ' + uuid);
 
 }
 
@@ -557,7 +553,6 @@ console.log(JSON.stringify(updating_data));
                 if(miwi_3d_xhr.status  === 200) { 
                     var json = JSON.parse(miwi_3d_xhr.responseText);
                     processPoiData(json);
-console.log("get_full_POI: " + miwi_3d_xhr.responseText);
                     cont_func(cont_data); // and continue
                     
                 }
@@ -571,6 +566,8 @@ console.log("get_full_POI: " + miwi_3d_xhr.responseText);
             log("failed to get 3d");
         };
         miwi_3d_xhr.open("GET", restQueryURL, true);
+        set_accept_languages(miwi_3d_xhr, [miwi_lang_sel_1.value, 
+            miwi_lang_sel_2.value]);
         miwi_3d_xhr.send();
 
     }
@@ -864,7 +861,6 @@ function adjust_search_radius() {
   var SW = bounds.getSouthWest();
 
   searchRadius = distHaversine(NE, SW) / 1.5;
-  console.log("searchRadius = " + searchRadius);
 }
    
         document.querySelector( '#button1' ).onclick = locate;
@@ -1275,15 +1271,14 @@ function adjust_search_radius() {
         delete miwi_poi_pois[uuid];
         unstorePoi(uuid);
       };
-      console.log("removed " + to_remove.length + " POIs.");
     };
         
 
 
     function searchPOIs( lat, lng ) {
-        var center, searchPoint;
-        var restQueryURL;
-
+      var center, searchPoint;
+      var restQueryURL;
+      if (miwi_active_categories != null) {
         if ( !lat || !lng ) {
             center = map.getCenter();
             lat = center.lat();
@@ -1292,8 +1287,9 @@ function adjust_search_radius() {
 
         restQueryURL = BACKEND_ADDRESS_POI + "radial_search?" +
            "lat=" + lat + "&lon=" + lng + "&radius=" +
-            searchRadius + "&component=fw_core"/* + 
-            "&category=pub,cafe,restaurant,cinema"*/;
+            searchRadius + "&component=fw_core" + 
+            ((miwi_active_categories != "") ?
+            ("&category=" + miwi_active_categories) : "");
         miwi_poi_xhr = new XMLHttpRequest();
         
         miwi_poi_xhr.overrideMimeType("application/json");
@@ -1341,7 +1337,7 @@ function adjust_search_radius() {
 
         queryID++;
 
-
+      }
     }
 
     function findSearchPoint( id ) {
@@ -1361,7 +1357,6 @@ function adjust_search_radius() {
     function unstorePoi(uuid) {
       // don't leave info window hanging
       if (poiWindow_uuid == uuid) {
-        console.log("Removed poiWindow.");
         poiWindow.close();
         poiWindow.setMap(null);
         poiWindow_uuid = null;
@@ -1449,6 +1444,20 @@ function adjust_search_radius() {
         } );
     }
 
+    function search_by_categories() {
+      var cat_list = "";
+      if (!(miwi_poi_pois_by_category["_ALL"].selected || 
+          miwi_poi_pois_by_category["_OTHER"].selected)) {
+        for (category in miwi_poi_pois_by_category) {
+          if (miwi_poi_pois_by_category[category].selected) {
+            cat_list += ((cat_list != "") ? "," : "") + category;
+          }
+        }
+      }
+      miwi_active_categories = cat_list;
+      searchPOIs();
+    }    
+    
     function category_changed() {
         var uuid;
         var categories;
@@ -1461,6 +1470,8 @@ function adjust_search_radius() {
         poiWindow.setMap(null);
         poiWindow_uuid = null;
 
+        search_by_categories();
+        
         for (uuid in miwi_poi_pois) {
             categories = getPoiLocal(uuid, 'categories');
             marker = getPoiLocal(uuid, 'marker');
@@ -1518,7 +1529,7 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
                     poiCore.geom_obj = geos;
                 }
 
-                if ( poiCore.hasOwnProperty( "location" ) ) {
+                if ( poiCore && poiCore.hasOwnProperty( "location" ) ) {
                     location = poiCore['location'];
                     wgs84 = location.wgs84;
                     if ( wgs84 ) {
@@ -1680,8 +1691,6 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
         }
     }
 
-    '<tr><td>L&#228;mp&#246;tila:</td><td>5.4</td><td>&#176;C</td></tr>'
-    
     function sensor_data_to_str(sensor_data_rec, languages) {
       return '<tr><td>' + html_ent2xml( text_by_langs(sensor_data_rec.name, 
           languages)) + ":</td><td>" + html_ent2xml(sensor_data_rec.value) + "</td><td>" 
@@ -1699,19 +1708,21 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
         poi_data = miwi_poi_pois[uuid] || {"label": "No information available"};
         poi_core = poi_data.fw_core;
         name = text_by_langs(poi_core["name"], languages);
-console.log("* name='" + name + "'");        
 
         category = categories_by_langs(poi_core["categories"], languages) || "";
-console.log("* category='" + category + "'");        
         thumbnail = poi_core["thumbnail"] || "";
         label = text_by_langs(poi_core["label"], languages) || "";
-console.log("* label='" + label + "'");
         description = text_by_langs(poi_core["description"], languages);
         url = text_by_langs(poi_core["url"], languages);
         // Default icon is star !
-        icon_string = miwi_poi_icon_strings[category] || "star"; // ???
+        icon_string = miwi_poi_icon_strings[category] || "star";
         found_label = (label != "");
         found_thumbnail = (thumbnail != "");
+        // Vehicle data
+        var fw_generic = poi_data.fw_generic;
+        var vehicle, v_line;
+        if(fw_generic) vehicle = fw_generic.vehicle;
+        if(vehicle) v_line = vehicle.line;
         // Set sensor data
         if(poi_data.fw_sensor) {
           for(key in poi_data.fw_sensor) {
@@ -1744,24 +1755,15 @@ console.log("* label='" + label + "'");
                 + ((url && url != "") ?
                     ("<p><a target=\"_blank\" href=\"" + str2html(url) + "\">"
                         + str2html(url) + "</a></p>") : "")
+                + ((v_line) ? ("<br/>Line " + v_line) : "")
                 + ((sensor_data_displ != "") ? ("<br/><table>" + sensor_data_displ + "</table>") : "")
                 + '</div>';
         poiWindow.setContent(new_content);
-/* 
-        poiWindow.setContent('<div id="infoCategory">cat1</div><br/>'
-                + '<div id="infoTitle">Title1</div>'
-                + '<div id="infoText"><table>'
-                + '<tr><td>L&#228;mp&#246;tila:</td><td>5.4</td><td>&#176;C</td></tr>'
-                + '<tr><td>tuuli:</td><td>3.2</td><td>m/s</td></tr>'
-                + '</table></div>');
-*/
-//console.log("setContent: " + new_content);
         poiWindow.open( map, poiMarker );
     }
         
     function POI_window_refresh(data) {
       show_POI_window(data.poiMarker, data.uuid);
-console.log("POI_window_referesh: " + data.uuid);      
     }
 
     function POI_onClick(poiMarker, uuid) {
@@ -1921,7 +1923,7 @@ console.log("POI_window_referesh: " + data.uuid);
         var thismarkerOps = new MarkerOps(uuid);
 
         google.maps.event.addListener(poiMarker, 'rightclick', 
-          function(mouseEvent){console.log("rightclick luokka=" + thismarkerOps.luokka);
+          function(mouseEvent){
               thismarkerOps.rightclick(mouseEvent);});
 
         updateMarker( pos, poiMarker );
@@ -2304,7 +2306,7 @@ console.log("POI_window_referesh: " + data.uuid);
         return map;
     };
 
-// For dynamic POIs enable this
+// For POI polling, enable this or something
 //    setInterval(searchPOIs, 10000);
 
   //window.onload = loadScript;

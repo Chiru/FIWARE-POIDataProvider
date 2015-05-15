@@ -487,9 +487,9 @@ sbje.make_array_form_internals = function (path, schema, data, key, schema_root)
             '<img id="oi:' + field_id + '" src="' + 
             (is_open ? sbje.icons.block_open : sbje.icons.block_closed) + 
             '" ' + 'onclick="sbje.toggle_section(\'' + path + '\')"/>' +
-            key + ':  {' +
+            key + ':  [' +
             '<span id="bc:' + field_id + '" style="display:' + 
-            (is_open ? 'none' : 'inherit') + '">' + '...}' +
+            (is_open ? 'none' : 'inherit') + '">' + '...]' +
             info_icon + '</span>' +
          '</span>' +
           '<span id="b:' + field_id + '" style="display:' + 
@@ -515,7 +515,7 @@ sbje.make_array_form_internals = function (path, schema, data, key, schema_root)
 */
     
     result += '</div>' +
-              '}' +
+              ']' +
           '</span>' +
         '</span>';
   } else {

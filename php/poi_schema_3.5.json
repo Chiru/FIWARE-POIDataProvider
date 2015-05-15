@@ -420,6 +420,13 @@
       "description": "describes where to find data and what to do with it",
       "type": "object",
       "properties": {
+        "components": {
+          "type": "array",
+          "items": {
+            "description": "names of the components with dynamic content",
+            "type": "string"
+          }
+        },
         "host_type": {
             "description": "Id of the host access configuration",
             "type": "string"
@@ -446,6 +453,10 @@
           "title": "Last update",
           "description": "DO NOT EDIT! Information to identify the version of the data component.",
           "$ref": "#/definitions/update_stamp"
+        },
+        "valid_duration": {
+          "description": "validity of data in seconds",
+          "type": "number"
         }
       }
     }

@@ -37,4 +37,5 @@ var miwi_poi_icon_strings =
 "university": "civic-building",
 "cinema": "cinema",
 "sensor": "glyphish_thermometer",
+"vehicle": "bus",
 };

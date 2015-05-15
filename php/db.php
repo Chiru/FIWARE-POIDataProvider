@@ -6,6 +6,75 @@
 * For conditions of distribution and use, see copyright notice in LICENCE
 */
 
+function update_fw_core($db_opts, $pgcon, $uuid, $fw_core, $fw_core_tbl, 
+    $new_timestamp)
+{
+  $description = NULL;
+  $label = NULL;
+  $url = NULL;
+  $thumbnail = NULL;
+  $source_name = NULL;
+  $source_website = NULL;
+  $source_id = NULL;
+  $source_license = NULL;
+   
+  $fw_core_intl_tbl = $db_opts['fw_core_intl_table_name'];
+
+  update_fw_core_intl_properties($pgcon, $fw_core_intl_tbl, $uuid, $fw_core);
+            
+  $categories = $fw_core['categories'];
+  foreach($categories as &$category)
+  {
+      $category = pg_escape_string($category);
+  }
+  
+  $pg_categories = "{". implode(",", $categories). "}";
+             
+  $location = $fw_core['location'];
+  $lat = NULL;
+  $lon = NULL;
+  if ($location['wgs84'])
+  {
+      $lat = pg_escape_string($location['wgs84']['latitude']);
+      $lon = pg_escape_string($location['wgs84']['longitude']);
+  }
+  if ($lat == NULL or $lon == NULL)
+  {
+      header("HTTP/1.0 400 Bad Request");
+      die ("Failed to parse location: lat or lon is NULL!");
+  }
+  
+
+  if (isset($fw_core['thumbnail']))
+      $thumbnail = pg_escape_string($fw_core['thumbnail']);
+
+  if (isset($fw_core['source']))
+  {
+      $src = $fw_core['source'];
+      if (isset($src['name']))
+          $source_name = pg_escape_string($src['name']);
+      if (isset($src['website']))
+          $source_website = pg_escape_string($src['website']);
+      if (isset($src['id']))
+          $source_id = pg_escape_string($src['id']);
+      if (isset($src['license']))
+          $source_license = pg_escape_string($src['license']);
+  }
+  
+  $update = "UPDATE $fw_core_tbl SET categories='$pg_categories', location=ST_GeogFromText('POINT($lon $lat)'), " .
+  "thumbnail='$thumbnail', timestamp=$new_timestamp, source_name='$source_name', source_website='$source_website', " .
+  "source_id='$source_id', source_license='$source_license' WHERE uuid='$uuid';";
+  
+  $update_result = pg_query($update);
+  if (!$update_result)
+  {
+      echo "*ERROR: A database error has occured!\n";
+      echo "  " . pg_last_error() . "\n";
+      exit;
+  }
+
+}
+
 //Database options
 function get_db_options()
 {
