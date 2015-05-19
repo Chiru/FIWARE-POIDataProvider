@@ -15,5 +15,8 @@
         "description": {
             "": "Test POI for testing add_poi functionality"
         }
+    },
+    "fw_contact": {
+        "phone":"040-123456789"
     }
 }
