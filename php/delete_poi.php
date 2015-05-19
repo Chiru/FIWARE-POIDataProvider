@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE' )
         
         echo "POI deleted succesfully";
         
-    }  
+    }
     
     else {
         header("HTTP/1.0 400 Bad Request");
