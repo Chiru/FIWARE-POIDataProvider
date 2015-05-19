@@ -12,7 +12,7 @@ CREATE TABLE fw_core
   userid uuid,
   source_name text,
   source_website text,
-  source_licence text,
+  source_license text,
   source_id text,
   CONSTRAINT "pkey" PRIMARY KEY (uuid)
 )

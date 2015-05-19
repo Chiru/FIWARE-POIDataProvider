@@ -1,5 +1,5 @@
 ﻿INSERT INTO fw_core(
-            uuid, osm_id, timestamp, category, location, source_name, source_website, source_licence)
+            uuid, osm_id, timestamp, category, location, source_name, source_website, source_license)
     SELECT uuid_generate_v4(), osm_id, 1410777181, amenity, Geography(ST_Transform(way,4326)), 'OpenStreetMap', 'http://www.openstreetmap.org', 'http://www.openstreetmap.org/copyright'
     FROM bayern_osm_point
     WHERE amenity is not NULL and name is not NULL and length(name) < 65;

@@ -3,7 +3,7 @@
 /*
 * Project: FI-WARE
 * Copyright (c) 2014 Center for Internet Excellence, University of Oulu, All Rights Reserved
-* For conditions of distribution and use, see copyright notice in LICENCE
+* For conditions of distribution and use, see copyright notice in LICENSE
 */
 
 require 'db.php';
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
             $source_name = NULL;
             $source_website = NULL;
             $source_id = NULL;
-            $source_licence = NULL;
+            $source_license = NULL;
             
 //             print "fw_core found!";
             $fw_core = $poi_data["fw_core"];
