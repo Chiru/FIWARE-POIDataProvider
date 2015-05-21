@@ -50,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE' )
             $collection = $m_db->$component;
             $collection->remove(array("_id" => $uuid));
         }
+        header("Access-Control-Allow-Origin: *");
         
         echo "POI deleted succesfully";
         
@@ -63,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE' )
 }
 
 else if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    header("Access-Control-Allow-Origin: *");
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
         header("Access-Control-Allow-Methods: DELETE, OPTIONS");
 

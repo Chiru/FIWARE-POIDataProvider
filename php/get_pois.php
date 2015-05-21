@@ -258,6 +258,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
 }
 
 else if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    header("Access-Control-Allow-Origin: *");
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
         header("Access-Control-Allow-Methods: GET, OPTIONS");
 

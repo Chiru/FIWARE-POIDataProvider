@@ -633,7 +633,7 @@ function updatePOI( poi_data, uuid ) {
         centerChangedTimeout,
         oldMapCenter,
         CENTER_CHANGED_THRESHOLD = 130,
-        BACKEND_ADDRESS_POI = "http://dev.cie.fi/FI-WARE/poi_dp_dyn/",
+        BACKEND_ADDRESS_POI = "http://ari.webhop.org/poi_dp/",
 
         searchRadius = 600,
         searchRadiusScaling = 2.0;
