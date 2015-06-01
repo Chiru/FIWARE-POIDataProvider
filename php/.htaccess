@@ -1,0 +1,8 @@
+# protect the possible confidential locations and access keys used to
+# get data from external sources
+#
+# NOTE: This requires enabling .htaccess in the server (Apache?).
+
+<FilesMatch "poi_dp_dyn_conf\.json$">
+    Deny from all
+</FilesMatch>
