@@ -114,13 +114,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
         }
         
         /* Include dynamic data */
-        /*
-           ToDo: 
-             1. Refresh dynamic data only when it expires. See 'valid_duration'
-                and 'timestamp'.
-             2. Remember to protect at least 'fw_dynamic' against dynamic 
-                modifications (except fw_dynamic._ctrl .
-        */
         $new_timestamp = time();
         $supported_components = get_supported_components();
         

@@ -427,26 +427,36 @@ var poi_schema = {
             "type": "string"
           }
         },
-        "host_type": {
-            "description": "Id of the host access configuration",
-            "type": "string"
-        },
-        "host_id": {
+        "sources": {
+          "description": "where and how to collect data for this POI",
           "type": "array",
           "items": {
-            "description": "parameter to host access configuration, e.g. url",
-            "type": "string"
-          }
-        },
-        "data_type": {
-            "description": "Id of the data mapping descriptor",
-            "type": "string"
-        },
-        "data_params": {
-          "type": "array",
-          "items": {
-            "description": "parameter to data mapping, e.g. a constant value",
-            "type": "string"
+            "description": "definition of a data source and related mapping",
+            "type": "object",
+            "properties": {
+              "host_type": {
+                  "description": "Id of the host access configuration",
+                  "type": "string"
+              },
+              "host_id": {
+                "type": "array",
+                "items": {
+                  "description": "parameter to host access configuration, e.g. url",
+                  "type": "string"
+                }
+              },
+              "data_type": {
+                  "description": "Id of the data mapping descriptor",
+                  "type": "string"
+              },
+              "data_params": {
+                "type": "array",
+                "items": {
+                  "description": "parameter to data mapping, e.g. a constant value",
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "last_update": {

@@ -176,4 +176,27 @@ function &array_merge_r(array &$array1, &$array2 = null)
   }
   return $merged;
 }
+
+// This does not overwrite numeric keys
+function &array_merge_r2(array &$array1, &$array2 = null)
+{
+  $merged = $array1;
+  
+  if (is_array($array2)) {
+    foreach ($array2 as $key => $val) {
+      if (is_array($val)) {
+        $item = (isset($merged[$key]) && is_array($merged[$key])) ? 
+            array_merge_r2($merged[$key], $val) : $val;
+      } else {
+        $item = $val;
+      }
+      if (is_int($key)) {
+        array_push($merged, $item);
+      } else {
+        $merged[$key] = $item;
+      }
+    }
+  }
+  return $merged;
+}
 ?>
