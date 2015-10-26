@@ -4,11 +4,24 @@
 // https://github.com/justinrainbow/json-schema
 require 'vendor/autoload.php';
 
+// Read and process the schema only once to globals
+$supported_components = array(); // set in load_poi_schema() as side effect
+$poi_schema = load_poi_schema();
+$intl_properties = find_intl_properties($poi_schema->properties);
+
+function get_supported_components()
+{
+    global $supported_components;
+    
+    return $supported_components;
+}
+
 function validate_poi_data($poi_data)
 {
+    global $poi_schema;
     $result = false;
     
-    $poi_schema = load_poi_schema();
+//=    $poi_schema = load_poi_schema();
     
     $intl_props = find_intl_properties($poi_schema->properties);
     
@@ -35,8 +48,12 @@ function validate_poi_data($poi_data)
 //Loads the POI schema from file to a PHP object structure
 function load_poi_schema($poi_schema_file = 'poi_schema_3.5.json')
 {
+    global $supported_components;
+    
     $retriever = new JsonSchema\Uri\UriRetriever;
     $poi_schema = $retriever->retrieve('file://' . realpath($poi_schema_file));
+    $supported_components = array_keys(
+        get_object_vars($poi_schema->properties));
     
     $refResolver = new JsonSchema\RefResolver($retriever);
     $refResolver->resolve($poi_schema, 'file://' .realpath($poi_schema_file));
@@ -221,9 +238,12 @@ function set_arr_value_by_path(&$array, $path, $new_val)
 //given languages
 function filter_poi_intl_properties(&$pois_data, $langs)
 {
+//*    global $poi_schema;
+    global $intl_properties;
     $pois = &$pois_data['pois'];
-    $schema = load_poi_schema();
-    $intl_properties = find_intl_properties($schema->properties);
+//*    $schema = load_poi_schema();
+//*    $intl_properties = find_intl_properties($schema->properties);
+//*    $intl_properties = find_intl_properties($poi_schema->properties);
     
     foreach($pois as &$poi)
     {

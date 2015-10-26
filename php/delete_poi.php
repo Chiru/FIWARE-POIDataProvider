@@ -7,6 +7,7 @@
 */
 
 require 'db.php';
+require 'data_manager.php';
 require 'util.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'DELETE' )

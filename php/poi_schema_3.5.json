@@ -469,6 +469,16 @@
           "type": "number"
         }
       }
+    },
+    "fw_test_data": {
+      "title": "Test data",
+      "description": "For development and quality control. Structure and content are arbitrary.",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        }
+      }
     }
   },
   "definitions": {

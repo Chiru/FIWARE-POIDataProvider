@@ -14,6 +14,7 @@ define('DEFAULT_DYN_DATA_VALID_TIME', 60); // used, if fw_dynamic.valid_duration
 require 'db.php';
 require 'util.php';
 require 'get_dyn_pois.php';
+require 'data_manager.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET' )
 {
