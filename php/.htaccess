@@ -1,3 +1,11 @@
+# Enable CORS
+# ===========
+# NOTE: This requires enabling mod_headers
+
+Header add Access-Control-Allow-Origin "*"
+
+# Protect Confidental Data
+# ========================
 # protect the possible confidential locations and access keys used to
 # get data from external sources
 #
@@ -6,3 +14,16 @@
 <FilesMatch "poi_dp_dyn_conf\.json$">
     Deny from all
 </FilesMatch>
+
+# Default .php Extension
+# ======================
+# To allow service access without .php extension
+# NOTE: This requires enabling mod_rewrite
+
+#turn on url rewriting 
+RewriteEngine on
+
+#remove the need for .php extention 
+RewriteCond %{REQUEST_FILENAME} !-d 
+RewriteCond %{REQUEST_FILENAME}\.php -f 
+RewriteRule ^(.*)$ $1.php
