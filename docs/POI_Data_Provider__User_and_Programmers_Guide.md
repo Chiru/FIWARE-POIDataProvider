@@ -129,7 +129,7 @@ The common parts used in queries are described in separate section.
 
 #### Spatial query 
 
-Spatial query is used to find the POIs based on their location. See [[#Interface reference|Interface reference]] for complete treatment of available query choices. 
+Spatial query is used to find the POIs based on their location. See [Interface reference](#Interface reference) for complete treatment of available query choices. 
 
 JavaScript skeleton for requesting POIs in given radius below gives an example how to implement a query in a client.
 
