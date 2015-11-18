@@ -1,0 +1,2257 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fiware_POI_R4</title>
+    <link href="css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+    <link href="css/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/idea.css">
+    <script src="js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <link rel="stylesheet" type="text/css" href="css/api-specification.css"> 
+
+    
+</head>
+<body id="respecDocument" class="h-entry">
+<div class="container">
+  <div id="TOC-container">
+    
+<section id="toc">
+
+        <div id="fiware-logo"></div>
+    <ul class="toc">
+
+
+    
+    
+
+
+
+
+
+<li><a href="#API_specification">API Specification</a>
+    <ul class="toc">
+    
+
+                        <li>
+                            
+                                <a href="#resource_group_platform" title = "Group Platform">Group Platform</a>
+                            
+                            <ul class="toc">
+                              
+                                
+                                    
+                                        
+                                            <li><a href="#action_get-components" title = "GET - Get Components">GET - Get Components aaaaaa</a></li>
+                                        
+                                        
+                                    
+                                
+                              
+                            </ul>
+                        </li>
+                      
+
+                        <li>
+                            
+                                <a href="#resource_group_query" title = "Group Query">Group Query</a>
+                            
+                            <ul class="toc">
+                              
+                                
+                                    
+                                        
+                                            <li><a href="#action_radial-search" title = "GET - Radial Search">GET - Radial Search aaaaaa</a></li>
+                                        
+                                        
+                                    
+                                
+                              
+                                
+                                    
+                                        
+                                            <li><a href="#action_bounding-box-search" title = "GET - Bounding Box Search">GET - Bounding Box Search aaaaaa</a></li>
+                                        
+                                        
+                                    
+                                
+                              
+                                
+                                    
+                                        
+                                            <li><a href="#action_get-pois" title = "GET - Get POIs">GET - Get POIs aaaaaa</a></li>
+                                        
+                                        
+                                    
+                                
+                              
+                            </ul>
+                        </li>
+                      
+
+                        <li>
+                            
+                                <a href="#resource_group_update" title = "Group Update">Group Update</a>
+                            
+                            <ul class="toc">
+                              
+                                
+                                    
+                                        
+                                            <li><a href="#action_add-poi" title = "POST - Add POI">POST - Add POI aaaaaa</a></li>
+                                        
+                                        
+                                    
+                                
+                              
+                                
+                                    
+                                        
+                                            <li><a href="#action_update-poi" title = "POST - Update POI">POST - Update POI aaaaaa</a></li>
+                                        
+                                        
+                                    
+                                
+                              
+                                
+                                    
+                                        
+                                            <li><a href="#action_delete-poi" title = "DELETE - Delete POI">DELETE - Delete POI aaaaaa</a></li>
+                                        
+                                        
+                                    
+                                
+                              
+                            </ul>
+                        </li>
+                      
+    <li><a href="#examples">Examples</a></li>
+    </ul>
+</li>
+    
+    
+    
+   </ul>
+</section>
+
+  </div>
+  <div id="API-content">
+  
+	
+
+	
+
+
+
+	
+
+	
+
+
+
+
+	
+
+	
+		
+		<dl>
+		
+			
+		
+			
+		
+
+		
+			
+		
+			
+		
+
+		<dt class="versionLabel">Latest version:</dt> 
+		<dd class="versionValue"> <a href="http://fiwarepoi.apiblueprint.org/latest">http://fiwarepoi.apiblueprint.org/latest</a> </dd>
+
+
+		</dl>
+	
+
+
+
+
+
+
+<hr>
+
+
+	<h2 id="abstract">Abstract</h2>
+	<p>Fiware Points of Interest Generic Enabler R4</p>
+
+
+
+
+<hr>
+
+    
+    
+
+
+
+
+		
+	
+	
+
+
+
+
+
+	
+
+
+
+    
+
+  
+  <section id="API_specification">
+      <h1>API Specification</h1>
+      
+
+
+
+
+        
+            <section id="resource_group_platform" class="resourceGroup">
+            <h2 id="h-resource_group_platform">Platform</h2>
+        
+	
+        
+            <section id="resource_get-components" class="resource">
+                 <div class= "header" ><h3 id="h-resource_get-components">Get Components [/get_components]</h3> </div>
+                
+                
+                
+
+		        
+                
+                
+
+
+
+
+
+
+    
+
+
+                
+
+
+                    
+                        
+                            <div id="action_get-components" class="action GET">
+                        
+
+                        
+    <h4 id="h-action_get-components">
+        Get Components -
+        GET
+        
+            /get_components
+        
+    </h4>
+
+        
+                            <div id="get-components_body" class="">
+                                <p>Return the list of POI data components available from this server.</p>
+                                
+                                
+                                
+			
+                                
+                                
+      
+                                    
+        	                            
+    
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+                                    
+                                    
+                                    <div class="goExample">
+                                        <a href="#action_get-components_examples">Go to example</a>
+                                    </div>
+                                    
+                                        
+    <div class="goApiary">
+    
+        
+    
+        
+    
+    </div>
+
+                                    
+                                
+                            </div>
+                        </div>
+                    
+            </section>
+        
+    </section>
+
+        
+            <section id="resource_group_query" class="resourceGroup">
+            <h2 id="h-resource_group_query">Query</h2>
+        
+	
+        
+            <section id="resource_radial-search" class="resource">
+                 <div class= "header" ><h3 id="h-resource_radial-search">Radial Search [/radial_search]</h3> </div>
+                
+                
+                
+
+		        
+                
+                
+
+
+
+
+
+
+    
+
+
+                
+
+
+                    
+                        
+                            <div id="action_radial-search" class="action GET">
+                        
+
+                        
+    <h4 id="h-action_radial-search">
+        Radial Search -
+        GET
+        
+            /radial_search
+        
+    </h4>
+
+        
+                            <div id="radial-search_body" class="">
+                                <p>Return the data of POIs within a given distance from a given location.</p>
+                                
+                                
+                                
+
+	<span class="parameters-title">Parameters</span>
+	<dl>
+		
+			<dt>
+				lat (Required, number
+				)
+			</dt>
+			<dd>
+				Latitude of the center of the search circle [degrees]
+				
+			</dd>
+		
+			<dt>
+				lon (Required, number
+				)
+			</dt>
+			<dd>
+				Longitude of the center of the search circle [degrees]
+				
+			</dd>
+		
+			<dt>
+				radius (Optional, number
+				)
+			</dt>
+			<dd>
+				Radius of the search circle [meters], default is implementation dependent
+				
+			</dd>
+		
+			<dt>
+				category (Optional, string
+				)
+			</dt>
+			<dd>
+				POI category/categories to be included to results. Several categories can be given by separating them with commas. If this parameter is not given, all categories are included.
+				
+			</dd>
+		
+			<dt>
+				component (Optional, string
+				)
+			</dt>
+			<dd>
+				POI data component names to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.
+				
+			</dd>
+		
+			<dt>
+				max_results (Optional, number
+				)
+			</dt>
+			<dd>
+				Maximum number of POIs returned.
+				
+			</dd>
+		
+			<dt>
+				begin_time (Optional, string
+				)
+			</dt>
+			<dd>
+				When time of interest begins. ISO 8601 adaptation format is used for times. However, it is allowed to leave the time zone definition out. If time zone is missing, the local time zone of the POI is used.
+				
+			</dd>
+		
+			<dt>
+				end_time (string, optional) - When time of interest ends. Format as for begin_time. Required, if begin_time is defined. (Required)
+			</dt>
+			<dd>
+				
+				
+			</dd>
+		
+			<dt>
+				min_minutes (number, optional) - Minimum time of availability in minutes. Optional. If begin_time is defined, default (Required)
+			</dt>
+			<dd>
+				
+				
+			</dd>
+		
+	</dl>
+			
+                                
+                                
+      
+                                    
+        	                            
+    
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+                                    
+                                    
+                                    <div class="goExample">
+                                        <a href="#action_radial-search_examples">Go to example</a>
+                                    </div>
+                                    
+                                        
+    <div class="goApiary">
+    
+        
+    
+        
+    
+    </div>
+
+                                    
+                                
+                            </div>
+                        </div>
+                    
+            </section>
+        
+            <section id="resource_bounding-box-search" class="resource">
+                 <div class= "header" ><h3 id="h-resource_bounding-box-search">Bounding Box Search [/bbox_search]</h3> </div>
+                
+                
+                
+
+		        
+                
+                
+
+
+
+
+
+
+    
+
+
+                
+
+
+                    
+                        
+                            <div id="action_bounding-box-search" class="action GET">
+                        
+
+                        
+    <h4 id="h-action_bounding-box-search">
+        Bounding Box Search -
+        GET
+        
+            /bbox_search
+        
+    </h4>
+
+        
+                            <div id="bounding-box-search_body" class="">
+                                <p>Return the data of POIs within a given bounding box.</p>
+                                
+                                
+                                
+
+	<span class="parameters-title">Parameters</span>
+	<dl>
+		
+			<dt>
+				north (Required, number
+				)
+			</dt>
+			<dd>
+				Latitude of the northern edge of the bounding box [degrees]
+				
+			</dd>
+		
+			<dt>
+				south (Required, number
+				)
+			</dt>
+			<dd>
+				Latitude of the southern edge of the bounding box [degrees]
+				
+			</dd>
+		
+			<dt>
+				east (Required, number
+				)
+			</dt>
+			<dd>
+				Longitude of the eastern edge of the bounding box [degrees]
+				
+			</dd>
+		
+			<dt>
+				west (Required, number
+				)
+			</dt>
+			<dd>
+				Longitude of the western edge of the bounding box [degrees]
+				
+			</dd>
+		
+			<dt>
+				category (Optional, string
+				)
+			</dt>
+			<dd>
+				POI category/categories to be included to results. Several categories can be given by separating them with commas. If this parameter is not given, all categories are included.
+				
+			</dd>
+		
+			<dt>
+				component (Optional, string
+				)
+			</dt>
+			<dd>
+				POI data component names to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.
+				
+			</dd>
+		
+			<dt>
+				max_results (Optional, number
+				)
+			</dt>
+			<dd>
+				Maximum number of POIs returned.
+				
+			</dd>
+		
+			<dt>
+				begin_time (Optional, string
+				)
+			</dt>
+			<dd>
+				When time of interest begins. ISO 8601 adaptation format is used for times. However, it is allowed to leave the time zone definition out. If time zone is missing, the local time zone of the POI is used.
+				
+			</dd>
+		
+			<dt>
+				end_time (string, optional) - When time of interest ends. Format as for begin_time. Required, if begin_time is defined. (Required)
+			</dt>
+			<dd>
+				
+				
+			</dd>
+		
+			<dt>
+				min_minutes (number, optional) - Minimum time of availability in minutes. Optional. If begin_time is defined, default (Required)
+			</dt>
+			<dd>
+				
+				
+			</dd>
+		
+	</dl>
+			
+                                
+                                
+      
+                                    
+        	                            
+    
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+                                    
+                                    
+                                    <div class="goExample">
+                                        <a href="#action_bounding-box-search_examples">Go to example</a>
+                                    </div>
+                                    
+                                        
+    <div class="goApiary">
+    
+        
+    
+        
+    
+    </div>
+
+                                    
+                                
+                            </div>
+                        </div>
+                    
+            </section>
+        
+            <section id="resource_get-pois" class="resource">
+                 <div class= "header" ><h3 id="h-resource_get-pois">Get POIs [/get_pois]</h3> </div>
+                
+                
+                
+
+		        
+                
+                
+
+
+
+
+
+
+    
+
+
+                
+
+
+                    
+                        
+                            <div id="action_get-pois" class="action GET">
+                        
+
+                        
+    <h4 id="h-action_get-pois">
+        Get POIs -
+        GET
+        
+            /get_pois
+        
+    </h4>
+
+        
+                            <div id="get-pois_body" class="">
+                                <p>Return the data of POIs listed in the query. This is intended to get additional information - other components - about interesting POIs.</p>
+                                
+                                
+                                
+
+	<span class="parameters-title">Parameters</span>
+	<dl>
+		
+			<dt>
+				poi_id (Required, string
+				)
+			</dt>
+			<dd>
+				UUID of the POI. Several UUIDs can be given by separating them with commas.
+				
+			</dd>
+		
+			<dt>
+				component (Optional, string
+				)
+			</dt>
+			<dd>
+				POI data component names to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.
+				
+			</dd>
+		
+			<dt>
+				get_for_update (Optional, boolean
+				)
+			</dt>
+			<dd>
+				The components requested are returned with all language and other variants and possible metadata for inspection and edit.
+				
+			</dd>
+		
+	</dl>
+			
+                                
+                                
+      
+                                    
+        	                            
+    
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+                                    
+                                    
+                                    <div class="goExample">
+                                        <a href="#action_get-pois_examples">Go to example</a>
+                                    </div>
+                                    
+                                        
+    <div class="goApiary">
+    
+        
+    
+        
+    
+    </div>
+
+                                    
+                                
+                            </div>
+                        </div>
+                    
+            </section>
+        
+    </section>
+
+        
+            <section id="resource_group_update" class="resourceGroup">
+            <h2 id="h-resource_group_update">Update</h2>
+        
+	<p>Update operations should require authorization in order to prevent misuse. The details of the authorization mechanism are out of the scope of this specification.</p>
+        
+            <section id="resource_add-poi" class="resource">
+                 <div class= "header" ><h3 id="h-resource_add-poi">Add POI [/add_poi]</h3> </div>
+                
+                
+                
+
+		        
+                
+                
+
+
+
+
+
+
+    
+
+
+                
+
+
+                    
+                        
+                            <div id="action_add-poi" class="action POST">
+                        
+
+                        
+    <h4 id="h-action_add-poi">
+        Add POI -
+        POST
+        
+            /add_poi
+        
+    </h4>
+
+        
+                            <div id="add-poi_body" class="">
+                                <p>This function is used for adding a new POI entity into a database. The POI data is given as JSON in HTTP POST request. It generates a UUID for the new POI and returns it to the client in JSON format including the timestamp of the POI creation. The client can include different data components to the new POI by sending them along with the request.</p>
+<p>The POSTed JSON must include only the content of a single POI, i.e. it must not contain a UUID as key as it is automatically generated by the server.</p>
+                                
+                                
+                                
+			
+                                
+                                
+      
+                                    
+        	                            
+                                            
+                                            
+                                            
+                                            
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Request </span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+    
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+                                    
+                                    
+                                    <div class="goExample">
+                                        <a href="#action_add-poi_examples">Go to example</a>
+                                    </div>
+                                    
+                                        
+    <div class="goApiary">
+    
+        
+    
+        
+    
+    </div>
+
+                                    
+                                
+                            </div>
+                        </div>
+                    
+            </section>
+        
+            <section id="resource_update-poi" class="resource">
+                 <div class= "header" ><h3 id="h-resource_update-poi">Update POI [/update_poi]</h3> </div>
+                
+                
+                
+
+		        
+                
+                
+
+
+
+
+
+
+    
+
+
+                
+
+
+                    
+                        
+                            <div id="action_update-poi" class="action POST">
+                        
+
+                        
+    <h4 id="h-action_update-poi">
+        Update POI -
+        POST
+        
+            /update_poi
+        
+    </h4>
+
+        
+                            <div id="update-poi_body" class="">
+                                <p>This function is used for updating data of an existing POI entity. Existing data components can be modified or new ones can be added. Each data component contains a ‘last modified’ timestamp in order to prevent concurrency issues.</p>
+<p>The updated POI data is given as JSON in HTTP POST request. The server responds with HTTP status messages indicating the success or failure of the operation.</p>
+                                
+                                
+                                
+			
+                                
+                                
+      
+                                    
+        	                            
+                                            
+                                            
+                                            
+                                            
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Request </span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+    
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (text/plain)
+        
+    
+            
+            
+     
+</div>
+        	                            
+                                    
+                                    
+                                    <div class="goExample">
+                                        <a href="#action_update-poi_examples">Go to example</a>
+                                    </div>
+                                    
+                                        
+    <div class="goApiary">
+    
+        
+    
+        
+    
+    </div>
+
+                                    
+                                
+                            </div>
+                        </div>
+                    
+            </section>
+        
+            <section id="resource_delete-poi" class="resource">
+                 <div class= "header" ><h3 id="h-resource_delete-poi">Delete POI [/delete_poi]</h3> </div>
+                
+                
+                
+
+		        
+                
+                
+
+
+
+
+
+
+    
+
+
+                
+
+
+                    
+                        
+                            <div id="action_delete-poi" class="action DELETE">
+                        
+
+                        
+    <h4 id="h-action_delete-poi">
+        Delete POI -
+        DELETE
+        
+            /delete_poi
+        
+    </h4>
+
+        
+                            <div id="delete-poi_body" class="">
+                                <p>Delete existing POI using HTTP DELETE request. The UUID of the POI to be deleted is given in the request as a URL parameter</p>
+                                
+                                
+                                
+
+	<span class="parameters-title">Parameters</span>
+	<dl>
+		
+			<dt>
+				id (Required, string
+				)
+			</dt>
+			<dd>
+				The UUID of the POI to be deleted
+				
+			</dd>
+		
+	</dl>
+			
+                                
+                                
+      
+                                    
+        	                            
+    
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (text/plain)
+        
+    
+            
+            
+     
+</div>
+        	                            
+                                    
+                                    
+                                    <div class="goExample">
+                                        <a href="#action_delete-poi_examples">Go to example</a>
+                                    </div>
+                                    
+                                        
+    <div class="goApiary">
+    
+        
+    
+        
+    
+    </div>
+
+                                    
+                                
+                            </div>
+                        </div>
+                    
+            </section>
+        
+    </section>
+
+<section id="examples">
+    <div class= "header" ><h2>Examples</h2> </div>
+    
+        
+            <section id="resource_group_platform_example" class="resourceGroupExample">
+                <div class= "header" ><h3 id="h-resource_group_platform_example">Platform</h3> </div>
+        
+
+                
+                    <section id="resource_get-components_example" class="resourceExample">
+                         <div class= "header" ><h4 id="h-resource_get-components_example">Get Components [/get_components]</h4></div>
+                            
+                            
+                            
+
+                            
+                            
+                            
+
+                            
+
+
+                            
+                                <div id="action_get-components_examples" class="actionExample GET">
+
+                                    
+    <h4 id="h-action_get-components_examples">
+        Get Components -
+        GET
+        
+            /get_components
+        
+    </h4>
+
+                
+                                    <div id="action_get-components_body" class=""> 
+                                        
+                                        
+                                        
+                                        
+         
+                                        
+                                            
+                                            
+                                                
+            
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_get-components_Response_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{
+  "components": [
+    "fw_core"
+  ]
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                            
+                                            <div class="goActions">
+                                                <a href="#action_get-components">Go to specification</a>
+                                            </div>
+                                    </div>
+                                </div>
+                            
+                    </section>
+            
+        </section>
+    
+        
+            <section id="resource_group_query_example" class="resourceGroupExample">
+                <div class= "header" ><h3 id="h-resource_group_query_example">Query</h3> </div>
+        
+
+                
+                    <section id="resource_radial-search_example" class="resourceExample">
+                         <div class= "header" ><h4 id="h-resource_radial-search_example">Radial Search [/radial_search]</h4></div>
+                            
+                            
+                            
+
+                            
+                            
+                            
+
+                            
+
+
+                            
+                                <div id="action_radial-search_examples" class="actionExample GET">
+
+                                    
+    <h4 id="h-action_radial-search_examples">
+        Radial Search -
+        GET
+        
+            /radial_search
+        
+    </h4>
+
+                
+                                    <div id="action_radial-search_body" class=""> 
+                                        
+                                        
+                                        
+                                        
+
+	<span class="parameters-title">Parameters</span>
+	<dl>
+		
+			<dt>
+				lat (Required, number
+				)
+			</dt>
+			<dd>
+				Latitude of the center of the search circle [degrees]
+				
+			</dd>
+		
+			<dt>
+				lon (Required, number
+				)
+			</dt>
+			<dd>
+				Longitude of the center of the search circle [degrees]
+				
+			</dd>
+		
+			<dt>
+				radius (Optional, number
+				)
+			</dt>
+			<dd>
+				Radius of the search circle [meters], default is implementation dependent
+				
+			</dd>
+		
+			<dt>
+				category (Optional, string
+				)
+			</dt>
+			<dd>
+				POI category/categories to be included to results. Several categories can be given by separating them with commas. If this parameter is not given, all categories are included.
+				
+			</dd>
+		
+			<dt>
+				component (Optional, string
+				)
+			</dt>
+			<dd>
+				POI data component names to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.
+				
+			</dd>
+		
+			<dt>
+				max_results (Optional, number
+				)
+			</dt>
+			<dd>
+				Maximum number of POIs returned.
+				
+			</dd>
+		
+			<dt>
+				begin_time (Optional, string
+				)
+			</dt>
+			<dd>
+				When time of interest begins. ISO 8601 adaptation format is used for times. However, it is allowed to leave the time zone definition out. If time zone is missing, the local time zone of the POI is used.
+				
+			</dd>
+		
+			<dt>
+				end_time (string, optional) - When time of interest ends. Format as for begin_time. Required, if begin_time is defined. (Required)
+			</dt>
+			<dd>
+				
+				
+			</dd>
+		
+			<dt>
+				min_minutes (number, optional) - Minimum time of availability in minutes. Optional. If begin_time is defined, default (Required)
+			</dt>
+			<dd>
+				
+				
+			</dd>
+		
+	</dl>
+         
+                                        
+                                            
+                                            
+                                                
+            
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_radial-search_Response_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{
+  "pois": {
+    "6be4752b-fe6f-4c3a-98c1-13e5ccf01721": {
+      "fw_core": {
+        "category": "cafe", 
+        "location": {
+          "wgs84": { 
+            "latitude": 65.059334, 
+            "longitude": 25.4664775
+          }
+        }, 
+        "name": {
+          "": "Aulakahvila"
+        }
+      }
+    }, 
+    "4c6754d9-0bb1-4962-b604-6f3fcc08a9ec": {
+      "fw_core": {
+        "category": "restaurant",
+        "location": {
+          "wgs84": { 
+            "latitude": 65.0581807, 
+            "longitude": 25.4667163
+          }
+        }, 
+        "name": {
+          "": "Discus"
+        }
+      }
+    }
+  }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                            
+                                            <div class="goActions">
+                                                <a href="#action_radial-search">Go to specification</a>
+                                            </div>
+                                    </div>
+                                </div>
+                            
+                    </section>
+            
+                    <section id="resource_bounding-box-search_example" class="resourceExample">
+                         <div class= "header" ><h4 id="h-resource_bounding-box-search_example">Bounding Box Search [/bbox_search]</h4></div>
+                            
+                            
+                            
+
+                            
+                            
+                            
+
+                            
+
+
+                            
+                                <div id="action_bounding-box-search_examples" class="actionExample GET">
+
+                                    
+    <h4 id="h-action_bounding-box-search_examples">
+        Bounding Box Search -
+        GET
+        
+            /bbox_search
+        
+    </h4>
+
+                
+                                    <div id="action_bounding-box-search_body" class=""> 
+                                        
+                                        
+                                        
+                                        
+
+	<span class="parameters-title">Parameters</span>
+	<dl>
+		
+			<dt>
+				north (Required, number
+				)
+			</dt>
+			<dd>
+				Latitude of the northern edge of the bounding box [degrees]
+				
+			</dd>
+		
+			<dt>
+				south (Required, number
+				)
+			</dt>
+			<dd>
+				Latitude of the southern edge of the bounding box [degrees]
+				
+			</dd>
+		
+			<dt>
+				east (Required, number
+				)
+			</dt>
+			<dd>
+				Longitude of the eastern edge of the bounding box [degrees]
+				
+			</dd>
+		
+			<dt>
+				west (Required, number
+				)
+			</dt>
+			<dd>
+				Longitude of the western edge of the bounding box [degrees]
+				
+			</dd>
+		
+			<dt>
+				category (Optional, string
+				)
+			</dt>
+			<dd>
+				POI category/categories to be included to results. Several categories can be given by separating them with commas. If this parameter is not given, all categories are included.
+				
+			</dd>
+		
+			<dt>
+				component (Optional, string
+				)
+			</dt>
+			<dd>
+				POI data component names to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.
+				
+			</dd>
+		
+			<dt>
+				max_results (Optional, number
+				)
+			</dt>
+			<dd>
+				Maximum number of POIs returned.
+				
+			</dd>
+		
+			<dt>
+				begin_time (Optional, string
+				)
+			</dt>
+			<dd>
+				When time of interest begins. ISO 8601 adaptation format is used for times. However, it is allowed to leave the time zone definition out. If time zone is missing, the local time zone of the POI is used.
+				
+			</dd>
+		
+			<dt>
+				end_time (string, optional) - When time of interest ends. Format as for begin_time. Required, if begin_time is defined. (Required)
+			</dt>
+			<dd>
+				
+				
+			</dd>
+		
+			<dt>
+				min_minutes (number, optional) - Minimum time of availability in minutes. Optional. If begin_time is defined, default (Required)
+			</dt>
+			<dd>
+				
+				
+			</dd>
+		
+	</dl>
+         
+                                        
+                                            
+                                            
+                                                
+            
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_bounding-box-search_Response_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{
+  "pois": {
+    "6be4752b-fe6f-4c3a-98c1-13e5ccf01721": {
+      "fw_core": {
+        "category": "cafe", 
+        "location": {
+          "wgs84": { 
+            "latitude": 65.059334, 
+            "longitude": 25.4664775
+          }
+        }, 
+        "name": {
+          "": "Aulakahvila"
+        }
+      }
+    }, 
+    "4c6754d9-0bb1-4962-b604-6f3fcc08a9ec": {
+      "fw_core": {
+        "category": "restaurant",
+        "location": {
+          "wgs84": { 
+            "latitude": 65.0581807, 
+            "longitude": 25.4667163
+          }
+        }, 
+        "name": {
+          "": "Discus"
+        }
+      }
+    }
+  }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                            
+                                            <div class="goActions">
+                                                <a href="#action_bounding-box-search">Go to specification</a>
+                                            </div>
+                                    </div>
+                                </div>
+                            
+                    </section>
+            
+                    <section id="resource_get-pois_example" class="resourceExample">
+                         <div class= "header" ><h4 id="h-resource_get-pois_example">Get POIs [/get_pois]</h4></div>
+                            
+                            
+                            
+
+                            
+                            
+                            
+
+                            
+
+
+                            
+                                <div id="action_get-pois_examples" class="actionExample GET">
+
+                                    
+    <h4 id="h-action_get-pois_examples">
+        Get POIs -
+        GET
+        
+            /get_pois
+        
+    </h4>
+
+                
+                                    <div id="action_get-pois_body" class=""> 
+                                        
+                                        
+                                        
+                                        
+
+	<span class="parameters-title">Parameters</span>
+	<dl>
+		
+			<dt>
+				poi_id (Required, string
+				)
+			</dt>
+			<dd>
+				UUID of the POI. Several UUIDs can be given by separating them with commas.
+				
+			</dd>
+		
+			<dt>
+				component (Optional, string
+				)
+			</dt>
+			<dd>
+				POI data component names to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.
+				
+			</dd>
+		
+			<dt>
+				get_for_update (Optional, boolean
+				)
+			</dt>
+			<dd>
+				The components requested are returned with all language and other variants and possible metadata for inspection and edit.
+				
+			</dd>
+		
+	</dl>
+         
+                                        
+                                            
+                                            
+                                                
+            
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_get-pois_Response_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{
+  "pois": {
+    "30ddf703-59f5-4448-8918-0f625a7e1122": {
+      "fw_core": {
+        "category": "cafe", 
+        "location": {
+          "wgs84" { 
+            "latitude": 65.059334, 
+            "longitude": 25.4664775
+          }
+        }, 
+        "name": {
+          "": "Aulakahvila"
+        }
+      }
+    } 
+  }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                            
+                                            <div class="goActions">
+                                                <a href="#action_get-pois">Go to specification</a>
+                                            </div>
+                                    </div>
+                                </div>
+                            
+                    </section>
+            
+        </section>
+    
+        
+            <section id="resource_group_update_example" class="resourceGroupExample">
+                <div class= "header" ><h3 id="h-resource_group_update_example">Update</h3> </div>
+        
+
+                
+                    <section id="resource_add-poi_example" class="resourceExample">
+                         <div class= "header" ><h4 id="h-resource_add-poi_example">Add POI [/add_poi]</h4></div>
+                            
+                            
+                            
+
+                            
+                            
+                            
+
+                            
+
+
+                            
+                                <div id="action_add-poi_examples" class="actionExample POST">
+
+                                    
+    <h4 id="h-action_add-poi_examples">
+        Add POI -
+        POST
+        
+            /add_poi
+        
+    </h4>
+
+                
+                                    <div id="action_add-poi_body" class=""> 
+                                        
+                                        
+                                        
+                                        
+         
+                                        
+                                            
+                                            
+                                                
+                                                    
+                                                    
+                                                    
+                                                    
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Request </span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_add-poi_Request_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{
+  "fw_core": {
+  "category": "cafe", 
+  "location": {
+    "wgs84" { 
+    "latitude": 65.059334, 
+    "longitude": 25.4664775
+    }
+  }, 
+  "name": {
+    "": "Aulakahvila"
+  }
+  }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+            
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_add-poi_Response_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{
+  "created_poi": {
+    "uuid": "30ddf703-59f5-4448-8918-0f625a7e1122",
+  "timestamp": 1394525977
+  }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                            
+                                            <div class="goActions">
+                                                <a href="#action_add-poi">Go to specification</a>
+                                            </div>
+                                    </div>
+                                </div>
+                            
+                    </section>
+            
+                    <section id="resource_update-poi_example" class="resourceExample">
+                         <div class= "header" ><h4 id="h-resource_update-poi_example">Update POI [/update_poi]</h4></div>
+                            
+                            
+                            
+
+                            
+                            
+                            
+
+                            
+
+
+                            
+                                <div id="action_update-poi_examples" class="actionExample POST">
+
+                                    
+    <h4 id="h-action_update-poi_examples">
+        Update POI -
+        POST
+        
+            /update_poi
+        
+    </h4>
+
+                
+                                    <div id="action_update-poi_body" class=""> 
+                                        
+                                        
+                                        
+                                        
+         
+                                        
+                                            
+                                            
+                                                
+                                                    
+                                                    
+                                                    
+                                                    
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Request </span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_update-poi_Request_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{ 
+  "30ddf703-59f5-4448-8918-0f625a7e1122": {
+    "fw_core": {
+    "category": "cafe", 
+    "location": {
+      "wgs84" { 
+      "latitude": 65.059334, 
+      "longitude": 25.4664775
+      }
+      }, 
+    "name": {
+      "": "Aulakahvila"
+    },
+    "description": {
+      "": "Cafe at the Univesity of Oulu"
+      }
+    }
+  }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+            
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (text/plain)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_update-poi_Response_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: text/plain</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>POI data updated succesfully
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                            
+                                            <div class="goActions">
+                                                <a href="#action_update-poi">Go to specification</a>
+                                            </div>
+                                    </div>
+                                </div>
+                            
+                    </section>
+            
+                    <section id="resource_delete-poi_example" class="resourceExample">
+                         <div class= "header" ><h4 id="h-resource_delete-poi_example">Delete POI [/delete_poi]</h4></div>
+                            
+                            
+                            
+
+                            
+                            
+                            
+
+                            
+
+
+                            
+                                <div id="action_delete-poi_examples" class="actionExample DELETE">
+
+                                    
+    <h4 id="h-action_delete-poi_examples">
+        Delete POI -
+        DELETE
+        
+            /delete_poi
+        
+    </h4>
+
+                
+                                    <div id="action_delete-poi_body" class=""> 
+                                        
+                                        
+                                        
+                                        
+
+	<span class="parameters-title">Parameters</span>
+	<dl>
+		
+			<dt>
+				id (Required, string
+				)
+			</dt>
+			<dd>
+				The UUID of the POI to be deleted
+				
+			</dd>
+		
+	</dl>
+         
+                                        
+                                            
+                                            
+                                                
+            
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (text/plain)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_delete-poi_Response_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: text/plain</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>POI entity deleted succesfully
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                            
+                                            <div class="goActions">
+                                                <a href="#action_delete-poi">Go to specification</a>
+                                            </div>
+                                    </div>
+                                </div>
+                            
+                    </section>
+            
+        </section>
+    
+
+
+
+</section>
+  </section>
+  
+   
+
+
+
+    
+    
+    
+  </div>
+</div>
+</body>
+</html>
