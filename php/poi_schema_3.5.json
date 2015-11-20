@@ -213,6 +213,9 @@
               "copyright": {
                 "description": "Copyright clause and/or attribution of the item",
                 "type": "string"
+              },
+              "source": {
+                "description": "Free format description where the item is from"
               }
             },
             "required": [
