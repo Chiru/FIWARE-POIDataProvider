@@ -11,10 +11,10 @@ define('SERVER_NAME', 'get_pois');
 define('DEFAULT_DYN_DATA_VALID_TIME', 60); // used, if fw_dynamic.valid_duration
                                            // is not defined
 
-require 'db.php';
-require 'util.php';
-require 'get_dyn_pois.php';
-require 'data_manager.php';
+require_once 'db.php';
+require_once 'util.php';
+require_once 'get_dyn_pois.php';
+require_once 'data_manager.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET' )
 {

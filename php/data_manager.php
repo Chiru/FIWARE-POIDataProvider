@@ -2,7 +2,7 @@
 
 // Dependency: JSON Schema validator, 
 // https://github.com/justinrainbow/json-schema
-require 'vendor/autoload.php';
+require_once 'vendor/autoload.php';
 
 // Read and process the schema only once to globals
 $supported_components = array(); // set in load_poi_schema() as side effect

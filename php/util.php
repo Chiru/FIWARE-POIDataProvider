@@ -6,7 +6,7 @@
 * For conditions of distribution and use, see copyright notice in LICENSE
 */
 
-require 'data_manager.php';
+require_once 'data_manager.php';
 
 function handle_common_search_params()
 {

@@ -6,8 +6,8 @@
 * For conditions of distribution and use, see copyright notice in LICENSE
 */
 
-require 'db.php';
-require 'data_manager.php';
+require_once 'db.php';
+require_once 'data_manager.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' )
 {
