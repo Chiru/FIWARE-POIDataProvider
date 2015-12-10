@@ -5,15 +5,19 @@
 * Copyright (c) 2014 Center for Internet Excellence, University of Oulu, All Rights Reserved
 * For conditions of distribution and use, see copyright notice in LICENSE
 */
+define('SERVICE_NAME', 'get_components');
 
-//require_once 'db.php';
 require_once 'data_manager.php';
+require_once 'util.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET' )
 {
     $components = get_supported_components();
 
     $json_struct = array("components" => $components);
+    
+    $json_struct['service_info'] = get_service_info(SERVICE_NAME);
+    
     $return_val = json_encode($json_struct);
 
     header("Content-type: application/json");

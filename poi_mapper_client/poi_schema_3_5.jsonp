@@ -469,6 +469,16 @@ var poi_schema = {
           "type": "number"
         }
       }
+    },
+    "fw_test_data": {
+      "title": "Test data",
+      "description": "For development and quality control. Structure and content are arbitrary.",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        }
+      }
     }
   },
   "definitions": {
@@ -506,9 +516,9 @@ var poi_schema = {
           "description": "Optional key of the default language for this string",
           "type": "string"
         },
-        "": {
+        "__": {
           "title": "Language independent text",
-          "description": "",
+          "description": "This is the default 'language' by default",
           "type": "string"
         },
         "de": {
@@ -546,9 +556,9 @@ var poi_schema = {
           "description": "Optional key of the default language for this string",
           "type": "string"
         },
-        "": {
+        "__": {
           "title": "Language independent text",
-          "description": "",
+          "description": "This is the default 'language' by default",
           "type": "string",
           "maxLength": 31
         },
@@ -592,9 +602,9 @@ var poi_schema = {
           "description": "Optional key of the default language for this string",
           "type": "string"
         },
-        "": {
+        "__": {
           "title": "Language independent text",
-          "description": "",
+          "description": "This is the default 'language' by default",
           "type": "string",
           "maxLength": 127
         },
@@ -638,9 +648,9 @@ var poi_schema = {
           "description": "Optional key of the default language for this link",
           "type": "string"
         },
-        "": {
+        "__": {
           "title": "Language independent URI",
-          "description": "",
+          "description": "This is the default 'language' by default",
           "type": "string",
           "format": "uri"
         },

@@ -273,7 +273,7 @@ function filter_intl_string_by_langs($text_intl, $langs) { // : string
 */
     $result = null;
     $resstring = null;
-    $deflang = ""; $i = ""; $reslang = "";
+    $deflang = "__"; $i = ""; $reslang = "__";
     $anylang = false;
   
   if($text_intl) {
@@ -292,7 +292,7 @@ function filter_intl_string_by_langs($text_intl, $langs) { // : string
       Now: we may have resstring, or anylang or neither
     */  
     if ($resstring == null) {
-        $reslang = "";
+        $reslang = "__";
         if (isset($text_intl[$reslang]))
             $resstring = $text_intl[$reslang];
     }
@@ -303,7 +303,7 @@ function filter_intl_string_by_langs($text_intl, $langs) { // : string
         $reslang = $deflang;
         if (isset($text_intl[$reslang]))
             $resstring = $text_intl[$reslang];
-        if(!$anylang) $reslang = "";
+        if(!$anylang) $reslang = "__";
       }
     }
     if (($resstring == null) and ($anylang == true)) {

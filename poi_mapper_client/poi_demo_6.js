@@ -1,4 +1,4 @@
-/* POI Demo 3 modified for Component POI data */
+/* poi_demo_6.js v.5.1.3.1 2015-12-09 ariokkon */
 
 // "use strict"; // useful in debugging
 
@@ -382,7 +382,7 @@ function isValidPOI(poi_data) {
     try {
         if (!poi_data.fw_core.categories[0]) return false;
         for (var lang in poi_data.fw_core.name) {
-            if (lang.length == 0 || lang.charAt(0) != '_') {
+            if (lang == "__" || lang.charAt(0) != '_') {
                 if (poi_data.fw_core.name[lang]) return true;
             }
         }
@@ -1588,7 +1588,7 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
         } else {
           for(i = 0; (i < langs.length) && (resstring == null); i++) {
             reslang = langs[i];
-            resstring = text_intl[reslang] || text_intl[''] || null;
+            resstring = text_intl[reslang] || text_intl['__'] || null;
             if(reslang == "*") {
               anylang = true;
               break;
@@ -1603,12 +1603,12 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
           if (deflang) {
             reslang = deflang;
             resstring = text_intl[reslang] || null;
-            if(!anylang) reslang = "";
+            if(!anylang) reslang = "__";
           }
         }
         if ((resstring == null) && anylang) {
           for (i in text_intl) {
-            if (i.charAt(0) != '_') {
+            if ((i.charAt(0) != '_') || (i == "__")) { // __ is good lang
               resstring = text_intl[i];
               reslang = i;
               if (resstring != null) break;

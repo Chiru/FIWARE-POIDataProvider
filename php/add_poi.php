@@ -1,13 +1,15 @@
-<?php
+<?php // add_poi.php v.5.1.3.1 ariokkon
 
 /*
 * Project: FI-WARE
 * Copyright (c) 2014 Center for Internet Excellence, University of Oulu, All Rights Reserved
 * For conditions of distribution and use, see copyright notice in LICENSE
 */
+define('SERVICE_NAME', 'add_poi');
 
 require_once 'db.php';
 require_once 'data_manager.php';
+require_once 'util.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' )
 {
@@ -52,7 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
             $label = NULL;
             $url = NULL;
             $thumbnail = NULL;
-            
+            $source_name = NULL;
+            $source_website = NULL;
+            $source_license = NULL;
+            $source_id = NULL;
 //             print "fw_core found!";
             $fw_core = $request_array["fw_core"];
             
@@ -148,6 +153,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
         $new_poi_info['uuid'] = $uuid;
         $new_poi_info['timestamp'] = $timestamp;
         $ret_val_arr = array("created_poi" => $new_poi_info);
+        
+        $ret_val_arr['service_info'] = get_service_info(SERVICE_NAME);
+       
         $ret_val = json_encode($ret_val_arr);
             
         header("Access-Control-Allow-Origin: *");

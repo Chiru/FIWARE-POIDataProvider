@@ -1,12 +1,11 @@
-<?php
+<?php // get_pois.php 5.1.3.1 2015-12-10 ariokkon
 
 /*
 * Project: FI-WARE
 * Copyright (c) 2014 Center for Internet Excellence, University of Oulu, All Rights Reserved
 * For conditions of distribution and use, see copyright notice in LICENSE
 */
-define('SERVER_VERSION', 'CIE dynamic 2');
-define('SERVER_NAME', 'get_pois');
+define('SERVICE_NAME', 'get_pois');
 
 define('DEFAULT_DYN_DATA_VALID_TIME', 60); // used, if fw_dynamic.valid_duration
                                            // is not defined
@@ -215,11 +214,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
     
     
         $pois_data = array("pois" => $data);
-        $pois_data['server_info'] = array();
-        $pois_data['server_info']['version'] = SERVER_NAME . ' ' . SERVER_VERSION;
+        $pois_data['service_info'] = get_service_info(SERVICE_NAME);
   // Uncomment, if needed
-  //    $pois_data['server_info']['log'] = $dlog;
-        
+  //    $pois_data['service_info']['log'] = $dlog;
         $get_for_update = false;
         
         if (isset ($_GET['get_for_update']))

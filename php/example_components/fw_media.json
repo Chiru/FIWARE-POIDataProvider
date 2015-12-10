@@ -10,7 +10,7 @@
            "en": "Sunset on the Bothnian Bay, Northwest from Hailuoto summer 2013"
          },
          "description": {
-           "": "Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat.",
+           "__": "Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat.",
            "fi": "Oli mukava retki."
          },
          "thumbnail": "http://www.example.org/sunset_on_sea_tbn.jpg",
@@ -20,7 +20,7 @@
        {
          "type": "audio",
          "short_label": {
-           "": "Säkkijärven polkka"
+           "__": "Säkkijärven polkka"
          },
          "url": "http://www.example.org/sakkijarven_polkka.mp3"
        }

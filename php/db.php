@@ -156,7 +156,7 @@ function fw_core_pgsql2array($core_result, $incl_fw_core)
                     
                     if ($key == 'name' or $key == 'label' or $key == 'description' or $key == 'url')
                     {
-                        //$core_component[$key] = array("" => $row[$key]);
+                        //$core_component[$key] = array("__" => $row[$key]);
                         continue;
                     }
                     else

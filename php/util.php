@@ -1,4 +1,4 @@
-<?php
+<?php // util.php 5.1.3.1 2015-12-10 ariokkon
 
 /*
 * Project: FI-WARE
@@ -198,5 +198,16 @@ function &array_merge_r2(array &$array1, &$array2 = null)
     }
   }
   return $merged;
+}
+
+function get_service_info($service_name)
+{
+  $s_infos = file_get_contents("./site_info.json");
+  $service_info = json_decode($s_infos, true);
+  
+  $service_info['name'] = $service_name;
+  
+  return $service_info;
+   
 }
 ?>

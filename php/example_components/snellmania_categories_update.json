@@ -21,7 +21,7 @@
                 "license": "http://www.openstreetmap.org/copyright123"
             },
             "name": {
-                "": "Snellu",
+                "__": "Snellu",
                 "fi": "Ravintola Snellmania"
             },
             "description": {

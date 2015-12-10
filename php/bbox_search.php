@@ -5,6 +5,7 @@
 * Copyright (c) 2014 Center for Internet Excellence, University of Oulu, All Rights Reserved
 * For conditions of distribution and use, see copyright notice in LICENSE
 */
+define('SERVICE_NAME', 'bbox_search');
 
 require_once 'db.php';
 require_once 'util.php';
@@ -143,6 +144,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
             }
             
         }    
+        
+        $json_struct['service_info'] = get_service_info(SERVICE_NAME);
         
         //Language filtering
         $accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
