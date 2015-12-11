@@ -1,15 +1,17 @@
-{"fw_contact": {
-   "visit": "Santa Claus Village‎, Napapiiri, 96930 Rovaniemi, Finland",
-   "postal": ["Santa Claus Village‎","Napapiiri","96930 Rovaniemi","Finland"],
-   "email": "travel.info@rovaniemi.fi",
-   "phone": "+358 16 346270",
-"last_update": {
-    "timestamp": "1390203898"
-},"source": {
-    "website": "http://www.cie.fi",
-    "name": "CIE, University of Oulu",
-    "id": "7c32c67d-cf00-4d11-9acc-2471141e03a3",
-    "license": "http://www.gnu.org/licenses/gpl.html"
-}
-}
+{
+  "fw_contact": {
+    "visit": "Santa Claus Village‎, Napapiiri, 96930 Rovaniemi, Finland",
+    "postal": ["Santa Claus Village‎","Napapiiri","96930 Rovaniemi","Finland"],
+    "mailto": "travel.info@rovaniemi.fi",
+    "phone": "+358 16 346270",
+    "last_update": {
+      "timestamp": 1390203898
+    },
+    "source": {
+      "website": "http://www.cie.fi",
+      "name": "CIE, University of Oulu",
+      "id": "7c32c67d-cf00-4d11-9acc-2471141e03a3",
+      "license": "http://www.gnu.org/licenses/gpl.html"
+    }
+  }
 }

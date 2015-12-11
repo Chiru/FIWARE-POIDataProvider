@@ -25,7 +25,7 @@ For a small practical deployment, the recommended system is:
 
 * 1 GHz Dual core CPU
 * 4 GB of system memory (RAM)
-* 50 GB of disk space
+* 40 GB of disk space
 
 The hardware needs of the POI Data Provider are mainly dominated by the databases (PostgreSQL and MongoDB), and as such the two most important factors are: 
 
@@ -265,6 +265,10 @@ You can test if this table is succesfully created with the following commands:
 
 If the table was created succesfully, this query should return '4', as there sould be four test POI entries created by the installation.
 
+To exit PostgreSQL use:
+
+    poidatabase=> \q
+
 **MongoDB**
 
 MongoDB should also contain a database named '<code>poi_db</code>'. It should contain a collection named '<code>testData</code>' containing a single test POI entry, created by the installation.
@@ -275,7 +279,13 @@ You can test if MongoDB was succesfully configured with the following commands:
     > use poi_db
     > show collections
 
-The db.collections command should list five POI data component collections created by the installation: fw\_contact, fw\_marker, fw\_media, fw\_relationships and fw\_time.
+The <code>show collections</code> command should list five POI data component collections created by the installation: fw\_contact, fw\_marker, fw\_media, fw\_relationships and fw\_time.
+
+To exit MongoDB use:
+
+    > exit
+
+
 
 ## Diagnosis Procedures
 
@@ -285,8 +295,8 @@ The Diagnosis Procedures are the first steps that a System Administrator will ta
 
 The amount of available resources depends on the size of the database and the usage rate of the service. The minimum recommended available resources are:
 
-* Available memory: 256 MB
-* Available disk space: 10 GB
+* Available memory: 4 GB
+* Available disk space: 40 GB
 
 ### Resource consumption
 The load value reported e.g. by the 'top' utility should not exceed the number of CPU cores in the system. If this happens, the performance of the system can dramatically drop.
@@ -296,3 +306,8 @@ Check that the HTTP port (80) is open and accessible from all the networks from 
 
 ### I/O flows
 All the incoming and outgoing data of the POI Data Provider will go through TCP port 80. The size of the flow is entirely dependant on the usage of the service, e.g. number of users.
+
+## Updating Database to R5.1
+The language key for the non-language-specific strings is changed from <code>""</code> to <code>"__"</code> (two underscore characters. The reason is that the MongoDB database does not like zero-length keys. The keys in databases that are created with earlier versions of the POI-DP can be updated using the following command:
+
+    $ psql -U gisuser -d poidatabase -a -f FIWARE-POIDataProvider/install_scripts/update_fw_core_intl_to_5.1.sql

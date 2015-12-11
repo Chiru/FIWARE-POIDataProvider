@@ -1,38 +1,32 @@
 {
-   "fw_media": {
-     "entities": [
-       {
-         "type": "photo",
-         "short_label": {
-           "en": "Sunset at sea"
-         },
-         "caption": {
-           "en": "Sunset on the Bothnian Bay, Northwest from Hailuoto summer 2013"
-         },
-         "description": {
-           "__": "Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat.",
-           "fi": "Oli mukava retki."
-         },
-         "thumbnail": "http://www.example.org/sunset_on_sea_tbn.jpg",
-         "url": "http://www.example.org/sunset_on_sea.jpg",
-         "copyright": "Photo: Ari Okkonen"
-       },
-       {
-         "type": "audio",
-         "short_label": {
-           "__": "Säkkijärven polkka"
-         },
-         "url": "http://www.example.org/sakkijarven_polkka.mp3"
-       }
-
+  "fw_media": {
+    "entities": [
+      {
+        "type": "photo",
+        "short_label": {
+          "en": "Sunset at sea"
+        },
+        "caption": {
+          "en": "Sunset on the Bothnian Bay, Northwest from Hailuoto summer 2013"
+        },
+        "description": {
+          "__": "Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat.",
+          "fi": "Oli mukava retki."
+        },
+        "thumbnail": "http://www.example.org/sunset_on_sea_tbn.jpg",
+        "url": "http://www.example.org/sunset_on_sea.jpg",
+        "copyright": "Photo: Ari Okkonen"
+      },
+      {
+        "type": "audio",
+        "short_label": {
+          "__": "Säkkijärven polkka"
+        },
+        "url": "http://www.example.org/sakkijarven_polkka.mp3"
+      }
      ],
-"last_update": {
-    "timestamp": "1390203898"
-}, "source": {
-    "website": "http://www.cie.fi",
-    "name": "CIE, University of Oulu",
-    "id": "7c32c67d-cf00-4d11-9acc-2471141e03a3",
-    "license": "http://www.gnu.org/licenses/gpl.html"
-}
-}
+    "last_update": {
+      "timestamp": 1390203898
+    }
+  }
 }

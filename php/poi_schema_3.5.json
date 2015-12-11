@@ -213,6 +213,10 @@
               "copyright": {
                 "description": "Copyright clause and/or attribution of the item",
                 "type": "string"
+              },
+              "source": {
+                "title": "Source of information",
+                "$ref": "#/definitions/source"
               }
             },
             "required": [
