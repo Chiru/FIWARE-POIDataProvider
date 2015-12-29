@@ -1,5 +1,6 @@
-var poi_schema = {
+{
   "title": "Point of Interest",
+  "description": "FIWARE POI data r5.1 GE, 2015-12-16 ariokkon/Adminotech",
   "type": "object",
   "properties": {
     "fw_core": {
@@ -213,6 +214,10 @@ var poi_schema = {
               "copyright": {
                 "description": "Copyright clause and/or attribution of the item",
                 "type": "string"
+              },
+              "source": {
+                "title": "Source of information",
+                "$ref": "#/definitions/source"
               }
             },
             "required": [
@@ -833,4 +838,4 @@ var poi_schema = {
     }
   },
   "additionalProperties": false
-};
+}

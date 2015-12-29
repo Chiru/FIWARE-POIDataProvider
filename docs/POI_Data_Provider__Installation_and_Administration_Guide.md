@@ -134,7 +134,6 @@ Change the following line in the file <code>/etc/apache2/apache2.conf</code> wit
 
 3. Activate PostGIS on the created database:
 
-        $ sudo -u postgres createdb --encoding=UTF8 --owner=gisuser poidatabase
         $ sudo -u postgres psql -d poidatabase -f /usr/share/postgresql/9.3/contrib/postgis-2.1/postgis.sql
         $ sudo -u postgres psql -d poidatabase -f /usr/share/postgresql/9.3/contrib/postgis-2.1/spatial_ref_sys.sql
         $ sudo -u postgres psql -d poidatabase -f /usr/share/postgresql/9.3/contrib/postgis-2.1/postgis_comments.sql

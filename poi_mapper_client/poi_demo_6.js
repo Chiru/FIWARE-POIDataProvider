@@ -11,6 +11,11 @@ var elemCategories = document.getElementById("categories");
 
 var ontology = "fw_osm";
 
+/* Database info for editing etc. */
+
+var poi_categories = {};
+var poi_schema = {};
+
 /* Local POI database indexed by UUID */
 
 var miwi_poi_pois = {}; // ["UUID": {<POI data>},...]
@@ -462,6 +467,194 @@ function updatePOI( poi_data, uuid ) {
 
 }
 
+function set_up_categories() {
+    // set up miwi_poi_pois_by_category
+    {
+      var by_category = miwi_poi_pois_by_category;
+      var category;
+      var parents;
+      var n;
+      var i;
+      var subst;
+      var j;
+      var supercategory;
+      var deprecation_check_needed = false;
+      
+      // first identify ontology
+      if ('_def' in poi_categories) {
+        ontology = poi_categories._def;
+      } else {
+        for (var ont in poi_categories) {
+          if (ont.charAt(0) != '_') {
+            ontology = ont;
+            break;
+          }
+        }
+      }
+      category_type_handler.ontology = ontology;
+/*  {
+  <category>: {
+    "label": { en:"xxx", fi:"yyy", ... } // translations of category label
+    "supercategories: [<category...>]
+    "subcategories: [<category>]
+    "expanded": <category> // subcategories shown under specified category
+    "selected": <boolean> // desired visibility of the markers
+    "visible": <boolean> // current visibility of the markers
+    "markers": [<markers on map, use setVisible(<boolean>)>]
+    "deprecated": true // optional, typically absent
+  }
+}
+*/
+      by_category._ALL = {
+        label: (poi_categories._ALL && poi_categories._ALL._label) || "-- ALL --",
+        supercategories: [],
+        subcategories: ['_OTHER'],
+        selected: false,
+        expanded: '_ALL',
+        visible: false,
+        markers: []
+      }
+      for (category in poi_categories[ontology]) {
+        if (category.charAt(0) != '_') {
+          by_category[category] = {
+            label: (poi_categories[ontology][category]._label || category),
+            supercategories: [],
+            subcategories: [],
+            selected: false,
+            expanded: null,
+            visible: false,
+            markers: []
+          }
+        }
+      }
+      by_category._OTHER = {
+        label: (poi_categories._OTHER && poi_categories._OTHER._label) 
+               || "-- OTHER --",
+        supercategories: ['_ALL'],
+        subcategories: [],
+        selected: false,
+        expanded: null,
+        visible: false,
+        markers: []
+      }
+      for (category in poi_categories[ontology]) {
+        if (category.charAt(0) != '_') {
+          parents = poi_categories[ontology][category]._parents;
+          if (!parents || parents.length == 0) parents = ['_ALL'];
+          if (poi_categories[ontology][category]._deprecated) {
+            deprecation_check_needed = true;
+            by_category[category].deprecated = true;
+            if (poi_categories[ontology][category]._deprecated.length) {
+              parents = parents.concat(
+                            poi_categories[ontology][category]._deprecated );
+              parents.push('_OTHER');
+            }
+          }
+          n = parents.length;
+          for (i = 0; i < n; i++) {
+            supercategory = parents[i];
+            if (!by_category[supercategory]) supercategory = '_OTHER';
+            if ( by_category[supercategory].subcategories
+                 .indexOf(category) < 0 )
+            {
+              by_category[supercategory].subcategories.push(category);
+            }
+            if ( by_category[category].supercategories
+                 .indexOf(supercategory) < 0 )
+            {
+              by_category[category].supercategories.push(supercategory);
+            }
+          }
+        }
+      }
+      while (deprecation_check_needed) {
+        deprecation_check_needed = false;
+        for (category in by_category) {
+          if (category.charAt(0) != '_') {
+            if (by_category[category].deprecated) {
+              for (supercategory in by_category[category].supercategories)
+              {
+                for (subcategory in by_category[category].subcategories) {
+                  if ( by_category[supercategory].subcategories.
+                       indexOf(subcategory) < 0 )
+                  {
+                    by_category[supercategory].subcategories
+                        .push(subcategory);
+                    deprecation_check_needed = true;
+                  }
+                  if ( by_category[subcategory].supercategories.
+                       indexOf(supercategory) < 0 )
+                  {
+                    by_category[subcategory].supercategories
+                        .push(supercategory);
+                    deprecation_check_needed = true;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+// test
+/*
+  var story = "Alustus: ";
+  var item;
+  
+  for(category in by_category) {
+    item = by_category[category];
+    if ( item.selector.selected ) {
+      story += "," + category;
+    }
+  }
+  alert(story);
+*/
+// end_test
+    }
+    
+    // fill category list
+    try {
+        namespace.fill_category_list();
+    } catch (e) {
+        alert("fill_category_list FAILED: "+e+"\n"+e.toSource());
+    }
+}
+
+
+function deleteProperties(objectToClean) {
+  for (var x in objectToClean) if (objectToClean.hasOwnProperty(x)) 
+    delete objectToClean[x];
+}
+
+function get_ext_json(x, url, success, fail) {
+  var xhr = new XMLHttpRequest();
+  
+  xhr.onreadystatechange = function () {
+    var key;
+    if(xhr.readyState === 4) {
+      if(xhr.status  === 200) { 
+        var json = JSON.parse(xhr.responseText);
+        deleteProperties(x);
+        for (key in json) {
+          x[key] = json[key];
+        }
+        success(xhr);
+      }
+      else if (xhr.status === 404) { 
+        fail(xhr);
+      }
+    }
+  };
+
+  xhr.onerror = function (e) {
+    fail(xhr);
+  };
+  xhr.open("GET", url, true);
+  xhr.send();
+}
+
+
+
     var field_id_location = "i:poi_editor.fw_core.location.wgs84";
     var field_id_lat = field_id_location+".latitude";
     var field_id_lng = field_id_location+".longitude";
@@ -863,6 +1056,11 @@ function adjust_search_radius() {
   searchRadius = distHaversine(NE, SW) / 1.5;
 }
    
+/*
+  BEGIN main
+  ==========
+*/  
+   
         document.querySelector( '#button1' ).onclick = locate;
         document.querySelector( '#button2' ).onclick = codeAddress;
  //       document.querySelector( '#categories' ).onchange = category_changed;
@@ -950,158 +1148,13 @@ function adjust_search_radius() {
 
             }
         } );
-
-        // set up miwi_poi_pois_by_category
-        {
-          var by_category = miwi_poi_pois_by_category;
-          var category;
-          var parents;
-          var n;
-          var i;
-          var subst;
-          var j;
-          var supercategory;
-          var deprecation_check_needed = false;
-          
-          // first identify ontology
-          if ('_def' in poi_categories) {
-            ontology = poi_categories._def;
-          } else {
-            for (var ont in poi_categories) {
-              if (ont.charAt(0) != '_') {
-                ontology = ont;
-                break;
-              }
-            }
-          }
-          category_type_handler.ontology = ontology;
-/*  {
-      <category>: {
-        "label": { en:"xxx", fi:"yyy", ... } // translations of category label
-        "supercategories: [<category...>]
-        "subcategories: [<category>]
-        "expanded": <category> // subcategories shown under specified category
-        "selected": <boolean> // desired visibility of the markers
-        "visible": <boolean> // current visibility of the markers
-        "markers": [<markers on map, use setVisible(<boolean>)>]
-        "deprecated": true // optional, typically absent
-      }
-    }
-*/
-          by_category._ALL = {
-            label: (poi_categories._ALL && poi_categories._ALL._label) || "-- ALL --",
-            supercategories: [],
-            subcategories: ['_OTHER'],
-            selected: false,
-            expanded: '_ALL',
-            visible: false,
-            markers: []
-          }
-          for (category in poi_categories[ontology]) {
-            if (category.charAt(0) != '_') {
-              by_category[category] = {
-                label: (poi_categories[ontology][category]._label || category),
-                supercategories: [],
-                subcategories: [],
-                selected: false,
-                expanded: null,
-                visible: false,
-                markers: []
-              }
-            }
-          }
-          by_category._OTHER = {
-            label: (poi_categories._OTHER && poi_categories._OTHER._label) 
-                   || "-- OTHER --",
-            supercategories: ['_ALL'],
-            subcategories: [],
-            selected: false,
-            expanded: null,
-            visible: false,
-            markers: []
-          }
-          for (category in poi_categories[ontology]) {
-            if (category.charAt(0) != '_') {
-              parents = poi_categories[ontology][category]._parents;
-              if (!parents || parents.length == 0) parents = ['_ALL'];
-              if (poi_categories[ontology][category]._deprecated) {
-                deprecation_check_needed = true;
-                by_category[category].deprecated = true;
-                if (poi_categories[ontology][category]._deprecated.length) {
-                  parents = parents.concat(
-                                poi_categories[ontology][category]._deprecated );
-                  parents.push('_OTHER');
-                }
-              }
-              n = parents.length;
-              for (i = 0; i < n; i++) {
-                supercategory = parents[i];
-                if (!by_category[supercategory]) supercategory = '_OTHER';
-                if ( by_category[supercategory].subcategories
-                     .indexOf(category) < 0 )
-                {
-                  by_category[supercategory].subcategories.push(category);
-                }
-                if ( by_category[category].supercategories
-                     .indexOf(supercategory) < 0 )
-                {
-                  by_category[category].supercategories.push(supercategory);
-                }
-              }
-            }
-          }
-          while (deprecation_check_needed) {
-            deprecation_check_needed = false;
-            for (category in by_category) {
-              if (category.charAt(0) != '_') {
-                if (by_category[category].deprecated) {
-                  for (supercategory in by_category[category].supercategories)
-                  {
-                    for (subcategory in by_category[category].subcategories) {
-                      if ( by_category[supercategory].subcategories.
-                           indexOf(subcategory) < 0 )
-                      {
-                        by_category[supercategory].subcategories
-                            .push(subcategory);
-                        deprecation_check_needed = true;
-                      }
-                      if ( by_category[subcategory].supercategories.
-                           indexOf(supercategory) < 0 )
-                      {
-                        by_category[subcategory].supercategories
-                            .push(supercategory);
-                        deprecation_check_needed = true;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-
-// test
-/*
-      var story = "Alustus: ";
-      var item;
-      
-      for(category in by_category) {
-        item = by_category[category];
-        if ( item.selector.selected ) {
-          story += "," + category;
-        }
-      }
-      alert(story);
-*/
-// end_test
-        }
+  
         
-        // fill category list
-        try {
-            namespace.fill_category_list();
-        } catch (e) {
-            alert("fill_category_list FAILED: "+e+"\n"+e.toSource());
-        }
-
+  get_ext_json(poi_categories, BACKEND_ADDRESS_POI + "poi_categories.json",
+      set_up_categories, function (){alert("POI categories not available");});
+        
+  get_ext_json(poi_schema, BACKEND_ADDRESS_POI + "poi_schema.json",
+      function(){}, function (){alert("POI schema not available");});
 /*  Context menu setup
     ==================
 */

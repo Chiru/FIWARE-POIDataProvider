@@ -127,6 +127,16 @@ The common parts used in queries are described in separate section.
 
 [XMLHttpRequest](http://www.w3.org/TR/XMLHttpRequest/)  is used to perform REST queries.
 
+#### Querying available data formats
+
+* **Full data schema** supported by the server is available from `http://<poi_server>/poi_dp/poi_schema.json` e.g.:
+
+      http://poi_dp.example.org/poi_dp/poi_schema.json
+    
+* **POI categories** supported by the server are available from `http://<poi_server>/poi_dp/poi_categories.json` e.g.:
+
+      http://poi_dp.example.org/poi_dp/poi_categories.json
+
 #### Spatial query 
 
 Spatial query is used to find the POIs based on their location. See [Interface reference](#Interface reference) for complete treatment of available query choices. 

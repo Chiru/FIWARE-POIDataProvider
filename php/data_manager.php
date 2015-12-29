@@ -46,7 +46,7 @@ function validate_poi_data($poi_data)
 }
 
 //Loads the POI schema from file to a PHP object structure
-function load_poi_schema($poi_schema_file = 'poi_schema_3.5.json')
+function load_poi_schema($poi_schema_file = 'poi_schema.json')
 {
     global $supported_components;
     
