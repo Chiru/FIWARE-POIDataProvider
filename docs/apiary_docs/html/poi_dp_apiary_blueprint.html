@@ -140,6 +140,12 @@
     
     
     
+    
+    
+    
+    
+    
+    
    </ul>
 </section>
 
@@ -150,7 +156,27 @@
 
 	
 
+	
+		<h1>FIWARE POI-DP GE API v4 Specification </h1>
+	
 
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+		<span class="dateLabel">DATE:</span> <span class="dateValue"> 14 </span>
+	
 
 	
 
@@ -169,7 +195,27 @@
 		
 			
 		
+			
+		
+			
+		
+			
+				<dt class="versionLabel">This version:</dt> 
+				<dd class="versionValue"> <a href="http://fiwarepoi.apiblueprint.org/v1.0">
+					http://fiwarepoi.apiblueprint.org/v1.0</a> </dd>
+			
+		
+			
+		
 
+		
+			
+		
+			
+		
+			
+		
+			
 		
 			
 		
@@ -183,19 +229,102 @@
 		</dl>
 	
 
+	
+
+	
+
+	
+
+	
 
 
 
+	
+		<h2 id="editors">Editors</h2>
+		<ol>
+<li>Ari Okkonen, Adminotech Oy</li>
+</ol>
+	
+
+	
+
+	
+
+
+
+	
+
+	
+		<h2 id="copyright">Copyright</h2>
+		<p>This specification is licensed under the
+[FIWARE Open Specification License]
+(http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-WARE_Open_Specification_Legal_Notice_%28implicit_patents_license%29).</p>
+	
+
+	
 
 
 <hr>
 
 
 	<h2 id="abstract">Abstract</h2>
-	<p>Fiware Points of Interest Generic Enabler R4</p>
+	<p><strong>FIWARE Points of Interest Generic Enabler R4</strong></p>
+<p>FIWARE POI (Points of interest) Generic Enabler API facilitates</p>
+<ul>
+<li>
+<p>Storing information related to locations</p>
+</li>
+<li>
+<p>Relate any information to places, e.g.</p>
+</li>
+<li>Tourist attractions / services</li>
+<li>Photos, videos, 3D content</li>
+<li>Special location data of your business</li>
+<li>Imaginary items of an outdoor game</li>
+<li>
+<p>... </p>
+</li>
+<li>
+<p>Search information by location and other criteria</p>
+</li>
+<li>
+<p>Store information by location</p>
+</li>
+<li>
+<p>Develop an application that utilizes those capabilities</p>
+</li>
+</ul>
+<p>Specially FIWARE POI Generic Enabler API allows you to</p>
+<ul>
+<li>
+<p><strong>combine</strong> your own data with public POI data</p>
+</li>
+<li>
+<p><strong>speed up</strong> mobile operation by fetching only the data your application needs</p>
+</li>
+<li>
+<p>define and use <strong>own data structures</strong>, if need for extra flexibility</p>
+</li>
+<li>
+<p><strong>distribute</strong> your service and data to several separately managed servers</p>
+</li>
+<li>
+<p>store texts and links in <strong>several languages</strong></p>
+</li>
+</ul>
+<h1>REST API</h1>
 
 
 
+
+	
+
+	
+
+	
+		<h2 id="status">Status of this document</h2>
+		<p>Final version of the FIWARE POI DP GE API R4</p>
+	
 
 <hr>
 
@@ -208,11 +337,23 @@
 		
 	
 	
+		
+	
+		
+	
+		
+	
 
 
 
 
 
+	
+		
+	
+		
+	
+		
 	
 
 
@@ -310,6 +451,18 @@
     
         
     
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a target="_blank" href="http://docs.fiwarepoi.apiary.io/#reference/platform/get-components/get-components">View in Apiary</a>
+            
         
     
     </div>
@@ -490,6 +643,18 @@
     
         
     
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a target="_blank" href="http://docs.fiwarepoi.apiary.io/#reference/query/radial-search/radial-search">View in Apiary</a>
+            
         
     
     </div>
@@ -673,6 +838,18 @@
     
         
     
+        
+    
+        
+    
+        
+    
+        
+            
+                <a target="_blank" href="http://docs.fiwarepoi.apiary.io/#reference/query/bounding-box-search/bounding-box-search">View in Apiary</a>
+            
+        
+    
     </div>
 
                                     
@@ -793,6 +970,18 @@
     
         
     
+        
+    
+        
+    
+        
+    
+        
+            
+                <a target="_blank" href="http://docs.fiwarepoi.apiary.io/#reference/query/get-pois/get-pois">View in Apiary</a>
+            
+        
+    
     </div>
 
                                     
@@ -907,6 +1096,18 @@
     
         
     
+        
+    
+        
+    
+        
+    
+        
+            
+                <a target="_blank" href="http://docs.fiwarepoi.apiary.io/#reference/update/add-poi/add-poi">View in Apiary</a>
+            
+        
+    
     </div>
 
                                     
@@ -1013,6 +1214,18 @@
     
         
     
+        
+    
+        
+    
+        
+    
+        
+            
+                <a target="_blank" href="http://docs.fiwarepoi.apiary.io/#reference/update/update-poi/update-poi">View in Apiary</a>
+            
+        
+    
     </div>
 
                                     
@@ -1113,6 +1326,18 @@
     
         
     
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a target="_blank" href="http://docs.fiwarepoi.apiary.io/#reference/update/delete-poi/delete-poi">View in Apiary</a>
+            
         
     
     </div>
@@ -2247,6 +2472,12 @@
    
 
 
+
+	
+
+	
+
+	
 
     
     
