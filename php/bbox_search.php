@@ -9,6 +9,7 @@ define('SERVICE_NAME', 'bbox_search');
 
 require_once 'db.php';
 require_once 'util.php';
+require_once 'security.php';
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET' )
@@ -32,7 +33,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
             header("HTTP/1.0 400 Bad Request");
             die("Coordinate values are out of range: east and west [-180, 180], north and south [-90, 90]");
         }
-    
+
+        // searching POIs requires view permission
+        $session = get_session();
+        $view_permission = $session['permissions']['view'];
+        if(!$view_permission) {
+            header("HTTP/1.0 401 Unauthorized");
+            die("Permission denied.");
+        }
+        
         $common_params = handle_common_search_params();
         $db_opts = get_db_options();
         $pgcon = connectPostgreSQL($db_opts["sql_db_name"]);

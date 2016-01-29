@@ -1,4 +1,4 @@
-/* poi_demo_6.js v.5.1.3.1 2015-12-09 ariokkon */
+/* poi_demo_6.js v.5.2.1.1 2016-01-29 ariokkon */
 
 // "use strict"; // useful in debugging
 
@@ -15,6 +15,7 @@ var ontology = "fw_osm";
 
 var poi_categories = {};
 var poi_schema = {};
+var poi_user_tok = ""; // SHA-1 of long user token
 
 /* Local POI database indexed by UUID */
 
@@ -238,21 +239,21 @@ var str2html_table = {
 };
 
 function str2html (rawstr) {
-	var result = "";
-    var code;
-    if (!rawstr) {
-        rawstr = "";
+  var result = "";
+  var code;
+  if (!rawstr) {
+    rawstr = "";
+  }
+  for (var i = 0; i < rawstr.length; i++) {
+    code = rawstr.charCodeAt(i);
+    if (code < 0x7f) {
+      result = result + (str2html_table[rawstr[i]] ? 
+        (str2html_table[rawstr[i]]) : (rawstr[i]));
+    } else {
+      result = result + "&#x" + code.toString(16) + ";";
     }
-	for (var i = 0; i < rawstr.length; i++) {
-        code = rawstr.charCodeAt(i);
-        if (code < 0x7f) {
-            result = result + (str2html_table[rawstr[i]] ? 
-				(str2html_table[rawstr[i]]) : (rawstr[i]));
-        } else {
-            result = result + "&#x" + code.toString(16) + ";";
-        }
-	}
-	return result;
+  }
+  return result;
 }
 /*-----------------*/
 
@@ -281,193 +282,235 @@ function safe_html (rawstr) {
 /**/
 
 (function ( namespace ) {
+  // Authentication operations
+  namespace.go_login = function(id_token, callback) {
+    var xhr = new XMLHttpRequest();
+    var restQueryURL = BACKEND_ADDRESS_POI + "login?auth_by=google";
+    
+    xhr.open('POST', restQueryURL, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function() {
+      var response, err;
+      try {
+        response = JSON.parse(xhr.responseText);
+        if (response.login) { // We're in!
+          poi_user_tok = Sha1.hash(id_token);
+        }
+      } catch(err) {
+        response = {"login":false,"message":"Bad response: " + err.message};
+      }
+      callback(response);
+    };
+    xhr.onerror = function() {
+        response = {"login":false,"message":"Login to server failed"};
+        callback(response);
+    };
+    xhr.send(id_token);
+  }
+  
+  namespace.go_logout = function() {
+    var xhr = new XMLHttpRequest();
+    var restQueryURL = BACKEND_ADDRESS_POI + "logout?auth_t=" + poi_user_tok;
+    
+    poi_user_tok = "";
+    xhr.open('GET', restQueryURL, true);
+//    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function() {
+        console.log('Signed out: ' + xhr.responseText);
+      };
+    xhr.send();
+    
+  }
 
   // MarkerOps class for marker events
-    function MarkerOps(uuid) {
-      this.luokka = "MarkerOps";
-      this.uuid = uuid;
-      this.rightclick = function(mouseEvent){
-        /*
-          Right click shows context menu
-        */
-        var my = this; // 'this' does not seem to behave well in closure
-        POIMenu.show(mouseEvent.latLng);
-        google.maps.event.clearListeners(POIMenu, 'menu_item_selected');
-        google.maps.event.addListener(POIMenu, 'menu_item_selected', function(latLng, eventName){
-          my.menu_item_selected(latLng, eventName);
-        });
+  function MarkerOps(uuid) {
+    this.luokka = "MarkerOps";
+    this.uuid = uuid;
+    this.rightclick = function(mouseEvent){
+      /*
+        Right click shows context menu
+      */
+      var my = this; // 'this' does not seem to behave well in closure
+      POIMenu.show(mouseEvent.latLng);
+      google.maps.event.clearListeners(POIMenu, 'menu_item_selected');
+      google.maps.event.addListener(POIMenu, 'menu_item_selected', function(latLng, eventName){
+        my.menu_item_selected(latLng, eventName);
+      });
 
-      };
-      this.menu_item_selected = function(latLng, eventname){
-        switch (eventname) {
-          case 'toggle_poi_select_click': {
-          
-          } break;
-          case 'edit_poi_click': {
-            POI_edit(uuid);
-          
-          } break;
-          case 'delete_poi_click': {
-            POI_delete(uuid);
-          
-          } break;
- 
-        };
+    };
+    this.menu_item_selected = function(latLng, eventname){
+      switch (eventname) {
+        case 'toggle_poi_select_click': {
+        
+        } break;
+        case 'edit_poi_click': {
+          POI_edit(uuid);
+        
+        } break;
+        case 'delete_poi_click': {
+          POI_delete(uuid);
+        
+        } break;
+
       };
     };
+  };
 
-var POIEditWindow = null;
+  var POIEditWindow = null;
 
-        
-function OpenPOIEditWindow(title, heading, cancel_callback) { // false, if not to use
-  var result;
-  
-  if (POIEditWindow && !POIEditWindow.closed) {
-    POIEditWindow.focus();
-    POIEditWindow.alert("Only one POI under editing allowed!");
-    result = false;
-  } else {
-    POIEditWindow=window.open('','editor_popup','toolbar=no,dialog=yes,' + 
-      'location=no,directories=no,status=no,menubar=no,resizable=yes,' + 
-      'copyhistory=no,scrollbars=yes,width=500,height=600');
+          
+  function OpenPOIEditWindow(title, heading, cancel_callback) { // false, if not to use
+    var result;
+    
+    if (POIEditWindow && !POIEditWindow.closed) {
+      POIEditWindow.focus();
+      POIEditWindow.alert("Only one POI under editing allowed!");
+      result = false;
+    } else {
+      POIEditWindow=window.open('','editor_popup','toolbar=no,dialog=yes,' + 
+        'location=no,directories=no,status=no,menubar=no,resizable=yes,' + 
+        'copyhistory=no,scrollbars=yes,width=500,height=600');
+      POIEditWindow.document.head.innerHTML = "<title>" + title + "</title>";
+      POIEditWindow.document.body.innerHTML = "<h3>" + heading + "</h3>" +
+          '<div id="poi_editor"></div><button id="poi_edit_cancel"' +
+          ' onclick="poi_edit_cancel()">Cancel' +
+          '</button> ';
+      POIEditWindow.poi_edit_cancel = cancel_callback;
+      result = true;
+    }
+    return result;
+  }; 
+
+  function EditInPOIEditWindow(title, heading, poi_data, uuid, cancel_callback, 
+        ok_callback) {
+
     POIEditWindow.document.head.innerHTML = "<title>" + title + "</title>";
     POIEditWindow.document.body.innerHTML = "<h3>" + heading + "</h3>" +
         '<div id="poi_editor"></div><button id="poi_edit_cancel"' +
         ' onclick="poi_edit_cancel()">Cancel' +
-        '</button> ';
+        '</button> <button id="poi_edit_ok"' +
+        ' onclick="poi_edit_ok(window.poi_data, window.uuid)">OK</button>';
+    POIEditWindow.sbje = sbje;
+    POIEditWindow.poi_data = poi_data;
+    POIEditWindow.uuid = uuid;
     POIEditWindow.poi_edit_cancel = cancel_callback;
-    result = true;
-  }
-  return result;
-}; 
+    POIEditWindow.poi_edit_ok = ok_callback;
+    sbje.make_form("poi_editor", poi_schema, poi_data, POIEditWindow.document);
+    window.setTimeout(function(){POIEditWindow.focus()}, 100);
 
-function EditInPOIEditWindow(title, heading, poi_data, uuid, cancel_callback, 
-      ok_callback) {
+  }; 
 
-  POIEditWindow.document.head.innerHTML = "<title>" + title + "</title>";
-  POIEditWindow.document.body.innerHTML = "<h3>" + heading + "</h3>" +
-      '<div id="poi_editor"></div><button id="poi_edit_cancel"' +
-      ' onclick="poi_edit_cancel()">Cancel' +
-      '</button> <button id="poi_edit_ok"' +
-      ' onclick="poi_edit_ok(window.poi_data, window.uuid)">OK</button>';
-  POIEditWindow.sbje = sbje;
-  POIEditWindow.poi_data = poi_data;
-  POIEditWindow.uuid = uuid;
-  POIEditWindow.poi_edit_cancel = cancel_callback;
-  POIEditWindow.poi_edit_ok = ok_callback;
-  sbje.make_form("poi_editor", poi_schema, poi_data, POIEditWindow.document);
-  window.setTimeout(function(){POIEditWindow.focus()}, 100);
-
-}; 
-
-function OpenAndEditInPOIEditWindow(title, heading, poi_data, uuid, cancel_callback, 
-    ok_callback) { // false if does not succeed
-  var result;
-  
-  result = OpenPOIEditWindow(title, heading, cancel_callback);
-  if (result) {
-    EditInPOIEditWindow(title, heading, poi_data, uuid, cancel_callback, 
-        ok_callback);
+  function OpenAndEditInPOIEditWindow(title, heading, poi_data, uuid, cancel_callback, 
+      ok_callback) { // false if does not succeed
+    var result;
+    
+    result = OpenPOIEditWindow(title, heading, cancel_callback);
+    if (result) {
+      EditInPOIEditWindow(title, heading, poi_data, uuid, cancel_callback, 
+          ok_callback);
+    };
+    return result;
   };
-  return result;
-};
 
-function POI_edit_cancel() {
+  function POI_edit_cancel() {
     if (POIEditWindow.marker) {
-        POIEditWindow.marker.setOptions({draggable: false});
-        POIEditWindow.marker.setPosition(POIEditWindow.markerOldPos);
-        POIEditWindow.marker = null;
-        google.maps.event.removeListener(POIEditWindow.draglistener);
-        POIEditWindow.draglistener = null;
+      POIEditWindow.marker.setOptions({draggable: false});
+      POIEditWindow.marker.setPosition(POIEditWindow.markerOldPos);
+      POIEditWindow.marker = null;
+      google.maps.event.removeListener(POIEditWindow.draglistener);
+      POIEditWindow.draglistener = null;
     }
     POIEditWindow.close();
-}
+  }
 
-function isValidPOI(poi_data) {
+  function isValidPOI(poi_data) {
     try {
-        if (!poi_data.fw_core.categories[0]) return false;
-        for (var lang in poi_data.fw_core.name) {
-            if (lang == "__" || lang.charAt(0) != '_') {
-                if (poi_data.fw_core.name[lang]) return true;
-            }
+      if (!poi_data.fw_core.categories[0]) return false;
+      for (var lang in poi_data.fw_core.name) {
+        if (lang == "__" || lang.charAt(0) != '_') {
+          if (poi_data.fw_core.name[lang]) return true;
         }
-        return false;
+      }
+      return false;
     } catch (e) {
-        return false;
+      return false;
     }
-}
+  }
 
-function checkPOI(poi_data) {
+  function checkPOI(poi_data) {
     var ans = isValidPOI(poi_data);
     if (!ans) {
-        var w = window;
-        if (POIEditWindow && !POIEditWindow.closed) {
-            POIEditWindow.focus();
-            w = POIEditWindow;
-        }
-        w.alert("Insufficient POI data!\n"+
-              "Category, location, and name are needed.");
+      var w = window;
+      if (POIEditWindow && !POIEditWindow.closed) {
+        POIEditWindow.focus();
+        w = POIEditWindow;
+      }
+      w.alert("Insufficient POI data!\n"+
+          "Category, location, and name are needed.");
     }
     return ans;
-}
+  }
 
-function updatePOI( poi_data, uuid ) {
+  function updatePOI( poi_data, uuid ) {
     var restQueryURL;
     var updating_data = {};
 
     if (!checkPOI(poi_data)) return;
 
-/* build updating structure like
+  /* build updating structure like
     { 
       "30ddf703-59f5-4448-8918-0f625a7e1122": {
-        "fw_core": {...},
-        ...
+      "fw_core": {...},
+      ...
       }
     }
-*/
+  */
 
     updating_data[uuid] = poi_data;
     
-    restQueryURL = BACKEND_ADDRESS_POI + "update_poi";
+    restQueryURL = BACKEND_ADDRESS_POI + "update_poi" +
+        ((poi_user_tok != "") ?
+        ("?auth_t=" + poi_user_tok) : "");
     miwi_poi_xhr = new XMLHttpRequest();
     
-    miwi_poi_xhr.overrideMimeType("application/json");
+//    miwi_poi_xhr.overrideMimeType("application/json");
     miwi_poi_xhr.onreadystatechange = function () {
-        var data;
-        var poiMarker;
-        if(miwi_poi_xhr.readyState === 4) {
-            if(miwi_poi_xhr.status  === 200) { 
-//                alert( "success: " + miwi_poi_xhr.responseText);
-                POI_edit_cancel();
-// Todo: Combine the following 3 operations everywhere!   
-                removePOI_UUID_FromMap(uuid);
-                delete miwi_poi_pois[uuid];
-                unstorePoi(uuid);
-// end to be combined                
-                data = {pois:{}};
-                data.pois[uuid] = poi_data;
-                processPoiData(data);
-                poiMarker = getPoiLocal(uuid, 'marker');
-                poiMarker.setVisible(true);
-                show_POI_window(poiMarker, uuid);
-            }
-            else if (miwi_poi_xhr.status === 404) { 
-                alert("failed 404: " + miwi_poi_xhr.responseText);
-            }
+      var data;
+      var poiMarker;
+      if(miwi_poi_xhr.readyState === 4) {
+        if(miwi_poi_xhr.status  === 200) { 
+  //                alert( "success: " + miwi_poi_xhr.responseText);
+          POI_edit_cancel();
+  // Todo: Combine the following 3 operations everywhere!   
+          removePOI_UUID_FromMap(uuid);
+          delete miwi_poi_pois[uuid];
+          unstorePoi(uuid);
+  // end to be combined                
+          data = {pois:{}};
+          data.pois[uuid] = poi_data;
+          processPoiData(data);
+          poiMarker = getPoiLocal(uuid, 'marker');
+          poiMarker.setVisible(true);
+          show_POI_window(poiMarker, uuid);
         }
+        else { 
+          alert("Failed " + miwi_poi_xhr.status + ": " + 
+              miwi_poi_xhr.responseText);
+        }
+      }
     }
 
     miwi_poi_xhr.onerror = function (e) {
-        alert("error" + JSON.stringify(e));
+      alert("error" + JSON.stringify(e));
     };
 
     miwi_poi_xhr.open("POST", restQueryURL, true);
     miwi_poi_xhr.send(JSON.stringify(updating_data));
     
 
-}
+  }
 
-function set_up_categories() {
+  function set_up_categories() {
     // set up miwi_poi_pois_by_category
     {
       var by_category = miwi_poi_pois_by_category;
@@ -596,20 +639,20 @@ function set_up_categories() {
         }
       }
 
-// test
-/*
-  var story = "Alustus: ";
-  var item;
-  
-  for(category in by_category) {
-    item = by_category[category];
-    if ( item.selector.selected ) {
-      story += "," + category;
-    }
-  }
-  alert(story);
-*/
-// end_test
+      // test
+      /*
+        var story = "Alustus: ";
+        var item;
+        
+        for(category in by_category) {
+          item = by_category[category];
+          if ( item.selector.selected ) {
+            story += "," + category;
+          }
+        }
+        alert(story);
+      */
+      // end_test
     }
     
     // fill category list
@@ -618,546 +661,559 @@ function set_up_categories() {
     } catch (e) {
         alert("fill_category_list FAILED: "+e+"\n"+e.toSource());
     }
-}
+  }
 
 
-function deleteProperties(objectToClean) {
-  for (var x in objectToClean) if (objectToClean.hasOwnProperty(x)) 
-    delete objectToClean[x];
-}
+  function deleteProperties(objectToClean) {
+    for (var x in objectToClean) if (objectToClean.hasOwnProperty(x)) 
+      delete objectToClean[x];
+  }
 
-function get_ext_json(x, url, success, fail) {
-  var xhr = new XMLHttpRequest();
+  function get_ext_json(x, url, success, fail) {
+    var xhr = new XMLHttpRequest();
+    
+    xhr.onreadystatechange = function () {
+      var key;
+      if(xhr.readyState === 4) {
+        if(xhr.status  === 200) { 
+          var json = JSON.parse(xhr.responseText);
+          deleteProperties(x);
+          for (key in json) {
+            x[key] = json[key];
+          }
+          success(xhr);
+        }
+        else if (xhr.status === 404) { 
+          fail(xhr);
+        }
+      }
+    };
+
+    xhr.onerror = function (e) {
+      fail(xhr);
+    };
+    xhr.open("GET", url, true);
+    xhr.send();
+  }
+
+
+
+  var field_id_location = "i:poi_editor.fw_core.location.wgs84";
+  var field_id_lat = field_id_location+".latitude";
+  var field_id_lng = field_id_location+".longitude";
+
+  function POI_moved_callback(newLocation) {
+    if (newLocation && POIEditWindow && !POIEditWindow.closed) {
+      var doc = POIEditWindow.document;
+      var lat_field = doc.getElementById(field_id_lat);
+      var lng_field = doc.getElementById(field_id_lng);
+      var lat = newLocation.latLng.lat();
+      var lng = newLocation.latLng.lng();
+      var msg = lat+"\n"+lng;
+      if (lat_field) {
+        sbje.number_type_handler.set_input_field(lat_field, lat);
+      }
+      if (lng_field) {
+        sbje.number_type_handler.set_input_field(lng_field, lng);
+      }
+      if (lat_field) {
+        sbje.field_changed(field_id_lat, lat);
+      }
+      if (lng_field) {
+        sbje.field_changed(field_id_lng, lng);
+      }
+      POIEditWindow.focus();
+    }
+  }
   
-  xhr.onreadystatechange = function () {
-    var key;
-    if(xhr.readyState === 4) {
-      if(xhr.status  === 200) { 
-        var json = JSON.parse(xhr.responseText);
-        deleteProperties(x);
-        for (key in json) {
-          x[key] = json[key];
-        }
-        success(xhr);
-      }
-      else if (xhr.status === 404) { 
-        fail(xhr);
-      }
+  function POI_edit(uuid) {
+    var restQueryURL, poi_data, poi_core;
+    var poiMarker = getPoiLocal(uuid, 'marker');
+
+    if (POIEditWindow && !POIEditWindow.closed) {
+      POIEditWindow.focus();
+      POIEditWindow.alert("Only one POI under editing allowed!");
+      return;
     }
-  };
 
-  xhr.onerror = function (e) {
-    fail(xhr);
-  };
-  xhr.open("GET", url, true);
-  xhr.send();
-}
-
-
-
-    var field_id_location = "i:poi_editor.fw_core.location.wgs84";
-    var field_id_lat = field_id_location+".latitude";
-    var field_id_lng = field_id_location+".longitude";
-
-    function POI_moved_callback(newLocation) {
-        if (newLocation && POIEditWindow && !POIEditWindow.closed) {
-            var doc = POIEditWindow.document;
-            var lat_field = doc.getElementById(field_id_lat);
-            var lng_field = doc.getElementById(field_id_lng);
-            var lat = newLocation.latLng.lat();
-            var lng = newLocation.latLng.lng();
-            var msg = lat+"\n"+lng;
-            if (lat_field) {
-                sbje.number_type_handler.set_input_field(lat_field, lat);
-            }
-            if (lng_field) {
-                sbje.number_type_handler.set_input_field(lng_field, lng);
-            }
-            if (lat_field) {
-                sbje.field_changed(field_id_lat, lat);
-            }
-            if (lng_field) {
-                sbje.field_changed(field_id_lng, lng);
-            }
-            POIEditWindow.focus();
-        }
-    }
+    show_POI_window(poiMarker, uuid);
     
-    function POI_edit(uuid) {
-        var restQueryURL, poi_data, poi_core;
-        var poiMarker = getPoiLocal(uuid, 'marker');
-
-        if (POIEditWindow && !POIEditWindow.closed) {
-            POIEditWindow.focus();
-            POIEditWindow.alert("Only one POI under editing allowed!");
-            return;
-        }
-
-        show_POI_window(poiMarker, uuid);
-        
-        restQueryURL = BACKEND_ADDRESS_POI + "get_pois?poi_id=" + uuid +
-            "&get_for_update=true";
-        
-        miwi_3d_xhr = new XMLHttpRequest();
-        
-        miwi_3d_xhr.onreadystatechange = function () {
-            if(miwi_3d_xhr.readyState === 4) {
-                if(miwi_3d_xhr.status  === 200) { 
-                    var json = JSON.parse(miwi_3d_xhr.responseText);
-                    var poi_edit_buffer = json.pois[uuid];
-                    
-                    EditInPOIEditWindow("update poi "  + uuid, "Edit POI data", 
-                        poi_edit_buffer, uuid, POI_edit_cancel, updatePOI);
+    restQueryURL = BACKEND_ADDRESS_POI + "get_pois?poi_id=" + uuid +
+      "&get_for_update=true" +
+      ((poi_user_tok != "") ?
+      ("&auth_t=" + poi_user_tok) : "");
+    
+    miwi_3d_xhr = new XMLHttpRequest();
+    
+    miwi_3d_xhr.onreadystatechange = function () {
+      if(miwi_3d_xhr.readyState === 4) {
+        if(miwi_3d_xhr.status  === 200) { 
+          var json = JSON.parse(miwi_3d_xhr.responseText);
+          var poi_edit_buffer = json.pois[uuid];
+          
+          EditInPOIEditWindow("update poi "  + uuid, "Edit POI data", 
+            poi_edit_buffer, uuid, POI_edit_cancel, updatePOI);
  
-                    POIEditWindow.marker = poiMarker;
-                    POIEditWindow.draglistener =
-                        google.maps.event.addListener(
-                                poiMarker, 'dragend', POI_moved_callback);
-                    POIEditWindow.markerOldPos = poiMarker.getPosition();
-                    poiMarker.setOptions({draggable: true});
-                }
-                else if (miwi_3d_xhr.status === 404) { 
-                    log("failed: " + miwi_3d_xhr.responseText);
-                }
-            }
-        };
+          POIEditWindow.marker = poiMarker;
+          POIEditWindow.draglistener =
+            google.maps.event.addListener(
+                poiMarker, 'dragend', POI_moved_callback);
+          POIEditWindow.markerOldPos = poiMarker.getPosition();
+          poiMarker.setOptions({draggable: true});
+        }
+        else if (miwi_3d_xhr.status === 404) { 
+          log("failed: " + miwi_3d_xhr.responseText);
+        }
+      }
+    };
 
-        miwi_3d_xhr.onerror = function (e) {
-            log("failed to get 3d");
-        };
-        OpenPOIEditWindow("Updating POI", "Wait, POI data requested", miwi_3d_xhr.abort);
-        miwi_3d_xhr.open("GET", restQueryURL, true);
-        miwi_3d_xhr.send();
+    miwi_3d_xhr.onerror = function (e) {
+      log("failed to get 3d");
+    };
+    OpenPOIEditWindow("Updating POI", "Wait, POI data requested", miwi_3d_xhr.abort);
+    miwi_3d_xhr.open("GET", restQueryURL, true);
+    miwi_3d_xhr.send();
 
-   }
-    
-    function get_full_POI(uuid, cont_func, cont_data) {
-        var restQueryURL, poi_data, poi_core;
-        var poiMarker = getPoiLocal(uuid, 'marker');
+  }
+  
+  function get_full_POI(uuid, cont_func, cont_data) {
+    var restQueryURL, poi_data, poi_core;
+    var poiMarker = getPoiLocal(uuid, 'marker');
 
 //        show_POI_window(poiMarker, uuid);
-        
-        restQueryURL = BACKEND_ADDRESS_POI + "get_pois?poi_id=" + uuid;
-        
-        miwi_3d_xhr = new XMLHttpRequest();
-        
-        miwi_3d_xhr.onreadystatechange = function () {
-            if(miwi_3d_xhr.readyState === 4) {
-                if(miwi_3d_xhr.status  === 200) { 
-                    var json = JSON.parse(miwi_3d_xhr.responseText);
-                    processPoiData(json);
-                    cont_func(cont_data); // and continue
-                    
-                }
-                else if (miwi_3d_xhr.status === 404) { 
-                    log("failed: " + miwi_3d_xhr.responseText);
-                }
-            }
-        };
-
-        miwi_3d_xhr.onerror = function (e) {
-            log("failed to get 3d");
-        };
-        miwi_3d_xhr.open("GET", restQueryURL, true);
-        set_accept_languages(miwi_3d_xhr, [miwi_lang_sel_1.value, 
-            miwi_lang_sel_2.value]);
-        miwi_3d_xhr.send();
-
-    }
     
-    function POI_delete(uuid) {
-        var poiMarker = getPoiLocal(uuid, 'marker');
-        show_POI_window(poiMarker, uuid);
-        setTimeout(function(){POI_delete_2(uuid);},100);
-    }
+    restQueryURL = BACKEND_ADDRESS_POI + "get_pois?poi_id=" + uuid +
+      ((poi_user_tok != "") ?
+      ("&auth_t=" + poi_user_tok) : "");
     
-    function POI_delete_2(uuid) {
-        var restQueryURL, poi_data, poi_core;
-      
-        var cfm = confirm("Confirm to delete POI " + uuid);
+    miwi_3d_xhr = new XMLHttpRequest();
+    
+    miwi_3d_xhr.onreadystatechange = function () {
+      if(miwi_3d_xhr.readyState === 4) {
+        if(miwi_3d_xhr.status  === 200) { 
+          var json = JSON.parse(miwi_3d_xhr.responseText);
+          processPoiData(json);
+          cont_func(cont_data); // and continue
+          
+        }
+        else if (miwi_3d_xhr.status === 404) { 
+          log("failed: " + miwi_3d_xhr.responseText);
+        }
+      }
+    };
 
-        if (cfm) {
-            restQueryURL = BACKEND_ADDRESS_POI + "delete_poi?poi_id=" + uuid;
+    miwi_3d_xhr.onerror = function (e) {
+      log("failed to get 3d");
+    };
+    miwi_3d_xhr.open("GET", restQueryURL, true);
+    set_accept_languages(miwi_3d_xhr, [miwi_lang_sel_1.value, 
+      miwi_lang_sel_2.value]);
+    miwi_3d_xhr.send();
 
-            miwi_3d_xhr = new XMLHttpRequest();
+  }
+  
+  function POI_delete(uuid) {
+    var poiMarker = getPoiLocal(uuid, 'marker');
+    show_POI_window(poiMarker, uuid);
+    setTimeout(function(){POI_delete_2(uuid);},100);
+  }
+  
+  function POI_delete_2(uuid) {
+    var restQueryURL, poi_data, poi_core;
+    
+    var cfm = confirm("Confirm to delete POI " + uuid);
 
-            miwi_3d_xhr.onreadystatechange = function () {
-                if(miwi_3d_xhr.readyState === 4) {
-                    if(miwi_3d_xhr.status  === 200) {
-                        poiWindow.close();
-                        poiWindow.setMap(null);
-                        poiWindow_uuid = null;
-                        removePOI_UUID_FromMap(uuid);
-                        delete miwi_poi_pois[uuid];
-                        unstorePoi(uuid);
+    if (cfm) {
+      restQueryURL = BACKEND_ADDRESS_POI + "delete_poi?poi_id=" + uuid +
+        ((poi_user_tok != "") ?
+        ("&auth_t=" + poi_user_tok) : "");
+
+      miwi_3d_xhr = new XMLHttpRequest();
+
+      miwi_3d_xhr.onreadystatechange = function () {
+        if(miwi_3d_xhr.readyState === 4) {
+          if(miwi_3d_xhr.status  === 200) {
+            poiWindow.close();
+            poiWindow.setMap(null);
+            poiWindow_uuid = null;
+            removePOI_UUID_FromMap(uuid);
+            delete miwi_poi_pois[uuid];
+            unstorePoi(uuid);
 //                        alert("Success: " + miwi_3d_xhr.responseText);
-                    } else {
-                        alert("Failed: "+miwi_3d_xhr.status+" "+miwi_3d_xhr.responseText);
-                    }
-                }
-            }
+          } else {
+            alert("Failed: "+miwi_3d_xhr.status+" "+miwi_3d_xhr.responseText);
+          }
+        }
+      }
 
-            miwi_3d_xhr.onerror = function (e) {
-                log("failed to delete POI " + JSON.stringify(e));
-            };
+      miwi_3d_xhr.onerror = function (e) {
+        log("failed to delete POI " + JSON.stringify(e));
+      };
 
 //        miwi_3d_xhr.open("GET", restQueryURL, true);
-            miwi_3d_xhr.open("DELETE", restQueryURL, true);
-            miwi_3d_xhr.send();
-        }
+      miwi_3d_xhr.open("DELETE", restQueryURL, true);
+      miwi_3d_xhr.send();
+    }
 
-   }
-    
-    
+  }
    
-    var log = wex.Util.log, map, geocoder, homeMarker, positionMarker, 
-        poiWindow,
-        poiWindow_uuid,
-        i,
-        poiStorage = {},
-        poiStorageLocal = {},
-        markers = [],
-        oldSearchPoints = {},
-        queries = {},
-        queryID = 0, //Running number to identify POI search areas, and to 
-                     //track search success
-        webSocket_POI = null,
-        webSocket_3D = null,
-        centerChangedTimeout,
-        oldMapCenter,
-        CENTER_CHANGED_THRESHOLD = 130,
-        BACKEND_ADDRESS_POI = "http://ari.webhop.org/poi_dp/",
-
-        searchRadius = 600,
-        searchRadiusScaling = 2.0;
-    var poi_edit_buffer;
-    var POIMenu;
+  var log = wex.Util.log, map, geocoder, homeMarker, positionMarker, 
+      poiWindow,
+      poiWindow_uuid,
+      i,
+      poiStorage = {},
+      poiStorageLocal = {},
+      markers = [],
+      oldSearchPoints = {},
+      queries = {},
+      queryID = 0, //Running number to identify POI search areas, and to 
+             //track search success
+      webSocket_POI = null,
+      webSocket_3D = null,
+      centerChangedTimeout,
+      oldMapCenter,
+      CENTER_CHANGED_THRESHOLD = 130,
+      BACKEND_ADDRESS_POI = "../poi_dp/",
+      searchRadius = 600,
+      searchRadiusScaling = 2.0;
+  var poi_edit_buffer;
+  var POIMenu;
 
 //        languages = ["fi", "sv"];
 
-    window.WebSocket = (window.WebSocket || window.MozWebSocket);
-    miwi_lang_sel_1 = document.getElementById( "lang_sel_1" );
-    miwi_lang_sel_2 = document.getElementById( "lang_sel_2" );
-    miwi_languages = [miwi_lang_sel_1, miwi_lang_sel_2];
+  window.WebSocket = (window.WebSocket || window.MozWebSocket);
+  miwi_lang_sel_1 = document.getElementById( "lang_sel_1" );
+  miwi_lang_sel_2 = document.getElementById( "lang_sel_2" );
+  miwi_languages = [miwi_lang_sel_1, miwi_lang_sel_2];
 
-    // This function is called by Google API when it has been loaded
-    // Initialises the demo
-    namespace.initialize = function () {
-        log( "Initialising the demo." );
+  // This function is called by Google API when it has been loaded
+  // Initialises the demo
+  namespace.initialize = function () {
+    console.log( "Callback from GMaps. Initialising the demo." );
 
-function addPOI( poi_data, dummy ) {
+  function addPOI( poi_data, dummy ) {
     var restQueryURL;
     var responseText;
 
     if (!checkPOI(poi_data)) return;
 
-    restQueryURL = BACKEND_ADDRESS_POI + "add_poi";
+    restQueryURL = BACKEND_ADDRESS_POI + "add_poi" +
+        ((poi_user_tok != "") ?
+        ("?auth_t=" + poi_user_tok) : "");
     miwi_poi_xhr = new XMLHttpRequest();
     
     miwi_poi_xhr.overrideMimeType("application/json");
 
     miwi_poi_xhr.onreadystatechange = function () {
-        var json;
-        var uuid;
-        var data;
-        var poiMarker;
-        if(miwi_poi_xhr.readyState === 4) {
-            responseText = miwi_poi_xhr.responseText;
-            if(miwi_poi_xhr.status  === 200) {
-                if (responseText.substring(0,6) != "Error:") { 
-                    POIEditWindow.close();
-                    json = JSON.parse(miwi_poi_xhr.responseText);
-                    uuid = json.created_poi.uuid;
-                    data = {pois:{}};
-                    data.pois[uuid] = poi_data;
-                    processPoiData(data);
-                    poiMarker = getPoiLocal(uuid, 'marker');
-                    poiMarker.setVisible(true);
-                    show_POI_window(poiMarker, uuid);
-//                    alert( "success: " + responseText);
-                } else {
-                    alert(responseText);
-                }
-            } else { 
-                alert("failed "+miwi_poi_xhr.status+": " + responseText);
-            }
-            if (POIEditWindow && !POIEditWindow.closed) {
-                POIEditWindow.focus();
-            }
+      var json;
+      var uuid;
+      var data;
+      var poiMarker;
+      if(miwi_poi_xhr.readyState === 4) {
+        responseText = miwi_poi_xhr.responseText;
+        if(miwi_poi_xhr.status  === 200) {
+          if (responseText.substring(0,6) != "Error:") { 
+            POIEditWindow.close();
+            json = JSON.parse(miwi_poi_xhr.responseText);
+            uuid = json.created_poi.uuid;
+            data = {pois:{}};
+            data.pois[uuid] = poi_data;
+            processPoiData(data);
+            poiMarker = getPoiLocal(uuid, 'marker');
+            poiMarker.setVisible(true);
+            show_POI_window(poiMarker, uuid);
+  //                    alert( "success: " + responseText);
+          } else {
+            alert(responseText);
+          }
+        } else { 
+          alert("failed "+miwi_poi_xhr.status+": " + responseText);
         }
+        if (POIEditWindow && !POIEditWindow.closed) {
+          POIEditWindow.focus();
+        }
+      }
     }
 
     miwi_poi_xhr.onerror = function (e) {
-        alert("error" + JSON.stringify(e));
-        if (POIEditWindow && !POIEditWindow.closed) {
-            POIEditWindow.focus();
-        }
+      alert("error" + JSON.stringify(e));
+      if (POIEditWindow && !POIEditWindow.closed) {
+        POIEditWindow.focus();
+      }
     };
 
     miwi_poi_xhr.open("POST", restQueryURL, true);
-//        miwi_poi_xhr.setRequestHeader('Content-Type', 'application/json');
-//alert("### "+JSON.stringify(poi_data));
+  //        miwi_poi_xhr.setRequestHeader('Content-Type', 'application/json');
+  //alert("### "+JSON.stringify(poi_data));
     miwi_poi_xhr.send(JSON.stringify(poi_data));
 
-}
-        
- 
-
-
-/* ContextMenu.js copied below 
-   =========================== */
-/*
-	ContextMenu v1.0
-	
-	A context menu for Google Maps API v3
-	http://code.martinpearman.co.uk/googlemapsapi/contextmenu/
-	
-	Copyright Martin Pearman
-	Last updated 21st November 2011
-	
-	developer@martinpearman.co.uk
-	
-	This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
-	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-function ContextMenu(map, options) {
-	options=options || {};
-  var key;
-	this.setMap(map);
-	
-	this.classNames_=options.classNames || {};
-	this.map_=map;
-	this.mapDiv_=map.getDiv();
-	this.menuItems_=options.menuItems || [];
-	this.pixelOffset=options.pixelOffset || new google.maps.Point(10, -5);
-}
-
-ContextMenu.prototype=new google.maps.OverlayView();
-
-ContextMenu.prototype.draw=function(){
-	if(this.isVisible_){
-		var mapSize=new google.maps.Size(this.mapDiv_.offsetWidth, this.mapDiv_.offsetHeight);
-		var menuSize=new google.maps.Size(this.menu_.offsetWidth, this.menu_.offsetHeight);
-		var mousePosition=this.getProjection().fromLatLngToDivPixel(this.position_);
-		
-		var left=mousePosition.x;
-		var top=mousePosition.y;
-		
-		if(mousePosition.x>mapSize.width-menuSize.width-this.pixelOffset.x){
-			left=left-menuSize.width-this.pixelOffset.x;
-		} else {
-			left+=this.pixelOffset.x;
-		}
-		
-		if(mousePosition.y>mapSize.height-menuSize.height-this.pixelOffset.y){
-			top=top-menuSize.height-this.pixelOffset.y;
-		} else {
-			top+=this.pixelOffset.y;
-		}
-		
-		this.menu_.style.left=left+'px';
-		this.menu_.style.top=top+'px';
-	}
-};
-
-ContextMenu.prototype.getVisible=function(){
-	return this.isVisible_;
-};
-
-ContextMenu.prototype.hide=function(){
-	if(this.isVisible_){
-		this.menu_.style.display='none';
-		this.isVisible_=false;
-	}
-};
-
-ContextMenu.prototype.onAdd=function() {
-	function createMenuItem(values){
-		var menuItem=document.createElement('div');
-		menuItem.innerHTML=values.label;
-		if(values.className){
-			menuItem.className=values.className;
-		}
-		if(values.id){
-			menuItem.id=values.id;
-		}
-		menuItem.style.cssText='cursor:pointer; white-space:nowrap';
-		menuItem.onclick=function(){
-			google.maps.event.trigger($this, 'menu_item_selected', $this.position_, values.eventName);
-		};
-		return menuItem;
-	}
-	function createMenuSeparator(){
-		var menuSeparator=document.createElement('div');
-		if($this.classNames_.menuSeparator){
-			menuSeparator.className=$this.classNames_.menuSeparator;
-		}
-		return menuSeparator;
-	}
-	var $this=this;	//	used for closures
-	
-	var menu=document.createElement('div');
-	if(this.classNames_.menu){
-		menu.className=this.classNames_.menu;
-	}
-	menu.style.cssText='display:none; position:absolute';
-	
-	for(var i=0, j=this.menuItems_.length; i<j; i++){
-		if(this.menuItems_[i].label && this.menuItems_[i].eventName){
-			menu.appendChild(createMenuItem(this.menuItems_[i]));
-		} else {
-			menu.appendChild(createMenuSeparator());
-		}
-	}
-	
-	delete this.classNames_;
-	delete this.menuItems_;
-	
-	this.isVisible_=false;
-	this.menu_=menu;
-	this.position_=new google.maps.LatLng(0, 0);
-	
-	google.maps.event.addListener(this.map_, 'click', function(mouseEvent){
-		$this.hide();
-	});
-	
-	this.getPanes().floatPane.appendChild(menu);
-};
-
-ContextMenu.prototype.onRemove=function(){
-	this.menu_.parentNode.removeChild(this.menu_);
-	delete this.mapDiv_;
-	delete this.menu_;
-	delete this.position_;
-};
-
-ContextMenu.prototype.show=function(latLng){
-	if(!this.isVisible_){
-		this.menu_.style.display='block';
-		this.isVisible_=true;
-	}
-	this.position_=latLng;
-	this.draw();
-};
-
-
-/* end ContextMenu.js
-   ================== */
-
-function adjust_search_radius() {
-  var bounds = map.getBounds();
-  var NE = bounds.getNorthEast();
-  var SW = bounds.getSouthWest();
-
-  searchRadius = distHaversine(NE, SW) / 1.5;
-}
-   
-/*
-  BEGIN main
-  ==========
-*/  
-   
-        document.querySelector( '#button1' ).onclick = locate;
-        document.querySelector( '#button2' ).onclick = codeAddress;
- //       document.querySelector( '#categories' ).onchange = category_changed;
- //       document.querySelector( '#button4' ).onclick = updateMap;
-
-        geocoder = new google.maps.Geocoder();
-
-        var mapOptions = {
-            zoom: 16,
-            mapTypeId: google.maps.MapTypeId.ROADMAP,
-            center: new google.maps.LatLng( 65.0610432, 25.468170099999952 ) 
-                //Initial location Oulu University
-        };
-
-        map = new google.maps.Map( document.getElementById( 'map-canvas' ),
-            mapOptions );
-
-        homeMarker = new google.maps.Marker( {
-            icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&" + 
-                "chld=home|FEFE00",
-            title: "Current position"
-        } );
-
-        positionMarker = new google.maps.Marker( {
-            icon: "http://chart.apis.google.com/chart?chst=d_map_pin_letter&" + 
-                "chld=L|00FFFF",
-            title: "Found location"
-        } );
-
-        poiWindow = new google.maps.InfoWindow( {
-            content: '<div class="infoTitle">DefaultName</div>' +
-                '<div class="infoText">' +
-                "<p>Category: DefaultCategory </p>" +
-                '</div>'
-        } );
-        poiWindow_uuid = null;
-
-        oldMapCenter = map.getCenter();
-        
-
-        google.maps.event.addListener( map, 'bounds_changed',
-            adjust_search_radius);
-
-        google.maps.event.addListener( map, 'zoom_changed',
-            adjust_search_radius);
-
-        google.maps.event.addListener( map, 'center_changed', function () {
-            var mapCenter = map.getCenter(), dist, minDist = Infinity, i, len,
-                searchPoints = oldSearchPoints[searchRadius + ''];
-
-            //TODO: Experimental feature. Reducing amount of queries to backend.
-            // (wip)
-            dist = distHaversine( mapCenter, oldMapCenter );
-            // Center has to move enough before looking through old search 
-            // points. Reduces processing amount.
-            if ( dist > CENTER_CHANGED_THRESHOLD ) {
-
-                // Now we check if the new search point is far enough from old 
-                // query points.
-                if ( searchPoints ) {
-                    len = searchPoints.length;
-
-                    for ( i = len; i--; ) {
-                        dist = distHaversine( mapCenter, 
-                                searchPoints[i]['center'] );
-                        if ( dist < minDist ) {
-                            minDist = dist;
-                        }
-
-                    }
-
-                    if ( minDist <= searchRadius * 0.8 ) {
-                        return;
-                    }
-                }
-
-                // Initiate new search after small timeout, so the search is 
-                // not constantly triggered while moving the map
-                clearTimeout( centerChangedTimeout );
-                centerChangedTimeout = window.setTimeout( 
-                        function ( lat, lng ) { searchPOIs( lat, lng );
-                }, 800, mapCenter.lat(), mapCenter.lng() );
-
-                oldMapCenter = mapCenter;
-
-            }
-        } );
+  }
   
-        
+    
+
+
+  /* ContextMenu.js copied below 
+     =========================== */
+  /*
+    ContextMenu v1.0
+    
+    A context menu for Google Maps API v3
+    http://code.martinpearman.co.uk/googlemapsapi/contextmenu/
+    
+    Copyright Martin Pearman
+    Last updated 21st November 2011
+    
+    developer@martinpearman.co.uk
+    
+    This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
+  function ContextMenu(map, options) {
+    options=options || {};
+    var key;
+    this.setMap(map);
+    
+    this.classNames_=options.classNames || {};
+    this.map_=map;
+    this.mapDiv_=map.getDiv();
+    this.menuItems_=options.menuItems || [];
+    this.pixelOffset=options.pixelOffset || new google.maps.Point(10, -5);
+  }
+
+  ContextMenu.prototype=new google.maps.OverlayView();
+
+  ContextMenu.prototype.draw=function(){
+    if(this.isVisible_){
+      var mapSize=new google.maps.Size(this.mapDiv_.offsetWidth, this.mapDiv_.offsetHeight);
+      var menuSize=new google.maps.Size(this.menu_.offsetWidth, this.menu_.offsetHeight);
+      var mousePosition=this.getProjection().fromLatLngToDivPixel(this.position_);
+      
+      var left=mousePosition.x;
+      var top=mousePosition.y;
+      
+      if(mousePosition.x>mapSize.width-menuSize.width-this.pixelOffset.x){
+        left=left-menuSize.width-this.pixelOffset.x;
+      } else {
+        left+=this.pixelOffset.x;
+      }
+      
+      if(mousePosition.y>mapSize.height-menuSize.height-this.pixelOffset.y){
+        top=top-menuSize.height-this.pixelOffset.y;
+      } else {
+        top+=this.pixelOffset.y;
+      }
+      
+      this.menu_.style.left=left+'px';
+      this.menu_.style.top=top+'px';
+    }
+  };
+
+  ContextMenu.prototype.getVisible=function(){
+    return this.isVisible_;
+  };
+
+  ContextMenu.prototype.hide=function(){
+    if(this.isVisible_){
+      this.menu_.style.display='none';
+      this.isVisible_=false;
+    }
+  };
+
+  ContextMenu.prototype.onAdd=function() {
+    function createMenuItem(values){
+      var menuItem=document.createElement('div');
+      menuItem.innerHTML=values.label;
+      if(values.className){
+        menuItem.className=values.className;
+      }
+      if(values.id){
+        menuItem.id=values.id;
+      }
+      menuItem.style.cssText='cursor:pointer; white-space:nowrap';
+      menuItem.onclick=function(){
+        google.maps.event.trigger($this, 'menu_item_selected', $this.position_, values.eventName);
+      };
+      return menuItem;
+    }
+    function createMenuSeparator(){
+      var menuSeparator=document.createElement('div');
+      if($this.classNames_.menuSeparator){
+        menuSeparator.className=$this.classNames_.menuSeparator;
+      }
+      return menuSeparator;
+    }
+    var $this=this;	//	used for closures
+    
+    var menu=document.createElement('div');
+    if(this.classNames_.menu){
+      menu.className=this.classNames_.menu;
+    }
+    menu.style.cssText='display:none; position:absolute';
+    
+    for(var i=0, j=this.menuItems_.length; i<j; i++){
+      if(this.menuItems_[i].label && this.menuItems_[i].eventName){
+        menu.appendChild(createMenuItem(this.menuItems_[i]));
+      } else {
+        menu.appendChild(createMenuSeparator());
+      }
+    }
+    
+    delete this.classNames_;
+    delete this.menuItems_;
+    
+    this.isVisible_=false;
+    this.menu_=menu;
+    this.position_=new google.maps.LatLng(0, 0);
+    
+    google.maps.event.addListener(this.map_, 'click', function(mouseEvent){
+      $this.hide();
+    });
+    
+    this.getPanes().floatPane.appendChild(menu);
+  };
+
+  ContextMenu.prototype.onRemove=function(){
+    this.menu_.parentNode.removeChild(this.menu_);
+    delete this.mapDiv_;
+    delete this.menu_;
+    delete this.position_;
+  };
+
+  ContextMenu.prototype.show=function(latLng){
+    if(!this.isVisible_){
+      this.menu_.style.display='block';
+      this.isVisible_=true;
+    }
+    this.position_=latLng;
+    this.draw();
+  };
+
+
+  /* end ContextMenu.js
+     ================== */
+
+  function adjust_search_radius() {
+    var bounds = map.getBounds();
+    var NE = bounds.getNorthEast();
+    var SW = bounds.getSouthWest();
+
+    searchRadius = distHaversine(NE, SW) / 1.5;
+  }
+     
+  /*
+    BEGIN main
+    ==========
+  */  
+ 
+  document.querySelector( '#button1' ).onclick = locate;
+  document.querySelector( '#button2' ).onclick = codeAddress;
+//       document.querySelector( '#categories' ).onchange = category_changed;
+//       document.querySelector( '#button4' ).onclick = updateMap;
+
+  geocoder = new google.maps.Geocoder();
+
+  var mapOptions = {
+    zoom: 16,
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
+    center: new google.maps.LatLng( 65.0610432, 25.468170099999952 ) 
+      //Initial location Oulu University
+  };
+
+  map = new google.maps.Map( document.getElementById( 'map-canvas' ),
+    mapOptions );
+
+  homeMarker = new google.maps.Marker( 
+    {
+      icon: "http://chart.apis.google.com/chart?chst=d_map_pin_icon&" + 
+        "chld=home|FEFE00",
+      title: "Current position"
+    } 
+  );
+
+  positionMarker = new google.maps.Marker( 
+    {
+      icon: "http://chart.apis.google.com/chart?chst=d_map_pin_letter&" + 
+        "chld=L|00FFFF",
+      title: "Found location"
+    } 
+  );
+
+  poiWindow = new google.maps.InfoWindow( 
+    {
+      content: '<div class="infoTitle">DefaultName</div>' +
+        '<div class="infoText">' +
+        "<p>Category: DefaultCategory </p>" +
+        '</div>'
+    } 
+  );
+  poiWindow_uuid = null;
+
+  oldMapCenter = map.getCenter();
+  
+
+  google.maps.event.addListener( map, 'bounds_changed',
+    adjust_search_radius);
+
+  google.maps.event.addListener( map, 'zoom_changed',
+    adjust_search_radius);
+
+  google.maps.event.addListener( map, 'center_changed', 
+    function () {
+      var mapCenter = map.getCenter(), dist, minDist = Infinity, i, len,
+        searchPoints = oldSearchPoints[searchRadius + ''];
+
+      //TODO: Experimental feature. Reducing amount of queries to backend.
+      // (wip)
+      dist = distHaversine( mapCenter, oldMapCenter );
+      // Center has to move enough before looking through old search 
+      // points. Reduces processing amount.
+      if ( dist > CENTER_CHANGED_THRESHOLD ) {
+
+        // Now we check if the new search point is far enough from old 
+        // query points.
+        if ( searchPoints ) {
+          len = searchPoints.length;
+
+          for ( i = len; i--; ) {
+            dist = distHaversine( mapCenter, 
+                searchPoints[i]['center'] );
+            if ( dist < minDist ) {
+              minDist = dist;
+            }
+
+          }
+
+          if ( minDist <= searchRadius * 0.8 ) {
+            return;
+          }
+        }
+
+        // Initiate new search after small timeout, so the search is 
+        // not constantly triggered while moving the map
+        clearTimeout( centerChangedTimeout );
+        centerChangedTimeout = window.setTimeout( 
+            function ( lat, lng ) { searchPOIs( lat, lng );
+        }, 800, mapCenter.lat(), mapCenter.lng() );
+
+        oldMapCenter = mapCenter;
+
+      }
+    } 
+  );
+
+      
   get_ext_json(poi_categories, BACKEND_ADDRESS_POI + "poi_categories.json",
       set_up_categories, function (){alert("POI categories not available");});
         
   get_ext_json(poi_schema, BACKEND_ADDRESS_POI + "poi_schema.json",
       function(){}, function (){alert("POI schema not available");});
-/*  Context menu setup
-    ==================
-*/
+  /*  Context menu setup
+      ==================
+  */
 	//	create the ContextMenuOptions object
 	var contextMenuOptions={};
 	contextMenuOptions.classNames={menu:'context_menu', menuSeparator:'context_menu_separator'};
@@ -1166,9 +1222,9 @@ function adjust_search_radius() {
 	var menuItems=[];
 //	menuItems.push({className:'context_menu_item', eventName:'zoom_in_click', label:'Zoom in'});
 //	menuItems.push({className:'context_menu_item', eventName:'zoom_out_click', label:'Zoom out'});
-    if (fw_editAllowed) {
-        menuItems.push({className:'context_menu_item', eventName:'add_poi_click', label:'Add POI'});
-    }
+  if (fw_editAllowed) {
+      menuItems.push({className:'context_menu_item', eventName:'add_poi_click', label:'Add POI'});
+  }
 	//	a menuItem with no properties will be rendered as a separator
 	menuItems.push({});
 	menuItems.push({className:'context_menu_item', eventName:'center_map_click', label:'Center map here'});
@@ -1342,7 +1398,10 @@ function adjust_search_radius() {
            "lat=" + lat + "&lon=" + lng + "&radius=" +
             searchRadius + "&component=fw_core" + 
             ((miwi_active_categories != "") ?
-            ("&category=" + miwi_active_categories) : "");
+            ("&category=" + miwi_active_categories) : "") +
+            ((poi_user_tok != "") ?
+            ("&auth_t=" + poi_user_tok) : "");
+            
         miwi_poi_xhr = new XMLHttpRequest();
         
         miwi_poi_xhr.overrideMimeType("application/json");

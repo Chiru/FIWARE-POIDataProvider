@@ -9,9 +9,18 @@ define('SERVICE_NAME', 'get_components');
 
 require_once 'data_manager.php';
 require_once 'util.php';
+require_once 'security.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET' )
 {
+    // asking about POIs requires view permission
+    $session = get_session();
+    $view_permission = $session['permissions']['view'];
+    if(!$view_permission) {
+        header("HTTP/1.0 401 Unauthorized");
+        die("Permission denied.");
+    }
+        
     $components = get_supported_components();
 
     $json_struct = array("components" => $components);

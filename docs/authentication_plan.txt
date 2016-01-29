@@ -1,0 +1,115 @@
+Operation of User Authentication in FIWARE POI Data Provider GE
+===============================================================
+
+OAuth2 user identification system is used. First implementation will use
+Google+ authentication. [1]
+
+Traffic considerations
+----------------------
+
+The token provided by Google authentication is 1144 characters long. Sending
+this in all requests seems extraneous. So, the full authentication token is
+sent in the login transaction, only. Subsequent transactions are sent with the
+SHA-1 hash of the full token. The server will save the full token and other
+useful info (expiration, access rights, etc.) to its database with its SHA-1 
+hash as the key. The data is removed at logout or in some cleanup operation, 
+when it has been expired.
+
+Login
+-----
+
+1.  The client gets an authentication token from the authentication provider 
+    (Google)
+   
+2.  The client sends _login_ request with the authentication token to the
+    POI server.
+    
+3.  The POI server forwards the token to Google authentication provider to
+    check the credentials.
+    
+4.  The POI server uses the email address got in the response from Google as
+    a key to obtain the permissions and other relevant user data from its
+    database. The relevant data is stored to the database with the SHA-1 of the 
+    token as its key.
+    
+Session data
+------------
+
+    "_session": {
+      "_id": "<SHA-1 of the user token>",
+      "user": "<UUID of the user>",
+      "begin_time": <timestamp>,
+      "permissions": {
+        "admin": boolean,
+        "add": boolean,
+        "update": boolean,
+        "view": boolean
+      },
+      "identification": {
+        "provider": "google",
+        "google": {
+          "email": "<google email>",
+          "token": "google-token"
+        }
+      }
+    }
+      
+User data
+---------
+
+    "_user": {
+      "_id": "<UUID of the user>",
+      "name": string,
+      "photo": urlstring,
+      "address": string,
+      "phone": string,
+      "emails": stringlist,
+      "permissions: {
+        "admin": boolean,
+        "add": boolean,
+        "update": boolean,
+        "view": boolean
+      },
+      "identification": {
+        "google": {
+          "email": "<google id email>"
+        }
+      }
+    }
+    
+Google to user mapping
+----------------------
+
+    "_google_user": [
+      "_id": "<email from google>",
+      "uuid": "user's uuid - key to _user"
+    }
+      
+POI Access
+----------
+
+1.  The client sends the SHA-1 of the authentication token as request parameter to the server. E.g.:
+      "...&auth_t=f7ff9e8b7bb2e09b70935a5d785e0cc5d9d0abf0&..."
+      
+2.  The server finds the full token and permissions from the database using
+    the SHA-1 of the token as a key. The permissions can be refreshed from the
+    authentication provider if there is reason to it.
+    
+3.  The POI request is fulfilled according the permissions granted to the user.
+
+Logout
+------
+
+1.  The client does the logout operation according the authentication protocol
+    of the service provider (Google).
+    
+2.  The client sends _logout_ request with the SHA-1 of the authentication
+    token to the POI server.
+    
+3.  The POI server removes the session entry form its database.
+
+Add User
+--------
+
+
+    

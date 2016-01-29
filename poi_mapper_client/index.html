@@ -1,28 +1,30 @@
 <!DOCTYPE html><!-- FIWARE_POI_Client v.5.1.3.1 2015-12-16 ariokkon -->
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
-    <title>POIs on Map Demo 6.0.*</title>
+  <title>POIs on Map Demo 6.0.*</title>
 
-    <!-- Style -->
-    <link rel="stylesheet" type="text/css" media="all" href="layout.css" />
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-<script>
-var fw_versionInfo = "FIWARE Poi Mapper\n2014-09-17";
-</script>    
-<script>
-var fw_editAllowed = !(!parent || !parent.window || !parent.window.fw_editAllowed);
-    // if this is loaded to a frame, the containing page may allow editing
-    // double negation normalizes the result to true or false
-</script>
-    
-<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-  <script type="text/javascritpt">console.log("maps ok");</script>
-<script type="text/javascript" src="category_3_3.js"></script>
-  <script type="text/javascritpt">console.log("category ok");</script>
-<script type="text/javascript" src="sbje_json_edit.js"/>
-  <script type="text/javascritpt">console.log("sbje ok");</script>
+  <!-- Style -->
+  <link rel="stylesheet" type="text/css" media="all" href="layout.css" />
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+
+  <meta name="google-signin-scope" content="profile email" />
+  <meta name="google-signin-client_id" content="1032522970282-gtsgnea0phqlo86osef1jg1oo8dhficg.apps.googleusercontent.com" />
+  <script src="https://apis.google.com/js/platform.js" async="async" defer="defer"></script>
+
+  <script>
+  var fw_versionInfo = "FIWARE Poi Mapper\n2014-09-17";
+  </script>    
+  <script>
+  var fw_editAllowed = !(!parent || !parent.window || !parent.window.fw_editAllowed);
+      // if this is loaded to a frame, the containing page may allow editing
+      // double negation normalizes the result to true or false
+  </script>
+      
+  <script type="text/javascript" src="category_3_3.js"></script>
+  <script type="text/javascript" src="sbje_json_edit.js"></script>
+  <script type="text/javascript" src="sha_1a.js"></script>
 
 </head>
 
@@ -34,8 +36,16 @@ var fw_editAllowed = !(!parent || !parent.window || !parent.window.fw_editAllowe
       
     </div>
     <div id="info-buttons" style="position:absolute;top:20px;right:10px">
-        <img src="help_icon.png" onclick="show_help()"/>
-        <img src="info_icon.gif" onclick="alert(fw_versionInfo)"/>
+      <span id="user_name">TEKSTI</span>&nbsp;
+      <img id="user_photo" src="cie_logo.png" width="32" height="32">
+      <!-- Google login stuff Begin -->
+      <div style="float:left" class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+      <a href="#" onclick="signOut();"><b>Sign out</b></a>
+      <!-- Google login stuff End -->
+      <div style="float:left">
+      <img src="help_icon.png" onclick="show_help()"/>
+      <img src="info_icon.gif" onclick="alert(fw_versionInfo)"/>
+      </div>
     </div>
     
     <div id="loadingScreen">
@@ -79,10 +89,6 @@ var fw_editAllowed = !(!parent || !parent.window || !parent.window.fw_editAllowe
             <input type="text" id="address" style="width:300px;" value="address/lat lon"/>
             <button id="button2">Go to position</button>
             <button id="button1" title="Find my true location">Locate me</button>
-<!--			
-            <button id="button3">Map Auto-Update Off</button>
-            <button id="button4">Update</button>
--->
         </div>
         <div id="languages">
           1<sup>st</sup>
@@ -108,10 +114,60 @@ var fw_editAllowed = !(!parent || !parent.window || !parent.window.fw_editAllowe
 
 <script type="text/javascript" src="Util.js"></script>
 <script type="text/javascript" src="poi_demo_6.js"></script>
-<script type="text/javascript" src="icon_strings.js"/>
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=true&amp;callback=demo4.initialize"></script>
+<script type="text/javascript" src="icon_strings.js"></script>
+<script type="text/javascript" async defer src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=true&amp;callback=demo4.initialize"></script>
 
 <script type="text/javascript">
+/* Google login stuff Begin */
+
+var user_id_token; // To be used in server calls
+var user_id_info = {}; // {name: string, photo: url_string}
+function onSignIn(googleUser) {
+  // Useful data for your client-side scripts:
+  var profile = googleUser.getBasicProfile();
+  console.log("ID: " + profile.getId()); // Don't send this directly 
+                                         // to your server!
+  user_id_info.name = profile.getName(); // AOk
+  user_id_info.photo = profile.getImageUrl();  // AOk
+  
+  console.log("Name: " + profile.getName());
+  console.log("Image URL: " + profile.getImageUrl());
+  console.log("Email: " + profile.getEmail());
+
+  // The ID token you need to pass to your backend:
+  user_id_token = googleUser.getAuthResponse().id_token;
+  console.log("ID Token: " + user_id_token);
+  
+  demo4.go_login(user_id_token, signInResp); // AOk
+  
+};
+
+function signInResp(response) {
+
+console.log("SignIn response: \"" + JSON.stringify(response) + "\"");
+
+  if (response.login) {
+    document.getElementById("user_name").innerHTML = user_id_info.name;
+    document.getElementById("user_photo").setAttribute("src", 
+        user_id_info.photo);
+  } else {
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function() {
+        alert("Sorry to inform you that\n" +
+              "the user is not known by this service.");});
+  }
+}
+
+function signOut() {
+  var auth2 = gapi.auth2.getAuthInstance();
+  auth2.signOut().then(function () {
+      document.getElementById("user_name").innerHTML = "[none]";
+      document.getElementById("user_photo").setAttribute("src", "cie_logo.png");
+      demo4.go_logout();
+  });
+}
+
+/* Google login stuff End */
 
 function set_control_visibility(value) {
   var html_element = {

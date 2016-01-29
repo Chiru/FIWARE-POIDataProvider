@@ -1,0 +1,1402 @@
+{{TOCright}}
+= Introduction =
+
+Please check the  [[FI-WARE Open Specification Legal Notice (implicit patents license) | FI-WARE Open Specification Legal Notice]] to understand the rights to use FI-WARE Open Specifications.
+
+== POI Data Provider RESTful API ==
+
+The POI Data Provider generic enabler provides a RESTful API for accessing and modifying POI data. The API is accessed via HTTP and it uses JSON based representations for information interchange.
+
+== Intended Audience ==
+
+This specification is intended to be used by data explorers, software developers and systems administrators.  To use this information, the reader should firstly have a general understanding of the [[FIWARE.OpenSpecification.MiWi.POIDataProvider]]. You should also be familiar with:
+:* RESTful web services
+:* HTTP/1.1
+:* JSON data serialization format.
+:* JSON Schema v4
+
+== API Change History ==
+
+This version of the POI GE RESTful API Guide replaces and obsoletes all previous versions. The most recent changes are described in the table below:
+
+{| style="border-collapse: collapse; border-width: 1px; border-style: solid; border-color: #000"
+|-
+! style="border-style: solid; border-width: 1px"| Revision Date
+! style="border-style: solid; border-width: 1px"| Changes Summary
+|-
+| style="border-style: solid; border-width: 1px"| 2013-10-16
+| style="border-style: solid; border-width: 1px"| 
+* Initial Version
+|-
+| style="border-style: solid; border-width: 1px"| 2013-12-31
+| style="border-style: solid; border-width: 1px"| 
+3.2 - Added: bounding box search, contact information, media, grouping. Improved: location data. Modified: query syntax<br/>[[http://forge.fi-ware.org/plugins/mediawiki/wiki/fi-ware-private/index.php?title=POI_Data_Provider_Open_API_Specification_%28DRAFT%29&oldid=28502 Version 3.2]]
+|-
+| style="border-style: solid; border-width: 1px"| 2014-02-13
+| style="border-style: solid; border-width: 1px"| 
+Language support, support for availability times.<br/> 
+|-
+| style="border-style: solid; border-width: 1px"| 2014-03-13
+| style="border-style: solid; border-width: 1px"| 
+First draft of Release 3.3<br/> 
+|-
+| style="border-style: solid; border-width: 1px"| 2014-08-14
+| style="border-style: solid; border-width: 1px"| 
+Release 3.3<br/> [http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php?title=POI_Data_Provider_Open_API_Specification_R3.3 Version 3.3]
+|-
+| style="border-style: solid; border-width: 1px"| 2015-12-09
+| style="border-style: solid; border-width: 1px"| 
+First draft of Release 5.1<br/> 
+|-
+| style="border-style: solid; border-width: 1px"| 2015-12-29
+| style="border-style: solid; border-width: 1px"| 
+<b>Release 5.1</b><br/> 
+|}
+
+== How to Read This Document ==
+
+It is assumed that the reader is familiar with RESTful web services architectural style. The document uses the following notation:
+:* A bold, mono-spaced font is used to represent code or logical entities, e.g., HTTP method (GET, PUT, POST, DELETE). 
+:* An italic font is used to represent document titles or some other kind of special text, e.g., URI.
+:* The variables are represented between brackets, e.g. {id} and in italic font. When the reader find it, can change it by any value.
+
+For a description of some terms used along this document, see the [[FIWARE.ArchitectureDescription.MiWi.POIDataProvider]]
+
+== Additional Resources ==
+
+For more details about the POI GE that this API is based upon, please refer to [[FIWARE.OpenSpecification.MiWi.POIDataProvider]]. Related documents, including an Architectural Description, are available at the same site.
+
+=API Overview=
+
+Needs associated to a POI provider are very different in different applications. POI system intended for tourists is supposed to offer different kinds of data than various systems for different professional uses. Different organizations may provide different kind of POI information or information about different POIs. It would be difficult and bulky to satisfy all needs by a single unified data description.
+
+In this approach the diversity of needs is addressed by modular data structure supporting independent components. The POI Data Provider GE provides a core component containing basic information about pois that enables spatial search. Additional data components are specified extending the POI data model, including 3D content, multimedia items and sensor information. 
+
+==Modular POI Data Model==
+
+The design of the POI data model is based on the principles of the entity-component model, which allows partitioning the POI data into separate components that are linked to a POI entity. A single POI is an entity, which is identified by a universally unique identifier (UUID). The data related to an entity is stored in different data components, which are linked to the entity using the UUID. These data components are independent of each other and every POI entity can have a different set of components. Every POI must, however, have a ‘fw_core’ component that contains the very minimal core data describing the POI.
+
+'''Recommendation:''' A data component name consists of a short organization identification and a short descriptive type name separated by an underscore "_". The name must be an acceptable JavaScript variable name in lower case only. Fi-Ware project will reserve "<code>fw</code>" as its organization identification.
+
+The structure of a POI data item in JSON format:
+<pre>
+"UUID of the POI": {
+    "fw_core": { /* Basic POI data */ },
+    "xcomp_data1": { /* Data1 defined by Xcomp organization */ },
+    /* More components */
+}
+</pre>
+==Resources Summary==
+
+[[Image:POI_server_resources.png]]
+
+==Authentication==
+
+Authentication is out of this specification's scope. For example the standard authentication mechanisms provided by the web server used in the implementation can be utilized.
+
+==Representation Format==
+
+The ''POI Data Provider RESTFul API'' supports JSON data format, where the data is structured as key-value pairs.
+
+POI data is modular consisting components, which are represented as JSON objects. The key of each JSON object identifies the type of POI data component it represents.
+
+The JSON schema and an example JSON structure of the POI data provided by the API is shown below. The root level JSON object is named "pois", which contains all the POIs corresponding to the query. Each POI is represented as a JSON object, where the UUID of the POI is the key of the object. Each POI object contains an individual set of data components.
+
+The JSON schema used here is enhanced with an application <b> specific keyword <code>fw_type</code></b> that is used to guide possible data editors and other special use. Currently the following typecodes are used:
+  
+  <b>poi_category</b> - <i>a string found in a category catalog</i>
+
+'''JSON schema of query response main structure'''
+  {
+    "title": "POIS Query Response",
+    "description": "Generic POIS response.",
+    "type": "object",
+    "properties": {
+      "'''pois'''": {
+        "description": "Contains one object per a point of interest. The key of an object is the UUID of the POI.",
+        "type": "object",
+        "additionalProperties": {
+          "title": "POI data, key is the '''UUID of the POI'''"
+          "description": "The POI data consists of data components that are identified by their keys.",
+          "type": "object",
+          "additionalProperties": {
+            "title": "POI data component, key defines the structure"
+          }
+        }
+      }
+    }
+  }
+'''Example of query response main structure''' - details hidden
+  {
+    "pois": {
+      "8e57d2e6-f98f-4404-b075-112049e72346": {
+        "fw_core": {
+          "categories": ["library"],
+          "location": {
+            "wgs84": {
+              "latitude": 65.0612507,
+              "longitude": 25.4667681
+            }
+          },
+          "name": {
+            "__":"Tiedekirjasto Pegasus"
+          },
+          /* ''more core data'' */
+        }
+      },
+      "30ddf703-59f5-4448-8918-0f625a7e1122": {
+        /* ''POI data'' */
+      }
+    },
+    "service_info": {
+      /* ''data about the service, and API version'' */
+    }
+  }
+
+==Support for multilingual content==
+
+Many attributes in the POI data, such as strings and URLs, may have multiple language variants. A POI data attribute containing a multilingual value is a JSON object containing key-value pairs, where the key is the ISO 639-1 language code of the language in which the value is represented.
+
+Example:
+
+  "label": {
+    "fi": "Unirestan Aularavintola Oulun yliopistolla.",
+    "en": "Uniresta Lobby Restaurant at University of Oulu",
+    "sv": "Uniresta Resgaurang av Ule&#xE5;borgs Universitet",
+    "es": "Restaurante Aularavintola"
+  },
+
+The language code <code>"__"</code> (two underscore characters) is used for <b>language independent strings</b>. Anyway, this can be overridden by specific strings for specific languages.
+
+Example:
+
+  "name": {
+    "__": "Starbucks"
+  }
+
+If a string of a <b>specific language can also be used as a default string</b>, a specific entry <code>"_def": "<i>&lt;language code&gt;</i>"</code> is used to define the default language.
+
+Example, where the English text is used for English and for all other languages not specified here:
+
+  "label": {
+    "'''_def'''": "'''en'''",
+    "fi": "Unirestan Aularavintola Oulun yliopistolla.",
+    "'''en'''": "Uniresta Lobby Restaurant at University of Oulu",
+    "sv": "Uniresta Resgaurang av Ule&#xE5;borgs Universitet",
+    "es": "Restaurante Aularavintola"
+  },
+
+
+The language variants returned by the response depend on the <code>Accept-Languages</code> HTTP header of the query.
+
+==Representation Transport==
+
+Resource representation is transmitted between client and server by using HTTP 1.1 protocol, as defined by IETF RFC-2616. ''Details added if necessary.''
+
+==Resource Identification==
+
+POIs are identified by UUID strings (universally unique) IETF RFC-4122.
+
+==Links and References==
+
+POI data contain URLs of POI related relevant resources.
+
+==Versions==
+The POI Data Provider API and data model represented as JSON schema are versioned according to the FI-WARE release number.
+
+==Faults==
+===Synchronous Faults===
+
+In this section, we provide the complete list of possible fault elements and error code, and if it is expected in all requests or not.
+
+{| border="1" cellpadding="2"
+|-
+!Fault Element
+!Associated Error Codes
+!Expected in All Requests?
+|-
+|GET
+|<code>400 Bad Request</code>, <code>500 Internal Server Error</code>
+|[YES]
+|-
+|POST
+|<code>400 Bad Request</code>, <code>500 Internal Server Error</code>
+|[YES]
+|- 
+|DELETE
+|<code>400 Bad Request</code>, <code>500 Internal Server Error</code>
+|[YES]
+|}
+
+A textual description of the fault that occurred will be provided in addition to the HTTP error code.
+
+=API Operations=
+
+The following section provides the detail for each RESTful operation giving the expected input and output for each request. For simplicity sake the API operations have been grouped into following categories: ''Platform'', ''Query'', and ''Update''.
+
+== Platform ==
+
+{| style="border-collapse: collapse; border-width: 1px; border-style: solid; border-color: #000"
+|-
+! style="border-style: solid; border-width: 1px"| Verb
+! style="border-style: solid; border-width: 1px"| URI
+! style="border-style: solid; border-width: 1px"| Description
+|-
+| style="border-style: solid; border-width: 1px"| GET
+| style="border-style: solid; border-width: 1px"| /get_components
+| style="border-style: solid; border-width: 1px"| Provide the POI data components supported by this server
+|-
+| style="border-style: solid; border-width: 1px"| GET
+| style="border-style: solid; border-width: 1px"| /poi_schema.json
+| style="border-style: solid; border-width: 1px"| Provide the full JSON schema of the data supported by this server
+|-
+| style="border-style: solid; border-width: 1px"| GET
+| style="border-style: solid; border-width: 1px"| /poi_categories.json
+| style="border-style: solid; border-width: 1px"| Provide the POI categories supported by this server
+|}
+
+==== /get_components ====
+
+Return the list of POI data components available from this server.
+
+<pre>
+GET /get_components
+</pre>
+
+Sample result:
+
+<pre>
+{
+  "components": [
+    "fw_core"
+  ],
+  "service_info": {
+    ...
+  }
+}
+</pre>
+
+== Query ==
+
+{| style="border-collapse: collapse; border-width: 1px; border-style: solid; border-color: #000"
+|-
+! style="border-style: solid; border-width: 1px"| Verb
+! style="border-style: solid; border-width: 1px"| URI
+! style="border-style: solid; border-width: 1px"| Description
+|-
+| style="border-style: solid; border-width: 1px"| GET
+| style="border-style: solid; border-width: 1px"| /radial_search
+| style="border-style: solid; border-width: 1px"| Provide the POIs within given circle
+|-
+| style="border-style: solid; border-width: 1px"| GET
+| style="border-style: solid; border-width: 1px"| /bbox_search
+| style="border-style: solid; border-width: 1px"| Provide the POIs within given bounding box
+|-
+| style="border-style: solid; border-width: 1px"| GET
+| style="border-style: solid; border-width: 1px"| /get_pois
+| style="border-style: solid; border-width: 1px"| Provide the pois listed by the query
+|}
+
+==== /radial_search ====
+
+Return the data of POIs within a given distance from a given location.
+
+<pre>
+GET /radial_search?{parameters}
+</pre>
+Mandatory parameters:<br/>
+<code>lat=</code>''latitude'' - Latitude of the center of the search circle [degrees]<br/>
+<code>lon=</code>''longitude'' - Longitude of the center of the search circle [degrees]<br/>
+Optional parameters:<br/>
+<code>radius=</code>''radius'' - Radius of the search circle [meters], default is implementation dependent<br/>
+<code>category=</code>''category'' - POI category/categories to be included to results. Several categories can be given by separating them with commas. If this parameter is not given, all categories are included.<br/>
+<code>component=</code>''component'' - POI data component name(s) to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.<br>
+<code>max_results=</code>''max_results'' - Maximum number of POIs returned.<br/>
+<code>begin_time=</code>''begin_time'' - When time of interest begins. ''See 'Time format' below.'' Optional, requires end_time.<br/>
+<code>end_time=</code>''end_time'' - When time of interest ends. ''See 'Time format' below.'' Required, if begin_time is defined.<br/>
+<code>min_minutes=</code>''min_minutes'' - Minimum time of availability  in minutes. Optional. If begin_time is defined, default: a short time > 0.<br/>
+
+'''Time format'''
+
+Basic rule: ISO 8601 adaptation format [http://www.w3.org/TR/NOTE-datetime] is used for times. However, it is allowed to leave the time zone definition out. If time zone is missing, the local time zone of the POI is used. ''This specification does not require implementation of time zone functionality.'' E.g.: '2014-01-23', '2014-01-23T13:34'<br/>
+
+Sample query:
+<pre>
+GET http://{poi server}/radial_search?lat=65.059254&lon=25.470997&radius=250&category=cafe,restaurant&begin_time=2014-01-23T11:30&end_time=2014-01-23T13:00&min_minutes=30&max_results=2
+</pre>
+
+Sample result:
+
+<pre>
+{
+  "pois": {
+    "6be4752b-fe6f-4c3a-98c1-13e5ccf01721": {
+      "fw_core": {
+        "categories": ["cafe"], 
+        "location": {
+          "wgs84": { 
+            "latitude": 65.059334, 
+            "longitude": 25.4664775
+          }
+        }, 
+        "name": {
+          "__": "Aulakahvila"
+        }
+      }
+    }, 
+    "4c6754d9-0bb1-4962-b604-6f3fcc08a9ec": {
+      "fw_core": {
+        "categories": ["restaurant"],
+        "location": {
+          "wgs84": { 
+            "latitude": 65.0581807, 
+            "longitude": 25.4667163
+          }
+        }, 
+        "name": {
+          "__": "Discus"
+        }
+      }
+    }
+  },
+  "service_info": {
+    ...
+  }
+}
+</pre>
+
+==== /bbox_search ====
+
+Return the data of POIs within a given bounding box.
+
+<pre>
+GET /bbox_search?{parameters}
+</pre>
+Mandatory parameters:<br/>
+<code>north=</code>''latitude'' - Latitude of the northern edge of the bounding box [degrees]<br/>
+<code>south=</code>''latitude'' - Latitude of the southern edge of the bounding box [degrees]<br/>
+<code>east=</code>''longitude'' - Longitude of the eastern edge of the bounding box [degrees]<br/>
+<code>west=</code>''longitude'' - Longitude of the western edge of the bounding box [degrees]<br/>
+Optional parameters:<br/>
+<code>category=</code>''category'' - POI category/categories to be included to results. Several categories can be given by separating them with commas. If this parameter is not given, all categories are included.<br/>
+<code>component=</code>''component'' - POI data component name(s) to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included. <br>
+<code>max_results=</code>''max_results'' - Maximum number of POIs returned.<br/>
+<code>begin_time=</code>''begin_time'' - When time of interest begins. ''See 'Time format' below.'' Optional, requires end_time.<br/>
+<code>end_time=</code>''end_time'' - When time of interest ends. ''See 'Time format' below.'' Required, if begin_time is defined.<br/>
+<code>min_minutes=</code>''min_minutes'' - Minimum time of availability  in minutes. Optional. If begin_time is defined, default: a short time > 0.<br/>
+
+Sample query:
+<pre>
+GET http://{poi server}/bbox_search?north=65.1&south=64.9&east=25.6&west=25.3&category=cafe,restaurant&max_results=2
+</pre>
+
+Results as in /radial_search.
+
+==== /get_pois ====
+
+Return the data of POIs listed in the query. This is intended to get additional information - other components - about interesting POIs.
+
+<pre>
+GET /get_pois?{parameters}
+</pre>
+Mandatory parameters:<br/>
+<code>poi_id=</code>''UUID'' - UUID of the POI. Several UUIDs can be given by separating them with commas.<br/>
+Optional parameters:<br/>
+<code>component=</code>''component'' - POI data component name(s) to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.<br>
+<code>get_for_update=true</code> - The components requested are returned with all language and other variants and possible metadata for inspection and edit.<br/>
+<br/>
+
+Sample query:
+<pre>
+GET http://{poi server}/get_pois?poi_id=30ddf703-59f5-4448-8918-0f625a7e1122&component=fw_core
+</pre>
+
+Sample result:
+
+<pre>
+{
+  "pois": {
+    "30ddf703-59f5-4448-8918-0f625a7e1122": {
+      "fw_core": {
+        "categories": ["cafe"], 
+        "location": {
+          "wgs84" { 
+            "latitude": 65.059334, 
+            "longitude": 25.4664775
+          }
+        }, 
+        "name": {
+          "__": "Aulakahvila"
+        }
+      }
+    } 
+  },
+  "service_info": {
+    ...
+  }
+}
+</pre>
+
+== Update ==
+
+Update operations should require authorization in order to prevent misuse. The details of the authorization mechanism are out of the scope of this specification.
+
+{| style="border-collapse: collapse; border-width: 1px; border-style: solid; border-color: #000"
+|-
+! style="border-style: solid; border-width: 1px"| Verb
+! style="border-style: solid; border-width: 1px"| URI
+! style="border-style: solid; border-width: 1px"| Description
+|-
+| style="border-style: solid; border-width: 1px"| POST
+| style="border-style: solid; border-width: 1px"| /add_poi
+| style="border-style: solid; border-width: 1px"| Add a new POI to the database
+|-
+| style="border-style: solid; border-width: 1px"| POST
+| style="border-style: solid; border-width: 1px"| /update_poi
+| style="border-style: solid; border-width: 1px"| Update existing POI data
+|-
+| style="border-style: solid; border-width: 1px"| DELETE
+| style="border-style: solid; border-width: 1px"| /delete_poi
+| style="border-style: solid; border-width: 1px"| Delete existing POI from database
+|}
+
+==== /add_poi ====
+
+This function is used for adding a new POI entity into a database. The POI data is given as JSON in HTTP POST request. It generates a UUID for the new POI and returns it to the client in JSON format including the timestamp of the POI creation. The client can include different data components to the new POI by sending them along with the request. 
+
+The POSTed JSON must include only the content of a single POI, i.e. it must not contain a UUID as key as it is automatically generated by the server.
+
+Example request:
+<pre>
+POST http://{poi server}/add_poi
+{
+  "fw_core": {
+	"categories": ["cafe"], 
+	"location": {
+	 "wgs84" { 
+		"latitude": 65.059334, 
+		"longitude": 25.4664775
+	 }
+	}, 
+	"name": {
+	 "__": "Aulakahvila"
+	}
+  }
+}
+</pre>
+
+Sample result:
+
+<pre>
+{
+  "created_poi": {
+    "uuid": "30ddf703-59f5-4448-8918-0f625a7e1122",
+	"timestamp": 1394525977
+  },
+  "service_info": {
+    ...
+  }
+}
+</pre>
+
+==== /update_poi ====
+
+This function is used for updating data of an existing POI entity. Existing data components can be modified or new ones can be added. Each data component contains a ‘last modified’ timestamp in order to prevent concurrency issues. 
+
+The updated POI data is given as JSON in HTTP POST request. The server responds with HTTP status messages indicating the success or failure of the operation.
+
+Example request:
+<pre>
+POST http://{poi server}/update_poi
+{ 
+  "30ddf703-59f5-4448-8918-0f625a7e1122": {
+    "fw_core": {
+	 "categories": ["cafe"], 
+	 "location": {
+	   "wgs84" { 
+		 "latitude": 65.059334, 
+		 "longitude": 25.4664775
+	   }
+  	 }, 
+	 "name": {
+	   "__": "Aulakahvila"
+	 },
+	 "description": {
+	   "__": "Cafe at the Univesity of Oulu"
+      }
+    }
+  }
+}
+</pre>
+
+Sample result:
+
+<pre>
+HTTP/1.1 200 OK
+POI data updated succesfully
+</pre>
+
+==== /delete_poi ====
+
+Delete existing POI using HTTP DELETE request. The UUID of the POI to be deleted is given in the request as a URL parameter
+
+Example request:
+<pre>
+DELETE http://{poi server}/delete_poi?poi_id=30ddf703-59f5-4448-8918-0f625a7e1122
+</pre>
+
+Example result:
+<pre>
+HTTP/1.1 200 OK
+POI entity deleted succesfully
+</pre>
+
+= POI Data Model Definitions =
+
+All the different data components that have been specified are described in this section. Also all the generic utility data types that are utilized in the different POI data components are defined. Each component is described with a examplary JSON structure and a JSON schema definition.
+
+The data components are JSON objects that comprise the POI data structure. The components are identified by their keys.  The key identifies the structure and interpretation of the component.
+
+== FW POI Data Components ==
+
+Specifications of POI data components defined in this project.
+
+'''NOTE:''' In JSON schemas the <code>$ref</code> definitions refer to ''utility types''.
+
+=== <code>fw_core</code> ===
+
+fw_core POI data component contains the essential information about a POI, such as the name, geographical location and categories. This information is used for indexing the POI database thus enabling search functionality.
+
+'''JSON example'''
+
+  {
+    "fw_core": {
+      "categories": ["cafe", "restaurant"],
+      "name": {
+        "__": "Aularavintola"
+      },
+      "url": {
+        "_def": "fi",
+        "fi": "http://www.uniresta.fi/ravintolat/kaikki-ravintolat/linnanmaa/aularavintola.html"
+      },
+      "label": {
+        "_def": "en",
+        "fi": "Unirestan Aularavintola Oulun yliopistolla.",
+        "en": "Uniresta Lobby Restaurant at University of Oulu",
+        "sv": "Uniresta Resgaurang av Oulus Universitet",
+        "es": "Restaurante Aularavintola"
+      },
+      "location": {
+        "wgs84": {
+          "latitude": 65.059264,
+          "longitude": 25.4664307
+        }
+      },
+      "thumbnail": "https://dl.dropboxusercontent.com/u/55717919/aularavintola_tb.jpg",
+      "description": {
+        "_def": "en",
+        "fi": "Oulun yliopiston syd\u00e4mess\u00e4, keskusaulassa sijaitseva 550-paikkainen Aularavintola palvelee kahdessa kerroksessa yli 3 000 asiakasta p\u00e4ivitt\u00e4in. Aularavintolasta l\u00f6yd\u00e4t useita erilaisia vaihtoehtoja. Kahden lounaslinjaston lis\u00e4ksi sinua palvelee Wokkipaja, joka valmistaa ala carte-annokset odottaessasi ja Salad Bar, jonka valikoimasta sinulle kootaan salaatti toiveittesi mukaan.",
+        "en": "Lunch buffet and ala carte restaurant of 550 seatings."
+      },
+      "source": {
+        "name": "Open Alleymap",
+        "website": "http://www.example.org/open_alleymap",
+        "id": "49115cb0-8286-11e3-baa7-0800200c9a66",
+        "license": "http://www.example.org/alley_license.txt"
+      },
+      "last_update": {
+        "timestamp": 1390305508467,
+        "responsible": "28509ff0-8294-11e3-baa7-0800200c9a66"
+      }
+    }
+  }
+
+'''JSON schema'''
+
+    "fw_core": {
+      "title": "Core information",
+      "description": "For spatial search and finding that interesting one",
+      "type": "object",
+      "properties": {
+        "categories": {
+          "title": "Categories",
+          "description": "Descriptive tags for narrowing the search: cafe, museum, etc.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "fw_type": "poi_category"
+          },
+          "minItems": 1
+        },
+        "location": {
+          "title": "Location",
+          "description": "Location of the POI",
+          "$ref": "#/definitions/location"
+        },
+        "geometry": {
+          "title": "Geometrical form of the POI",
+          "description": "Format: Open Geospatial Consortium's 'Well-known text' ISO/IEC 13249-3:2011",
+          "type": "string"
+        },
+        "short_name": {
+          "title": "Short name",
+          "description": "Short name (max. 31 chars) to be shown on the map or in a narrow list",
+          "$ref": "#/definitions/intl_string_31"
+        },
+        "name": {
+          "title": "Name",
+          "description": "Descriptive name",
+          "$ref": "#/definitions/intl_string"
+        },
+        "label": {
+          "title": "Label",
+          "description": "More info to complement the name, if enough space",
+          "$ref": "#/definitions/intl_string_127"
+        },
+        "description": {
+          "title": "Description",
+          "description": "Text to facilitate decision to be interested or not",
+          "$ref": "#/definitions/intl_string"
+        },
+        "thumbnail": {
+          "title": "Thumbnail",
+          "description": "Link to a small picture to be shown on a list, scene or map. Preferably max. 256x256 pixels, e.g. 120x160.",
+          "type": "string",
+          "format": "uri"
+        },
+        "url": {
+          "title": "Web address",
+          "description": "URL to get more info, preferably official website of the POI",
+          "$ref": "#/definitions/intl_uri"
+        },
+        "source": {
+          "title": "Source of information",
+          "$ref": "#/definitions/source"
+        },
+        "last_update": {
+          "title": "Last update",
+          "description": "DO NOT EDIT! Information to identify the version of the data component.",
+          "$ref": "#/definitions/update_stamp"
+        }
+      },
+      "required": [
+        "categories",
+        "location"
+      ],
+      "additionalProperties": false
+    }
+
+=== <code>fw_time</code> ===
+
+fw_time defines temporal availability of the services of the POI. Two types of schedules are defined: '''open''' tells when the facility is open for business or visiting, '''show_times''' defines times of performances, presentations, etc. where participation from the beginning to the end is required or recommended. Notation for the '''schedule''' is defined in the utility type <code>schedule</code>.
+
+'''JSON example'''
+ /* opening_hours=Mo 10:00-12:00,12:30-15:00; Tu-Fr 08:00-12:00,12:30-15:00; 
+     Sa 08:00-12:00 */ 
+  
+  {
+    "fw_time": {
+      "type": "open",
+      "schedule": {
+        "or": [
+          {
+            "and": [
+              {"wd": [1]}, 
+              {
+                "or": [
+                  {"bhr": [10], "ehr": [12]},
+                  {"bhr": [12,30], "ehr": [15]}
+                ]
+              }
+            ]
+          },
+          {
+            "and": [
+              {"wd": [2, 3, 4, 5]},
+              {
+                "or": [
+                  {"bhr": [8], "ehr": [12]},
+                  {"bhr": [12,30], "ehr": [15]}
+                ]
+              }
+            ]
+          },
+          {"wd": [6], "bhr": [8], "ehr": [12]}
+        ]
+      },
+      "source": {
+        "name": "Open Alleymap",
+        "website": "http://www.example.org/open_alleymap",
+        "id": "49115cb0-8286-11e3-baa7-0800200c9a66",
+        "license": "http://www.example.org/alley_license.txt"
+      },
+      "last_update": {
+        "timestamp": 1390305508467,
+        "responsible": "28509ff0-8294-11e3-baa7-0800200c9a66"
+      }
+    }
+  }
+
+
+'''JSON schema'''
+
+    "'''fw_time'''": {
+      "description": "",
+      "type": "object",
+      "properties": {
+        "'''type'''": {
+          "description": "Open - available thru open time, show_times - available at beginnings of shows",
+          "enum": ["open", "show_times"]
+        },
+        "'''time_zone'''": {
+          "description": "'''TBD'''. Local time is assumed. Standardized notation including daylight savings time reference is needed."
+        },
+        "'''schedule'''": {
+          "description": "",
+          "$ref": "#/definitions/schedule"
+        }
+      },
+      "'''last_update'''": {
+        "$ref": "#/definitions/update_stamp"
+      }
+    }
+
+=== <code>fw_xml3d</code> ===
+
+fw_xml3d contains the required information for linking a 3D model stored in an XML3D format to a POI. 
+
+'''JSON example'''
+
+  {
+    "fw_xml3d": {
+      "model_id": "coffee3",
+      "model": "<group id=\"coffee3\" transform=\"https://dl.dropboxusercontent.com/u/17661643/coffee.xml#t_Icosphere\"><group shader=\"https://dl.dropboxusercontent.com/u/17661643/coffee.xml#Coffee\"><mesh src=\"https://dl.dropboxusercontent.com/u/17661643/coffee.xml#mesh_Icosphere_Coffee\" type=\"triangles\"/></group></group>",
+      "source": {
+        "name": "Open Alleymap",
+        "website": "http://www.example.org/open_alleymap",
+        "id": "49115cb0-8286-11e3-baa7-0800200c9a66",
+        "license": "http://www.example.org/alley_license.txt"
+      },
+      "last_update": {
+        "timestamp": 1390305508467,
+        "responsible": "28509ff0-8294-11e3-baa7-0800200c9a66"
+      }
+    }
+  }
+
+'''JSON schema'''
+
+    "'''fw_xml3d'''":{
+      "description": "3D description",
+      "type": "object",
+      "properties": {
+        "'''model_id'''": {
+          "description": "ID for XML3D engine",
+          "type": "string"
+        },
+        "'''model'''": {
+          "description": "Model for XML3D engine",
+          "type": "string"
+        }
+      },
+      "'''last_update'''": {
+        "$ref": "#/definitions/update_stamp"
+      }
+    }
+
+=== <code>fw_contact</code> ===
+
+Fw_contact component is intended to provide contact information of the main service related to the POI when applicable. Postal address can be omitted, if the visiting address includes all the information.
+
+'''JSON example'''
+
+  {
+    "fw_contact": {
+      "visit": "Santa Claus Village?, Napapiiri, 96930 Rovaniemi, Finland",
+      "postal": ["Santa Claus Village?","Napapiiri","96930 Rovaniemi","Finland"],
+      "mailto": "travel.info@rovaniemi.fi",
+      "phone": "+358 16 346270",
+      "source": {
+        "name": "Open Alleymap",
+        "website": "http://www.example.org/open_alleymap",
+        "id": "49115cb0-8286-11e3-baa7-0800200c9a66",
+        "license": "http://www.example.org/alley_license.txt"
+      },
+      "last_update": {
+        "timestamp": 1390305508467,
+        "responsible": "28509ff0-8294-11e3-baa7-0800200c9a66"
+      }
+    }
+  }
+
+'''JSON schema'''
+
+  "'''fw_contact'''": {
+    "properties": {
+      "'''visit'''": {
+        "description": "Visiting address good for a taxi driver or Google Maps",
+        "type": "string"
+      },
+      "'''postal'''": {
+        "description": "Postal address. One string per line",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "'''mailto'''": {
+        "description": "Email address",
+        "type": "string"
+      },
+      "'''phone'''": {
+        "description": "Phone number",
+        "type": "string"
+      },
+      "'''last_update'''": {
+        "$ref": "#/definitions/update_stamp"
+      }
+    }
+  }
+
+=== <code>fw_media</code> ===
+
+Fw_media component is intended to provide links to available related media items to the user. Currently available media types are photo, video, audio, and folder. If a folder link provides JSON of this format, it can be shown using the same mechanism.
+
+'''JSON example'''
+
+ {
+    "fw_media": {
+      "entities": [
+        {
+          "type": "photo",
+          "short_label": {
+            "en": "Sunset at sea"
+          },
+          "caption": {
+            "en": "Sunset on the Bothnian Bay, Northwest from Hailuoto summer 2013"
+          },
+          "description": {
+            "__": "Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat.",
+            "fi": "Oli mukava retki."
+          },
+          "thumbnail": "http://www.example.org/sunset_on_sea_tbn.jpg",
+          "url": "http://www.example.org/sunset_on_sea.jpg",
+          "copyright": "Photo: Ari Okkonen"
+        },
+        {
+          "type": "audio",
+          "short_label": {
+            "__": "S&auml;kkij&auml;rven polkka"
+          },
+          "url": "http://www.example.org/sakkijarven_polkka.mp3"
+        }
+      ],
+      "last_update": {
+        "timestamp": 1390305508467,
+        "responsible": "28509ff0-8294-11e3-baa7-0800200c9a66"
+      }
+    }
+  }
+
+'''JSON schema'''
+
+    "'''fw_media'''": {
+      "description": "Media items related to this item",
+      "type": "object",
+      "properties": {
+        "'''entities'''": {
+          "description": "",
+          "type": "array",
+          "items": {
+            "description": "",
+            "type": "object",
+            "properties": {
+              "'''type'''": {
+                  "description": "what kind of media item this is",
+                  "enum": [
+                    "folder",
+                    "photo",
+                    "video",
+                    "audio"
+                  ]
+              },
+              "'''short_label'''": {
+                "description": "To be shown along the item",
+                "$ref": "#/definitions/intl_string_31"
+              },
+              "'''caption'''": {
+                "description": "To be shown along the item",
+                "$ref": "#/definitions/intl_string_127"
+              },
+              "'''description'''": {
+                "description": "More info about the item",
+                "$ref": "#/definitions/intl_string"
+              },
+              "'''thumbnail'''": {
+                "description": "A small picture to be shown in the list",
+                "type": "string",
+                "format": "uri"
+              },
+              "'''url'''": {
+                "description": "URL of the actual media item",
+                "type": "string",
+                "format": "uri"
+              },
+              "'''copyright'''": {
+                  "description": "Copyright clause and/or attribution of the item",
+                  "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "'''last_update'''": {
+        "$ref": "#/definitions/update_stamp"
+      }
+    }
+
+=== <code>fw_relationships</code> ===
+
+fw_relationships allows defining one-to-many relations between POIs. The relation is defined as a triple: subject-predicate-objects. The subject is the source of the relation, the predicate defines the relation type and objects are the targets of the relation. The key of the predicate defines the ontology. "fw" is the ontology defined in FI-WARE project.
+
+Relation ontology of FI-WARE project
+ '''<code>contains</code>''' An area contains points or smaller areas. A group or collection contains items that may be any objects.
+ '''<code>has_entry</code>''' defines a point for entering an area or a large building.
+
+'''JSON example'''
+
+ {
+    "'''fw_relationships'''": [
+        {
+            "'''subject'''": "''9202ee90-9fcb-11e3-a5e2-0800200c9a66''",
+            "'''predicate'''": {
+                "fw": "contains"
+            },
+            "'''objects'''": [
+                "8e1962e0-9fcc-11e3-a5e2-0800200c9a66",
+                "c3f6e810-9fcc-11e3-a5e2-0800200c9a66",
+                "d117ceb0-9fcc-11e3-a5e2-0800200c9a66",
+                "df46f100-9fcc-11e3-a5e2-0800200c9a66"
+            ]
+        },
+        {
+            "'''subject'''": "''9202ee90-9fcb-11e3-a5e2-0800200c9a66''",
+            "'''predicate'''": {
+                "fw": "has_entry"
+            },
+            "'''objects'''": [
+                "9d9f9340-ae7e-11e3-a5e2-0800200c9a66",
+                "b7c8f680-ae7e-11e3-a5e2-0800200c9a66"
+            ]
+        },
+        {
+            "'''subject'''": "83891460-ae81-11e3-a5e2-0800200c9a66",
+            "'''predicate'''": {
+                "fw": "contains"
+            },
+            "'''objects'''": [
+                "''9202ee90-9fcb-11e3-a5e2-0800200c9a66''"
+            ]
+        },
+        {
+            "'''subject'''": "f42d98d0-ae81-11e3-a5e2-0800200c9a66",
+            "'''predicate'''": {
+                "fw": "contains"
+            },
+            "'''objects'''": [
+                "''9202ee90-9fcb-11e3-a5e2-0800200c9a66''"
+            ]
+        }
+    ]
+ }
+'''JSON schema'''
+ {
+    "title": "Relationships",
+    "type": "object",
+    "properties": {
+        "'''fw_relationships'''": {
+            "description": "List of relationships the POI is connected to.",
+            "type": "array",
+            "items": {
+                "description": "specifies ONE to MANY relation between POIs or other entities",
+                "type": "object",
+                "properties": {
+                    "'''subject'''": {
+                        "description": "UUID of the ONE in the relation",
+                        "type": "string"
+                    },
+                    "'''predicate'''": {
+                        "description": "type of the relation",
+                        "type": "object",
+                        "additionalProperties": {
+                            "description": "defines the type of the relation within ontology defined by the ''key''",
+                            "type": "string"
+                        }
+                    },
+                    "'''objects'''": {
+                        "type": "array",
+                        "items": {
+                            "description": "UUIDs of the MANY in the relation",
+                            "type": "string"
+                        }
+                    },
+                    "'''last_update'''": {
+                        "$ref": "#/definitions/update_stamp"
+                    }
+                }
+            }
+        }
+    }
+ }
+
+=== <code>fw_marker</code> ===
+
+fw_marker enables storing marker related information to a POI to be used e.g. in augmented reality applications.
+
+'''JSON example'''
+
+ {
+    "'''fw_marker'''": {
+        "alvar_3x3": {
+            "'''code'''": 33,
+            "'''image_ref'''": "http://www.example.com/x_marker.gif"
+        }
+    }
+ }
+
+'''JSON schema'''
+
+ {
+    "title": "marker",
+    "type": "object",
+    "properties": {
+        "'''fw_marker'''": {
+            "description": "This contains technology dependent properties only. Property keys define the technology used.",
+            "type": "object",
+            "properties": {
+                "'''alvar_3x3'''": {
+                    "description": "3x3 marker used in Alvar (VTT Oulu) marker tracking system is used as an example here.",
+                    "type": "object",
+                    "properties": {
+                        "'''code'''": {
+                            "description": "code embedded to marker as defined by Alvar",
+                            "type": "integer"
+                        },
+                        "'''image_ref'''": {
+                            "description": "image of the marker e.g. for printing",
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    }
+                }
+            },
+            "additionalProperties": {
+                "description": "image_ref is a recommended property in other marker techniques, also",
+                "type": "object",
+                "properties": {
+                    "'''image_ref'''": {
+                        "description": "image of the marker e.g. for printing",
+                        "type": "string",
+                        "format": "uri"
+                    }
+                }
+            }
+        }
+    }
+ }
+
+== Utility Types ==
+
+General structured data types used in components
+
+=== <code>location</code> ===
+'''JSON schema'''
+ {
+   "title": "Location Data",
+   "description": "",
+   "type": "object",
+   "properties": {
+     "'''wgs84'''": {
+       "title": "World Geodetic System",
+       "description": "",
+       "type": "object",
+       "properties": {
+         "'''latitude'''": {
+           "description": "degrees north",
+           "type": "number"
+         },
+         "'''longitude'''": {
+           "description": "degrees east",
+           "type": "number"
+         },
+         "'''altitude'''": {
+           "description": "meters up from sea level, optional",
+           "type": "number"
+         },
+       }
+     }
+   },
+   "additionalProperties": {
+       "title": "Possible other coordinate systems",
+       "description": "Contents depend on the system defined by the key",
+       "type": "object",
+     }
+   }
+ }
+
+=== <code>intl_string</code> ===
+'''JSON schema'''
+ {
+   "title": "Internationalized string",
+   "description": "",
+   "type": "object",
+   "properties": {
+     "'''_def'''": {
+       "title": "Default language override",
+       "description": "Optional key of the default language for this string",
+       "type": "string",
+     },
+     "__": {
+       "title": "Language independent text",
+       "description": "",
+       "type": "string",
+     },
+     "'''en'''": {
+       "title": "Text in language 'en'",
+       "description": "",
+       "type": "string",
+     }
+   },
+   "additionalProperties": {
+       "title": "Text in language <key>",
+       "description": "The key is ISO 639-1 Language Code",
+       "type": "string",
+     }
+   }
+ } 
+
+=== <code>intl_string_''&lt;length&gt;''</code> ===
+'''JSON schema'''
+ {
+   "title": "Internationalized string",
+   "description": "",
+   "type": "object",
+   "properties": {
+     "'''_def'''": {
+       "title": "Default language override",
+       "description": "Optional key of the default language for this string",
+       "type": "string",
+     },
+     "__": {
+       "title": "Language independent text",
+       "description": "",
+       "type": "string",
+       "maxLength": <length>
+     },
+     "'''en'''": {
+       "title": "Text in language 'en'",
+       "description": "",
+       "type": "string",
+       "maxLength": <length>
+     }
+   },
+   "additionalProperties": {
+       "title": "Text in language <key>",
+       "description": "The key is ISO 639-1 Language Code",
+       "type": "string",
+       "maxLength": <length>
+     }
+   }
+ } 
+
+=== <code>intl_uri</code> ===
+'''JSON schema'''
+ {
+   "title": "Internationalized URI",
+   "description": "",
+   "type": "object",
+   "properties": {
+     "'''_def'''": {
+       "title": "Default language override",
+       "description": "Optional key of the default language for this link",
+       "type": "string",
+     },
+     "__": {
+       "title": "Language independent URI",
+       "description": "",
+       "type": "string",
+       "format": "uri"
+     },
+     "'''en'''": {
+       "title": "URI for language 'en'",
+       "description": "",
+       "type": "string",
+       "format": "uri"
+     }
+   },
+   "additionalProperties": {
+       "title": "URI for language <key>",
+       "description": "The key is ISO 639-1 Language Code",
+       "type": "string",
+       "format": "uri"
+     }
+   }
+ } 
+
+=== <code>schedule</code> ===
+This defines the availability of a thing. This may be used to define service times, open times, show times, etc. The notation utilizes elementary interval definitions and operations from set theory to produce more complex definitions.
+
+'''JSON example'''
+
+ /* opening_hours=Mo 10:00-12:00,12:30-15:00; Tu-Fr 08:00-12:00,12:30-15:00; 
+     Sa 08:00-12:00 */ 
+  
+ var opening_hours = {
+         "or": [
+           {
+             "and": [
+               {"wd": [1]}, 
+               {
+                 "or": [
+                   {"bhr": [10], "ehr": [12]},
+                   {"bhr": [12,30], "ehr": [15]}
+                 ]
+               }
+             ]
+           },
+           {
+             "and": [
+               {"wd": [2, 3, 4, 5]},
+               {
+                 "or": [
+                   {"bhr": [8], "ehr": [12]},
+                   {"bhr": [12,30], "ehr": [15]}
+                 ]
+               }
+             ]
+           },
+           {"wd": [6], "bhr": [8], "ehr": [12]}
+         ]
+       };
+	  
+
+'''JSON schema'''
+ {
+   "properties": {
+     "'''or'''": {
+       "description": "union - valid when any of subschedules is valid",
+       "type": "array",
+       "items": {
+         "#ref": "schedule"
+       }
+     },
+     "'''and'''": {
+       "description": "intersection - valid when all of subschedules are valid",
+       "type": "array",
+       "items": {
+         "#ref": {"schedule"}
+       }
+     },
+     "'''not'''": {
+       "description": "complement - valid when the subschedule is not valid",
+       "#ref": "schedule"
+       }
+     },
+     "'''wd'''": {
+       "description": "weekday: valid on listed weekdays, 1=monday,...,7=sunday",
+       "type": "array",
+       "items": {
+         "type": "integer",
+         "minimum": 1,
+         "maxmum": 7
+       }
+     },
+     "'''bhr'''": {
+       "description": "begin hour [hour-integer, minute-integer, second-number]. End zeros can be omitted.",
+       "type": "array",
+       "items": {
+         "type": "integer",
+       }
+     },
+     "'''ehr'''": {
+       "description": "end hour [hour-integer, minute-integer, second-number]. End zeros can be omitted.",
+       "type": "array",
+       "items": {
+         "type": "integer",
+       }
+     },
+     "'''bev'''": {
+       "description": "begin event [year, month, day, hour, minute -integers, second-number]. End zeros can be omitted.",
+       "type": "array",
+       "items": {
+         "type": "integer",
+       }
+     },
+     "'''eev'''": {
+       "description": "end event [year, month, day, hour, minute -integers, second-number]. End zeros can be omitted.",
+       "type": "array",
+       "items": {
+         "type": "integer",
+       }
+     },
+     "'''bdate'''": {
+       "description": "begin date [ month, day] until the end of the year",
+       "type": "array",
+       "items": {
+         "type": "integer",
+       }
+     },
+     "'''edate'''": {
+       "description": "end date [ month, day] from the beginning of the year",
+       "type": "array",
+       "items": {
+         "type": "integer",
+       }
+     },
+   }
+ }
+
+=== <code>source</code> ===
+
+'''JSON schema'''
+
+    "'''source'''": {
+      "properties": {
+        "'''name'''": {
+          "description": "Source of the component information",
+          "type": "string"
+        },
+        "'''website'''": {
+          "description": "Link to a related webpage",
+          "type": "string",
+          "format": "uri"
+        },
+        "'''id'''": {
+          "description": "UUID of the source profile",
+          "type": "string"
+        },
+        "'''license'''": {
+          "description": "Link to applied license",
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    }
+
+=== <code>update_stamp</code> ===
+
+'''JSON schema'''
+
+ "update_stamp": {
+   "properties": {
+     "'''timestamp'''": {
+       "description": "When updated - to catch conflicts",
+       "type": "number",
+       "format": "utc-millisec"
+     },
+     "'''responsible'''": {
+       "description": "Who updated, UUID of the profile",
+       "type": "string",
+     }
+   }
+ }

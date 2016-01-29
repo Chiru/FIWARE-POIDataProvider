@@ -62,7 +62,7 @@ In order to have the POI Data Provider up and running, the following software is
  * PostgreSQL module
  * MongoDB module
  * JSON Schema for PHP 1.4.3 [[1]](https://github.com/justinrainbow/json-schema)
- * pecl_http module
+ * pecl_http-1.7.6 module
 
 ## Software Installation and Configuration
 ### Update OS if applicable
@@ -92,11 +92,10 @@ The required software packages can be installed using the 'apt-get' command-line
     $ sudo pecl install mongo
 
 
-**The installation of the Pecl_HTTP module for PHP5.** This enables use of HTTP requests to obtain dynamic data from other sites.
-
+**The installation of the Pecl_HTTP module for PHP5.** This enables use of HTTP requests to obtain dynamic data from other sites. Note the version, because the interface changes to the version 2, and the version 3 is totally incompatible with PHP5.
 
     $ sudo apt-get install libcurl3-openssl-dev
-    $ sudo pecl install pecl_http
+    $ sudo pecl install pecl_http-1.7.6
 
 Add these lines to /etc/php5/apache2/php.ini:
 
