@@ -63,7 +63,8 @@ User data
       "photo": urlstring,
       "address": string,
       "phone": string,
-      "emails": stringlist,
+      "email": string,
+      "additional_emails": stringlist,
       "permissions: {
         "admin": boolean,
         "add": boolean,
