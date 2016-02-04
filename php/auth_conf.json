@@ -1,9 +1,28 @@
 {
+  "description": [
+    "These permissions override those in the database.",
+    "Mainly this is to define the root administrator for the POI database,",
+    "but this can be used generally to define hard-coded permissions."
+  ],
   "open_data": false,
-  "admin": [
-    {
-      "auth_by": "google",
-      "auth_id": "ariokkonen@gmail.com"
+  "hard_auths": {
+    "google": {
+      "ariokkonen@gmail.com": {
+        "name": "Ari Okkonen",
+        "photo": "http://www.example.com/ariokkon.jpg",
+        "address": "Kotikatu 60 A 22, 90990 Oulu, Finland",
+        "phone": "+356 8 999 999",
+        "email": "ari.okkonen@gmail.com",
+        "additional_emails": [],
+        "permissions": {
+          "admin": true,
+          "add": true,
+          "update": true,
+          "view": true
+        }
+      }
+    },
+    "keyrock": {
     }
-  ]
+  }
 }

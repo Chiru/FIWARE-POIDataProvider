@@ -285,7 +285,7 @@ function safe_html (rawstr) {
   // Authentication operations
   namespace.go_login = function(id_token, callback) {
     var xhr = new XMLHttpRequest();
-    var restQueryURL = BACKEND_ADDRESS_POI + "login?auth_by=google";
+    var restQueryURL = BACKEND_ADDRESS_POI + "login?auth_p=google";
     
     xhr.open('POST', restQueryURL, true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');

@@ -210,4 +210,27 @@ function get_service_info($service_name)
   return $service_info;
    
 }
+
+function poi_new_uuid_v4()
+{
+  $uuid_bin = openssl_random_pseudo_bytes ( 16 );
+  $uuid_bin[6] = chr((ord($uuid_bin[6]) & 0x0f) | 0x40);
+  $uuid_bin[8] = chr((ord($uuid_bin[8]) & 0x3f) | 0x80);
+  $uuid_hex = bin2hex($uuid_bin);
+  $uuid = substr($uuid_hex, 0, 8) . "-"
+        . substr($uuid_hex, 8, 4) . "-"
+        . substr($uuid_hex, 12, 4) . "-"
+        . substr($uuid_hex, 16, 4) . "-"
+        . substr($uuid_hex, 20, 12);
+
+  return $uuid;
+}
+
+function poi_new_key()
+{
+  $base_str = openssl_random_pseudo_bytes ( 20 );
+  $hex1= bin2hex($base_str);
+  
+  return $hex1;
+}
 ?>

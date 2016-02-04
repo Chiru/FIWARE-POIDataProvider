@@ -1,0 +1,68 @@
+{
+  "title": "User data",
+  "description": "FIWARE POI User Data, 2016-02-02 ariokkon/Adminotech",
+  "type": "object",
+  "properties": {
+    "_user": {
+      "title": "User information",
+      "description": "For user identification",
+      "type": "object",
+      "properties": {
+        "permissions": {
+          "title": "Access permissions",
+          "description": "What the user can do.",
+          "type": "object",
+          "properties": {
+            "admin": {
+              "title": "Administrator",
+              "description": "Everything is permitted",
+              "type": "boolean"
+            },
+            "add": {
+              "title": "Add POI",
+              "description": "Adding a POI is permitted",
+              "type": "boolean"
+            },
+            "update": {
+              "title": "Update POI",
+              "description": "Updating and deleting a POI is permitted",
+              "type": "boolean"
+            },
+            "view": {
+              "title": "View",
+              "description": "Viewing a POI is permitted",
+              "type": "boolean"
+            }
+          }
+        },
+        "email": {
+          "title": "E-mail address",
+          "description": "Principal email address",
+          "type": "string",
+          "format": "email"
+        },
+        "name": {
+          "title": "Name of the user",
+          "description": "as convenient",
+          "type": "string"
+        },
+        "address": {
+          "title": "Postal address",
+          "description": "Use comma to separate lines",
+          "type": "string"
+        },
+        "phone": {
+          "title": "Phone number",
+          "description": "as convenient",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "email"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
   $session = get_session();
   $add_permission = $session['permissions']['add'];
   if(!$add_permission) {
-    header("HTTP/1.0 400 Bad Request");
+    header("HTTP/1.0 401 Unauthorized");
     die("Permission denied.");
   }
 
