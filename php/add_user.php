@@ -20,35 +20,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
   $session = get_session();
   $admin_permission = $session['permissions']['admin'];
   if(!$admin_permission) {
-    header("HTTP/1.0 401 Unauthorized");
+    header("HTTP/1.0 403 Forbidden");
     die("Permission denied.");
   }
 
   $request_body = file_get_contents('php://input');
 //     print $request_body;
   
-  $request_array = json_decode($request_body, true);
+  $user_data = json_decode($request_body, true);
   
-  if ($request_array != NULL)
+  if ($user_data != NULL)
   {
 //         print "JSON decoded succesfully!";
     
-    $is_valid = validate_user_data($request_array);
-    if (!($is_valid && $request_array['_user']))
+    $is_valid = validate_user_data($user_data);
+    if (!($is_valid))
     {
       header("HTTP/1.0 400 Bad Request");
-      die ("User data missing or validation failed!");
+      die ("Invalid user data");
     }
     
-    $user_data = $request_array["_user"];
-
     if(!$user_data['email']) {
       header("HTTP/1.0 400 Bad Request");
       die("Email address missing.");
     }
     $email = $user_data['email'];
     $db_opts = get_db_options();
-    $pgcon = connectPostgreSQL($db_opts["sql_db_name"]);
     
     $uuid = poi_new_uuid_v4();
     $timestamp = time();
@@ -89,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
         'address' => $email,
         'subject' => $msubject,
         'message' => $mmessage,
-        'result' => $mres);
+        'mail_sent' => $mres);
     
     $ret_val = json_encode($ret_val_arr);
       

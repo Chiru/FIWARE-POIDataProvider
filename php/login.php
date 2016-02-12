@@ -35,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
   // Hard authorizations set $user, others set $user_id
   
   $hard_auths = $auth_conf['hard_auths'];
+  $user = null; $user_id = null; // set either
   
   if ($auth_p == 'google') {  
 
@@ -44,22 +45,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     $output_data = http_parse_message($output_msg);
     $gauth_body = json_decode($output_data->body);
     $email = $gauth_body->email;
-    if ($hard_auths['google'][$email]) {
-      $user = $hard_auths['google'][$email];
-    } else {
-      $auth_google = $mongodb->_auth_google; // Google authentication mappings
-      
-      $user_id = $auth_google->findOne(array("_id" => $email), 
-          array("_id" => false))['user'];
+    if ($email) { // recognized by google
+      if ($hard_auths['google'][$email]) {
+        $user = $hard_auths['google'][$email];
+      } else {
+        $auth_google = $mongodb->_auth_google; // Google authentication mappings
+        
+        $user_id = $auth_google->findOne(array("_id" => $email), 
+            array("_id" => false))['user'];
 
+      }
+      $identification = array(
+            'provider' => 'google',
+            'google' => array(
+              'email' => $email,
+              'token' => $request_body
+            )
+          );
     }
-    $identification = array(
-          'provider' => 'google',
-          'google' => array(
-            'email' => $email,
-            'token' => $request_body
-          )
-        );
   } else if ($auth_p == 'keyrock') {
     // to be done
     $user = null; $user_id = null; // set either

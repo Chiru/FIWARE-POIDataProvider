@@ -57,7 +57,7 @@ Session data
 User data
 ---------
 
-    "_user": {
+    {
       "_id": "<UUID of the user>",
       "name": string,
       "photo": urlstring,
@@ -77,6 +77,27 @@ User data
         }
       }
     }
+    
+Example:
+  {
+    "_id": "801343a1-6acc-4aa0-ad00-949cf5d866fb",
+    "name": "Ari Okkonen",
+    "email": "ari.okkonen@gmail.com",
+    "permissions": {
+      "admin": true,
+      "add": true,
+      "update": true,
+      "view": true
+    },
+    "last_update": {
+      "timestamp": 1454483510
+    },
+    "identification": {
+      "google": {
+        "email": "ariokkonen@gmail.com"
+      }
+    }
+  }    
     
 Google to user mapping
 ----------------------

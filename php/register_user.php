@@ -50,40 +50,52 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
   $_reg_calls = $mongodb->_reg_calls;
   $registration_call = $_reg_calls->findOne(array("_id" => $key), 
       array("_id" => false));
-  $user_id = $registration_call['user_id'];
-  
-  if ($auth_p == 'google') {  
-    $output_msg = http_get('https://www.googleapis.com/oauth2/v3/tokeninfo?' .
-        'id_token=' . $request_body);
-echo 'output_msg=' . $output_msg . "\n";   
-    $output_data = http_parse_message($output_msg);
-    $gauth_body = json_decode($output_data->body);
-    $email = $gauth_body->email;
+  if($registration_call) {
+    $user_id = $registration_call['user_id'];
+    if ($auth_p == 'google') {  
+      $output_msg = http_get('https://www.googleapis.com/oauth2/v3/tokeninfo?' .
+          'id_token=' . $request_body);
+      $output_data = http_parse_message($output_msg);
+      $gauth_body = json_decode($output_data->body);
+      $email = $gauth_body->email;
+      if ($email) { // recognized by google
 
-    $auth_google = $mongodb->_auth_google; // Google authentication mappings
-    // Check for double registration
-echo 'email:' . $email . "\n";
-echo 'user:' . $user_id . "\n";
-    if(!$auth_google->findOne(array("_id" => $email), 
-        array("_id" => false))) {
-      $auth_mapping = array(
-        '_id' => $email,
-        'user' => $user_id,
-        'registration_time' => time()
-      );
-    
-      $auth_google->insert($auth_mapping);
-echo 'auth_mapping inserted' . "\n";      
-      $users = $mongodb->_users;
-      $user = $users->findOne(array("_id" => $user_id), 
-        array("_id" => false));
-      $user['identification']['google'] = array('email' => $email);
-      $users->update(array("_id" => $user_id),$user);
+        $auth_google = $mongodb->_auth_google; // Google authentication mappings
+        // Check for double registration
+        if(!$auth_google->findOne(array("_id" => $email), 
+            array("_id" => false))) {
+          $auth_mapping = array(
+            '_id' => $email,
+            'user' => $user_id,
+            'registration_time' => time()
+          );
+        
+          $auth_google->insert($auth_mapping);
+          $users = $mongodb->_users;
+          $user = $users->findOne(array("_id" => $user_id), 
+            array("_id" => false));
+          $user['identification']['google'] = array('email' => $email);
+          $users->update(array("_id" => $user_id),$user);
+        }
+        echo '{"registration":true,"name":"' . $user['name'] . '"}';
+      } else {
+        header("HTTP/1.0 401 Unauthorized");
+        echo '{"registration":false,"msg":"Denied by authorization provider"}';
+      }
+    } else if ($auth_p == 'keyrock') {
+      // KeyRock not yet implemented
+      header("HTTP/1.0 401 Unauthorized");
+      echo '{"registration":false,"msg":"KeyRock not implemented."}';
+    } else {
+      header("HTTP/1.0 401 Unauthorized");
+      echo '{"registration":false,"msg":"Unknown authorization provider"}';
+      
     }
- 
+    //  $_reg_calls->remove(array("_id" => $key));
+  } else {
+    header("HTTP/1.0 401 Unauthorized");
+    echo '{"registration":false,"msg":"Key not recognized."}';
     
-  } else if ($auth_p == 'keyrock') {
-    // KeyRock not yet implemented
   }
 }
 ?>

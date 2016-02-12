@@ -2,7 +2,8 @@
 
 /*
 * Project: FI-WARE
-* Copyright (c) 2014 Center for Internet Excellence, University of Oulu, All Rights Reserved
+* Copyright (c) 2014 Center for Internet Excellence, University of Oulu, 
+* All Rights Reserved
 * For conditions of distribution and use, see copyright notice in LICENSE
 */
 define('SERVICE_NAME', 'logout');
@@ -11,12 +12,6 @@ require_once 'db.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET' )
 {
-/*
-  $auth_t = $_GET['auth_t'];
-  if (isset($auth_t))
-  {
-    $token_sha1 = pg_escape_string($auth_t);
-*/
   if (isset($_GET['auth_t']))
   {
     $token_sha1 = pg_escape_string($_GET['auth_t']);

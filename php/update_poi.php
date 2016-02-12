@@ -233,12 +233,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
             header("HTTP/1.0 400 Bad Request");
             if ($update_timestamp == 0)
             {
-              die("No valid 'last_update:timestamp' value was ' .
-                'found for '$comp_name' component!");
+              die("No valid 'last_update:timestamp' value was " .
+                "found for '$comp_name' component!");
             } else {
               die("The given last_update:timestamp (". 
-                $update_timestamp .") does not match the ' .
-                'value in the database (". $curr_timestamp .
+                $update_timestamp .") does not match the " .
+                "value in the database (". $curr_timestamp .
                 ") in $comp_name!");
             }
           }
