@@ -1,0 +1,680 @@
+<html>
+<head>
+  <title>POI DP User Management</title>
+  <meta name="google-signin-scope" content="profile email" />
+  <meta name="google-signin-client_id" 
+      content="1032522970282-gtsgnea0phqlo86osef1jg1oo8dhficg.apps.googleusercontent.com"
+  />
+  <script src="https://apis.google.com/js/platform.js" async="async" 
+      defer="defer"></script>
+      
+  <script type="text/javascript" src="sbje_json_edit.js"></script>
+  <script type="text/javascript" src="sha_1a.js"></script>
+  <link rel="stylesheet" type="text/css" href="selection_list.css">
+  <script type="text/javascript" src="selection_list.js"></script>
+
+</head>
+<body>
+  <h2>POI DP User Account Management</h2>
+    <div>
+      <!-- Google login stuff Begin -->
+      <div id="google_signin_b" style="" class="g-signin2" 
+          data-onsuccess="onSignIn" data-theme="dark"></div>
+      <button id="signout_b" style="display:none" type="button" 
+          onclick="signOut();"><b>Sign out</b></button>
+      <!-- Google login stuff End -->
+      <br>
+      <span id="user_name"></span>&nbsp;
+      <img id="user_photo" 
+          src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" 
+          width="32" height="32"><br>
+      <span id="result"></span>
+    </div>
+    <div>
+      <div style="float:left;width:50%">
+        <div id="user_choices">
+          [empty]
+        </div>
+      </div>
+      <div style="float:left;width:49%">
+        <button id="button_new" type="button" onclick="click_new()" disabled="disabled">
+            New user</button>
+        <button id="button_save" type="button" onclick="click_save()" disabled="disabled">
+            Save</button>
+        <button id="button_cancel" type="button" onclick="click_cancel()" disabled="disabled">
+            Cancel</button>
+        <div id="editor">
+          [empty]
+        </div>
+        <div id="status">
+        </div>
+      </div>
+    </div>      
+<script>
+"use strict"; // reveal bad scripting
+
+var BACKEND_ADDRESS_POI = "";
+
+var user_account_ops = {
+  wiev: "View",
+  edit: "Edit",
+  disable: "Disable",
+  remove: "DELETE!"
+};
+var str2html_table = {
+	"<": "&lt;",
+	"&": "&amp;",
+	"\"": "&quot;",
+	"'": "&apos;",
+	">": "&gt;",
+};
+
+function str2html (rawstr) {
+  var result = "";
+  var code;
+  if (!rawstr) {
+    rawstr = "";
+  }
+  for (var i = 0; i < rawstr.length; i++) {
+    code = rawstr.charCodeAt(i);
+    if (code < 0x7f) {
+      result = result + (str2html_table[rawstr[i]] ? 
+        (str2html_table[rawstr[i]]) : (rawstr[i]));
+    } else {
+      result = result + "&#x" + code.toString(16) + ";";
+    }
+  }
+  return result;
+}
+
+var user_schema = {};
+var poi_user_tok = ""; // SHA-1 of long user token
+
+var user_id_token; // To be used in server calls
+var user_id_info = {}; // {name: string, photo: url_string}
+function onSignIn(googleUser) {
+  // Useful data for your client-side scripts:
+  var profile = googleUser.getBasicProfile();
+  console.log("ID: " + profile.getId()); // Don't send this directly 
+                                         // to your server!
+  user_id_info.name = profile.getName(); // AOk
+  user_id_info.photo = profile.getImageUrl();  // AOk
+  
+  console.log("Name: " + profile.getName());
+  console.log("Image URL: " + profile.getImageUrl());
+  console.log("Email: " + profile.getEmail());
+
+  // The ID token you need to pass to your backend:
+  user_id_token = googleUser.getAuthResponse().id_token;
+  console.log("ID Token: " + user_id_token);
+  
+  go_login(user_id_token, signInResp); // AOk
+  
+};
+
+function signInResp(response) {
+
+console.log("SignIn response: \"" + JSON.stringify(response) + "\"");
+  var auth2 = gapi.auth2.getAuthInstance();
+
+  if (response.login) {
+    document.getElementById("user_name").innerHTML = user_id_info.name;
+    document.getElementById("user_photo").setAttribute("src", 
+        user_id_info.photo);
+    auth2.signOut();
+  } else {
+    auth2.signOut().then(function() {
+        alert("Sorry to inform you that\n" +
+              "the user is not known by this service.");});
+  }
+  document.getElementById("google_signin_b").style.display = "none";
+  document.getElementById("signout_b").style.display = "inline";
+  
+  stm.fn.signed_in();
+}
+
+function signOut() {
+  var auth2 = gapi.auth2.getAuthInstance();
+  auth2.signOut().then(function () {
+      document.getElementById("user_name").innerHTML = "";
+      document.getElementById("user_photo").setAttribute("src",
+          "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=");
+      document.getElementById("google_signin_b").style.display = "inline";
+      document.getElementById("signout_b").style.display = "none";
+      go_logout();
+  });
+}
+
+function go_logout() {
+  var xhr = new XMLHttpRequest();
+  var restQueryURL = BACKEND_ADDRESS_POI + "logout?auth_t=" + poi_user_tok;
+  
+  poi_user_tok = "";
+  xhr.open('GET', restQueryURL, true);
+  xhr.onload = function() {
+      console.log('Signed out: ' + xhr.responseText);
+      stm.fn.signed_out();
+    };
+  xhr.send();
+  
+}
+
+function go_login(id_token, callback) {
+  var xhr = new XMLHttpRequest();
+  var restQueryURL = BACKEND_ADDRESS_POI + "login?auth_p=google";
+  
+  xhr.open('POST', restQueryURL, true);
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  xhr.onload = function() {
+    var response, err;
+    try {
+      response = JSON.parse(xhr.responseText);
+      if (response.login) { // We're in!
+        poi_user_tok = Sha1.hash(id_token);
+      }
+    } catch(err) {
+      response = {"login":false,"message":"Bad response: " + err.message};
+    }
+    callback(response);
+  };
+  xhr.onerror = function() {
+      response = {"login":false,"message":"Login to server failed"};
+      callback(response);
+  };
+  xhr.send(id_token);
+}
+
+function click_new() {
+  user_under_editing_id = "new";
+  user_data_under_editing = {"new": {}};
+  sbje.make_form("editor", user_schema, 
+      user_data_under_editing["new"], document);
+  stm.fn.start_editing();
+}
+
+function click_save() {
+  if (user_under_editing_id == "new" ) {
+    add_user( user_data_under_editing["new"], saved_new );
+  } else {
+    update_user( user_data_under_editing, saved_old );
+  }
+}
+
+function saved_new(response) {
+  var data1 = JSON.stringify(response, null, "  ");
+  var user_id = response.created_user.uuid;
+  
+  user_data_list[user_id] = user_data_under_editing["new"];
+  display_user_list(user_data_list);
+  
+  document.getElementById("status").innerHTML = 
+      "<h3>Added user data</h3>" +
+      (response.mail_data.mail_sent ?
+      "<p><b>Remember to send the registration request to the user!</b></p>" : 
+      "") +
+      "<pre>" + str2html(data1) + 
+      "</pre>";
+
+  stm.fn.stop_editing();
+}
+
+function saved_old(response) {
+  var data1 = JSON.stringify(response, null, "  ");
+  
+  user_data_list[user_under_editing_id] = 
+      user_data_under_editing[user_under_editing_id];
+  display_user_list(user_data_list);
+  
+  document.getElementById("status").innerHTML = 
+      "<h3>Updated user data</h3>" +
+      "<pre>" + str2html(data1) + 
+      "</pre>";
+
+  stm.fn.stop_editing();
+
+}
+
+function click_cancel() {
+
+  stm.fn.stop_editing();
+}
+
+function user_account_action(user_id, action) {
+  switch ( action ) {
+    case "wiev": {
+      view_user(user_id);
+    } break;
+    case "edit": {
+      edit_user(user_id);
+    } break;
+    case "disable": {
+      disable_user(user_id);
+    } break;
+    case "remove": {
+      remove_user(user_id);
+    } break;
+  }
+}
+
+var user_data_under_editing = {};
+var user_under_editing_id;
+
+function view_user(user_id) {
+  user_under_editing_id = user_id;
+  get_user_data(user_id, view_user_succ, view_user_fail);
+}
+
+function view_user_succ() {
+  user_data_under_editing = user_data_buffer.users;
+  load_user_editor_ro("View user account", user_data_under_editing, 
+      user_under_editing_id);
+}
+
+function view_user_fail() {
+}
+
+function edit_user(user_id) {
+  user_under_editing_id = user_id;
+  get_user_data(user_id, edit_user_succ, edit_user_fail);
+}
+
+function edit_user_succ() {
+  user_data_under_editing = user_data_buffer.users;
+  sbje.make_form("editor", user_schema, 
+      user_data_under_editing[user_under_editing_id], document);
+  stm.fn.start_editing();
+}
+
+function edit_user_fail() {
+}
+
+function disable_user(user_id) {
+  user_under_editing_id = user_id;
+  get_user_data(user_id, disable_user_succ_1, disable_user_fail);
+}
+
+function disable_user_succ_1() {
+  user_data_under_editing = user_data_buffer.users;
+  user_data_under_editing[user_under_editing_id].permissions = {
+      admin: false,
+      add: false,
+      update: false,
+      view: false
+  };
+  update_user( user_data_under_editing, disable_user_succ_2 );
+}
+
+function disable_user_succ_2(response) {
+  var data1 = JSON.stringify(response, null, "  ");
+  document.getElementById("status").innerHTML = 
+      "<h3>User disabled</h3>" +
+      "<pre>" + str2html(data1) + 
+      "</pre>";
+}
+
+function disable_user_fail() {
+  document.getElementById("status").innerHTML = 
+      "<h3>Disabling failed</h3>";
+}
+
+function remove_user(user_id) {
+  var user_data = user_data_list[user_id];
+
+  var cfm = confirm(
+      "Deleting user data causes loss of historical\n" +
+      "'who updated this' information.\n" + 
+      "Consider hitting 'Cancel' and \n" +
+      "disabling the user instead.\n\n" +
+      "Confirm to permanently delete all data of the user\n\n" +
+      user_data.name + ", " + user_data.email + 
+      ",\nid:" + user_id);
+
+  if (cfm) { 
+    confirmed_remove_user(user_id, user_removed);
+  }
+}
+
+function user_removed(user_id) {
+  var user_data = user_data_list[user_id];
+  document.getElementById("status").innerHTML = 
+      "<h3>User deleted</h3>" +
+      user_data.name + ", " + user_data.email;
+
+  delete user_data_list[user_id];
+  display_user_list(user_data_list);
+}
+
+function load_user_editor_ro(heading, data, id) {
+  var data1 = JSON.stringify(data, null, "  ");
+  document.getElementById("editor").innerHTML = "<pre>" + str2html(data1) + 
+      "</pre>";
+}
+
+var user_data_buffer = {};
+
+function get_user_data(user_id, success, fail) {
+  var url = BACKEND_ADDRESS_POI + "get_user?user_id=" + user_id +
+    "&auth_t=" + poi_user_tok;
+    
+  get_ext_json(user_data_buffer, url, success, fail)
+  
+}
+
+// Sequence control (state machine)
+// ================================
+// Event functions - call stack is cleared here by setTimeout(xx, 0)
+const STM_DISABLED = 0,
+  STM_ENABLED = 1,
+  STM_LOGGED_OUT = 2,
+  STM_LOGGED_IN = 3,
+  STM_EDITING = 4;
+
+var stm = {};
+  stm.state = STM_DISABLED;
+  stm.ev = {}; // event flags
+    stm.ev.signed_in = false;
+    stm.ev.signed_out = false;
+    stm.ev.start_editing = false;
+    stm.ev.stop_editing = false;
+  stm.fn = {}; // event functions
+
+stm.fn.enable = function() {
+  stm.state = STM_ENABLED;
+  stm.process_event();
+}
+
+stm.fn.signed_in = function() {
+  stm.ev.signed_in = true;
+  stm.process_event();
+}
+
+stm.fn.signed_out = function() {
+  stm.ev.signed_out = true;
+  stm.process_event();
+}
+
+stm.fn.start_editing = function() {
+  stm.ev.start_editing = true;
+  stm.process_event();
+}
+
+stm.fn.stop_editing = function() {
+  stm.ev.stop_editing = true;
+  stm.process_event();
+}
+
+stm.process_event = function() {
+  setTimeout(stm.process_event_2, 0); // clear call stack
+}
+
+stm.process_event_2 = function() {
+  var going = true;
+ 
+  while (going) {
+    going = false;
+    switch (stm.state) {
+      case STM_ENABLED: {
+        going = true;
+       
+        stm.state = STM_LOGGED_OUT;
+        stm.enter_state = true;
+      }; break;
+      case STM_LOGGED_OUT: {
+        if (stm.enter_state) {
+          stm.enter_state = false;
+          document.getElementById("button_new").disabled = true;
+          document.getElementById("button_save").disabled = true;
+          document.getElementById("button_cancel").disabled = true;
+
+          document.getElementById("user_choices").innerHTML = "[empty]";
+          document.getElementById("editor").innerHTML = "[empty]";
+          }
+        if (stm.ev.signed_in) {
+          stm.ev.signed_in = false;
+          going = true;
+         
+//            alert("STM: Signed in");
+          load_user_list();
+         
+          stm.state = STM_LOGGED_IN;
+          stm.enter_state = true;
+        }
+      }; break;
+      case STM_LOGGED_IN: {
+        if (stm.enter_state) {
+          stm.enter_state = false;
+          document.getElementById("button_new").disabled = false;
+          document.getElementById("button_save").disabled = true;
+          document.getElementById("button_cancel").disabled = true;
+
+          document.getElementById("editor").innerHTML = "[empty]";
+        }
+        if (stm.ev.signed_out) {
+          stm.ev.signed_out = false;
+          going = true;
+         
+          stm.state = STM_LOGGED_OUT;
+          stm.enter_state = true
+        } else if (stm.ev.start_editing) {
+          stm.ev.start_editing = false;
+          going = true;
+         
+          stm.state = STM_EDITING;
+          stm.enter_state = true;
+        }
+      }; break;
+      case STM_EDITING: {
+        if (stm.enter_state) {
+          stm.enter_state = false;
+          document.getElementById("button_new").disabled = true;
+          document.getElementById("button_save").disabled = false;
+          document.getElementById("button_cancel").disabled = false;
+        }
+        if (stm.ev.signed_out) {
+          stm.ev.signed_out = false;
+          going = true;
+         
+          stm.state = STM_LOGGED_OUT;
+          stm.enter_state = true
+        } else if (stm.ev.stop_editing) {
+          stm.ev.stop_editing = false;
+          going = true;
+         
+          stm.state = STM_LOGGED_IN;
+          stm.enter_state = true;
+        }
+      }; break;
+   
+    }
+ 
+  }
+
+}
+var user_data_list; // accounts from the server
+
+function load_user_list() {
+  var response; // why this?
+  var xhr = new XMLHttpRequest();
+  var restQueryURL = BACKEND_ADDRESS_POI + "find_users?auth_t=" + poi_user_tok;
+  // ToDo: add skip & limit parameters
+  xhr.open('GET', restQueryURL, true);
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  xhr.onload = function() {
+    var err;
+    try {
+      user_data_list = JSON.parse(xhr.responseText);
+      display_user_list(user_data_list);
+    } catch(err) {
+      response = {"login":false,"message":"Bad response: " + err.message};
+    }
+  };
+  xhr.onerror = function() {
+      response = {"login":false,"message":"Login to server failed"};
+  };
+  xhr.send();
+}
+
+function display_user_list(user_data_list) {
+  var account_diplay = {}; // what to see in the list
+  var user_data; // current user
+  var user_id;
+  
+  for ( user_id in user_data_list ) {
+    user_data = user_data_list[user_id];
+    
+    account_diplay[user_id] =  
+        user_data.name + ", " + user_data.email;
+  }
+  selection_list_fill("user_choices", account_diplay, user_account_ops, 
+          user_account_action, "Cancel");
+}
+
+function update_user( user_data , success) {
+  var restQueryURL;
+  var responseText;
+  var xhr;
+
+//  if (!checkPOI(user_data)) return;
+
+  restQueryURL = BACKEND_ADDRESS_POI + "update_user" +
+      "?auth_t=" + poi_user_tok;
+  xhr = new XMLHttpRequest();
+  
+  xhr.overrideMimeType("application/json");
+
+  xhr.onreadystatechange = function () {
+    var json;
+    var uuid;
+    var data;
+    var poiMarker;
+    if(xhr.readyState === 4) {
+      responseText = xhr.responseText;
+      if(xhr.status  === 200) {
+        if (responseText.substring(0,6) != "Error:") { 
+          json = JSON.parse(xhr.responseText);
+          success(json);
+        } else {
+          alert(responseText);
+        }
+      } else { 
+        alert("failed "+xhr.status+": " + responseText);
+      }
+    }
+  }
+
+  xhr.onerror = function (e) {
+    alert("error" + JSON.stringify(e));
+  };
+
+  xhr.open("POST", restQueryURL, true);
+  xhr.send(JSON.stringify(user_data));
+
+}
+
+function add_user( user_data , success) {
+  var restQueryURL;
+  var responseText;
+  var xhr;
+
+//  if (!checkPOI(user_data)) return;
+
+  restQueryURL = BACKEND_ADDRESS_POI + "add_user" +
+      "?auth_t=" + poi_user_tok;
+  xhr = new XMLHttpRequest();
+  
+  xhr.overrideMimeType("application/json");
+
+  xhr.onreadystatechange = function () {
+    var json;
+    var uuid;
+    var data;
+    var poiMarker;
+    if(xhr.readyState === 4) {
+      responseText = xhr.responseText;
+      if(xhr.status  === 200) {
+        if (responseText.substring(0,6) != "Error:") { 
+          json = JSON.parse(xhr.responseText);
+          success(json);
+        } else {
+          alert(responseText);
+        }
+      } else { 
+        alert("failed "+xhr.status+": " + responseText);
+      }
+    }
+  }
+
+  xhr.onerror = function (e) {
+    alert("error" + JSON.stringify(e));
+  };
+
+  xhr.open("POST", restQueryURL, true);
+  xhr.send(JSON.stringify(user_data));
+
+}
+
+function confirmed_remove_user(user_id, success) {
+  var restQueryURL = BACKEND_ADDRESS_POI + "delete_user?user_id=" + user_id +
+        "&auth_t=" + poi_user_tok;
+
+  var xhr = new XMLHttpRequest();
+
+  xhr.onreadystatechange = function () {
+    if(xhr.readyState === 4) {
+      if(xhr.status  === 200) {
+        success(user_id);
+      } else {
+        alert("Failed: "+xhr.status+" "+xhr.responseText);
+      }
+    }
+  }
+
+  xhr.onerror = function (e) {
+    log("failed to delete user " + JSON.stringify(e));
+  };
+
+  xhr.open("DELETE", restQueryURL, true);
+  xhr.send();
+}
+      
+function deleteProperties(objectToClean) {
+  for (var x in objectToClean) if (objectToClean.hasOwnProperty(x)) 
+    delete objectToClean[x];
+}
+
+
+function get_ext_json(buf, url, success, fail) {
+  var xhr = new XMLHttpRequest();
+  
+  xhr.onreadystatechange = function () {
+    var key;
+    if(xhr.readyState === 4) {
+      if(xhr.status  === 200) { 
+        var json = JSON.parse(xhr.responseText);
+        deleteProperties(buf);
+        for (key in json) {
+          buf[key] = json[key];
+        }
+        success(xhr);
+      }
+      else if (xhr.status === 404) { 
+        fail(xhr);
+      }
+    }
+  };
+
+  xhr.onerror = function (e) {
+    fail(xhr);
+  };
+  xhr.open("GET", url, true);
+  xhr.send();
+}
+
+// end of declarations
+get_ext_json(user_schema, BACKEND_ADDRESS_POI + "user_schema.json",
+    function(){}, function (){alert("User schema not available");});
+
+stm.fn.enable(); // start it
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+/* selection_list.css  v1.0 2016-02-24 Ari Okkonen
+
+  Internal styles for selection list package
+  
+  All style names begin with "sl_".
+  
+  Developed in FIWARE POI project 
+  http://catalogue.fiware.org/enablers/poi-data-provider
+  
+  Copyright 2016 Adminotech Oy, Finland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.  
+  
+*/  
+.sl_popup_menu {
+  zIndex:2;
+  position:absolute;
+  border:solid 1px #000;
+  background-color:#fcfcfc;
+  padding:5px;
+  cursor:pointer;
+  display:none;
+}
+
+.sl_popup_menu p {
+  padding: 0px;
+  margin: 0px;
+  border: 1px;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.sl_sellist {
+  padding:5px;
+  cursor:pointer;
+}
+
+.sl_sellist p {
+  padding: 0px;
+  margin: 0px;
+  border: 1px;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.sl_option {
+  font-family: sans-serif;
+  font-size: small;
+}
+.sl_option_selected {
+  font-family: sans-serif;
+  font-size: small;
+  background-color: dodgerblue;
+  color: white;
+}
+.sl_option_focus {
+  font-family: sans-serif;
+  font-size: small;
+  background-color: lightcyan;
+}
+.sl_choice_selected {
+  font-family: sans-serif;
+  font-size: small;
+  background-color: dodgerblue;
+  color: white;
+}

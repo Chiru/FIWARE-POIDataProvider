@@ -14,13 +14,11 @@
   Minumum requirement for a new data item is an empty object: {}.
   
   To create the editor use JavaScript function call
-    sbje.make_form(element_id, schema, data_object, doc);
+    sbje.make_form(element_id, schema, data_object);
       where
         element_id is the id of the html element for the editor e.g. "editor1"
         schema is the JSON Schema describing the data
         data_object is the data object to be edited.
-        doc is the document object containing the editor (usually document)
-
         
   To see the data during editing include an element having id="sbje.dump" to
   the web page. 

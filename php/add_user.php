@@ -75,10 +75,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     $_reg_calls = $mongodb->_reg_calls;
     $_reg_calls->insert($registration_call);
 
-// *** CHANGE THE WEB ADDRESS! ***    
     $msubject = 'Call for a POI DB Registration';
     $mmessage = 'You may now register to the POI database' . "\n" .
-        'http://ari.webhop.org/register_user?key='. $registration_key . "\n";
+        'http://(this_server)/register_user?key=' .
+        $registration_key . "\n";
         
     $mres = mail( $email, $msubject, $mmessage); 
 

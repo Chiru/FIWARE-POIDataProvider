@@ -4,6 +4,17 @@
   "description": "For user identification",
   "type": "object",
   "properties": {
+    "name": {
+      "title": "Name of the user",
+      "description": "as convenient",
+      "type": "string"
+    },
+    "email": {
+      "title": "E-mail address",
+      "description": "Principal email address",
+      "type": "string",
+      "format": "email"
+    },
     "permissions": {
       "title": "Access permissions",
       "description": "What the user can do.",
@@ -30,17 +41,6 @@
           "type": "boolean"
         }
       }
-    },
-    "email": {
-      "title": "E-mail address",
-      "description": "Principal email address",
-      "type": "string",
-      "format": "email"
-    },
-    "name": {
-      "title": "Name of the user",
-      "description": "as convenient",
-      "type": "string"
     },
     "address": {
       "title": "Postal address",

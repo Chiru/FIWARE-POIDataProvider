@@ -89,13 +89,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
       $users->update($upd_criteria, $new_user_data, 
           array("upsert" => true));
     } catch(Exception $e) {
-      echo "*ERROR: Exception when updating " . $user_id . "." . $comp_name . "\n";
-      echo "  message: " . $e->getMessage() . "\n";
-      echo "  code: " . $e->getCode() . "\n";
+      echo '{"msg":"*ERROR: Exception when updating ' . $user_id . '.' . 
+          $comp_name . '",';
+      echo '"message":"' . $e->getMessage() . '",';
+      echo '"code:":"' . $e->getCode() . '"}';
       
     }
     header("Access-Control-Allow-Origin: *");
-    print "User data updated succesfully!";
+    print '{"msg":"User data updated succesfully!"}';
   }
 }
 
