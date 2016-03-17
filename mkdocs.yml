@@ -1,0 +1,14 @@
+site_name: POI Data Provider
+site_url: https://fiware-poidataprovider.readthedocs.org
+repo_url: https://github.com/Chiru/FIWARE-POIDataProvider
+site_description: POI Data Provider Documentation
+docs_dir: docs/
+site_dir: html
+markdown_extensions: [toc,fenced_code]
+use_directory_urls: false
+theme: readthedocs
+extra_css: ["https://fiware.org/style/fiware_readthedocs.css"]
+pages:
+  - Home: index.md
+  - 'Installation & Administration Manual': 'POI_Data_Provider__Installation_and_Administration_Guide.md'
+  - 'User & Programmers Manual': 'POI_Data_Provider__User_and_Programmers_Guide.md'

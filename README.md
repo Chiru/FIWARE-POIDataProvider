@@ -1,5 +1,9 @@
 FIWARE-POIDataProvider
 ======================
+[![License badge](https://img.shields.io/hexpm/l/plug.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Documentation badge](https://readthedocs.org/projects/fiware-poidataprovider/badge/?version=latest)](http://fiware-poidataprovider.readthedocs.org/en/latest/?badge=latest)
+[![Docker badge](https://img.shields.io/docker/pulls/ariokkon/fiware_poi_dataprovider.svg)](https://hub.docker.com/r/ariokkon/fiware_poi_dataprovider/)
+[![Support badge]( https://img.shields.io/badge/support-sof-yellowgreen.svg)](mailto:ari.okkonen@adminotech.com)
 
 This project is part of FIWARE http://www.fiware.org/
 
