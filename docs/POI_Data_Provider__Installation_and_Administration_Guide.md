@@ -203,6 +203,29 @@ Rewrite is used to default the .php extension from service requests. E.g. http//
     $ sudo a2enmod rewrite
     $ sudo service apache2 restart
 
+## Enabling secure server (SSL)
+*Optional feature - for confidetial or dependable information*
+
+Professional secure sites need a certificate signed by a [trusted authority](https://en.wikipedia.org/wiki/Certificate_authority). Obtaining a SSL certificate is explained at [How To Order An SSL Certificate](https://www.sslshopper.com/how-to-order-an-ssl-certificate.html).
+
+An experimental or hobby site can do with a self-signed certificate. Setting up a site with such can be done according to instructions at [How To Create a SSL Certificate on Apache for Ubuntu 14.04](https://www.digitalocean.com/community/tutorials/how-to-create-a-ssl-certificate-on-apache-for-ubuntu-14-04).
+
+In general you have to enable the ssl mode in the server
+
+    $ sudo a2enmod ssl
+    $ sudo service apache2 restart
+    $ sudo mkdir /etc/apache2/ssl
+
+Then you have to set up the certificate by either of the methods liked above.
+Hint: the "Common Name (e.g. server FQDN or YOUR name)" seems to need to be the domain name of your server.
+
+Edit the server configuration.
+
+    $ sudo nano /etc/apache2/sites-available/default-ssl.conf
+
+Detailed instructions at [How To Create ...](https://www.digitalocean.com/community/tutorials/how-to-create-a-ssl-certificate-on-apache-for-ubuntu-14-04).
+
+
 ## Sanity check procedures
 
 The Sanity Check Procedures are the steps that a System Administrator will take to verify that an installation is ready to be tested. This is therefore a preliminary set of tests to ensure that obvious or basic malfunctioning is fixed before proceeding to unit tests, integration tests and user validation.
