@@ -65,18 +65,15 @@ In order to have the POI Data Provider up and running, the following software is
  * pecl_http-1.7.6 module
 
 ## Software Installation and Configuration
-### Update OS if applicable
+### Update package lists
 
-You may run to problems with old OS image. The software packages may assume some new OS corrections. So you may need to update the OS first:
-
+Get up-to-date package lists from update servers:
 
     $ sudo apt-get update
-
 
 ### Installing required packages
 
 The required software packages can be installed using the 'apt-get' command-line package installation tool:
-
 
     $ sudo apt-get install -y postgis postgresql-9.3-postgis-2.1
     $ sudo apt-get install mongodb
@@ -84,13 +81,10 @@ The required software packages can be installed using the 'apt-get' command-line
     $ sudo apt-get install php5 php5-pgsql
     $ sudo apt-get install git
 
-
 **The installation of the MongoDB module for PHP5.** :
-
 
     $ sudo apt-get install php-pear php5-dev gcc make
     $ sudo pecl install mongo
-
 
 **The installation of the Pecl_HTTP module for PHP5.** This enables use of HTTP requests to obtain dynamic data from other sites. Note the version, because the interface changes to the version 2, and the version 3 is totally incompatible with PHP5.
 
@@ -103,7 +97,6 @@ Add these lines to /etc/php5/apache2/php.ini:
     extension=raphf.so
     extension=propro.so
     extension=http.so
-
 
 **Enable access control in per-directory basis.** The POI DP uses <code>.htaccess</code> file to protect external access keys for dynamic POIs.
 
@@ -177,17 +170,36 @@ local unix socket connections (from the same computer where the database is runn
         $ ./create_tables.sh
         $ cd ../..
 
-3. Copy the folder <code>FIWARE-POIDataProvider/php</code> from the cloned project under the current working directory, e.g. to <code>/var/www/html/poi_dp</code>
+3. Choice between secure (https) and unsecure (http) access to the data provider depends on required confidentiality and dependability of the service. Plaintext http access is easily eavesdropped and intercepted. Do not use it for confidential or dependable data. Encrypted https access requires more determination to intercept. However, https requires more work to set up and manage. See: [Wikipedia HTTPS](https://en.wikipedia.org/wiki/HTTPS). Choose either:
+
+    **A. Unsecure (http)**
+
+    Copy the folder <code>FIWARE-POIDataProvider/php</code> from the cloned project under the current working directory, e.g. to <code>/var/www/html/poi_dp</code>
 
         $ sudo cp -r FIWARE-POIDataProvider/php /var/www/html/poi_dp
 
-**Installation of JSON Schema for PHP**
+    Installation of JSON Schema for PHP
 
-    $ wget http://getcomposer.org/composer.phar
-    $ php composer.phar require justinrainbow/json-schema:1.4.3
-    $ sudo cp -r vendor /var/www/html/poi_dp/
+        $ wget http://getcomposer.org/composer.phar
+        $ php composer.phar require justinrainbow/json-schema:1.4.3
+        $ sudo cp -r vendor /var/www/html/poi_dp/
 
-More information about the JSON Schema for PHP implementation can be found at [[3]](https://github.com/justinrainbow/json-schema).
+    More information about the JSON Schema for PHP implementation can be found at [[3]](https://github.com/justinrainbow/json-schema).
+
+
+    **B. Secure (https)**
+
+    Copy the folder <code>FIWARE-POIDataProvider/php</code> from the cloned project under the current working directory, e.g. to <code>/var/www/ssl/poi_dp</code>
+
+        $ sudo cp -r FIWARE-POIDataProvider/php /var/www/ssl/poi_dp
+
+    Installation of JSON Schema for PHP
+
+        $ wget http://getcomposer.org/composer.phar
+        $ php composer.phar require justinrainbow/json-schema:1.4.3
+        $ sudo cp -r vendor /var/www/ssl/poi_dp/
+
+    More information about the JSON Schema for PHP implementation can be found at [[3]](https://github.com/justinrainbow/json-schema).
 
 ### Enable Handling of Cross-origin Resource Sharing and URL Rewrite in Apache
 
@@ -197,7 +209,7 @@ Cross-origin Resource Sharing (CORS) is required if the POI-DP client is a web a
 
 Rewrite is used to default the .php extension from service requests. E.g. http//www.example.org/poi_dp/radial_search -> http//www.example.org/poi_dp/radial_search.php .
 
-**Enable mod_headers and mod_rewrite Apache modules:**
+**Enable mod\_headers and mod\_rewrite Apache modules:**
 
     $ sudo a2enmod headers
     $ sudo a2enmod rewrite
@@ -206,24 +218,29 @@ Rewrite is used to default the .php extension from service requests. E.g. http//
 ## Enabling secure server (SSL)
 *Optional feature - for confidetial or dependable information*
 
-Professional secure sites need a certificate signed by a [trusted authority](https://en.wikipedia.org/wiki/Certificate_authority). Obtaining a SSL certificate is explained at [How To Order An SSL Certificate](https://www.sslshopper.com/how-to-order-an-ssl-certificate.html).
-
-An experimental or hobby site can do with a self-signed certificate. Setting up a site with such can be done according to instructions at [How To Create a SSL Certificate on Apache for Ubuntu 14.04](https://www.digitalocean.com/community/tutorials/how-to-create-a-ssl-certificate-on-apache-for-ubuntu-14-04).
-
 In general you have to enable the ssl mode in the server
 
     $ sudo a2enmod ssl
     $ sudo service apache2 restart
     $ sudo mkdir /etc/apache2/ssl
 
-Then you have to set up the certificate by either of the methods liked above.
+Then you have to set up the secure certificate.
+
+Professional secure sites need a certificate signed by a [trusted authority](https://en.wikipedia.org/wiki/Certificate_authority). Obtaining a SSL certificate is explained at [How To Order An SSL Certificate](https://www.sslshopper.com/how-to-order-an-ssl-certificate.html).
+
+An experimental or hobby site can do with a self-signed certificate. Setting up a site with such can be done according to instructions at [How To Create a SSL Certificate on Apache for Ubuntu 14.04](https://www.digitalocean.com/community/tutorials/how-to-create-a-ssl-certificate-on-apache-for-ubuntu-14-04).
+
 Hint: the "Common Name (e.g. server FQDN or YOUR name)" seems to need to be the domain name of your server.
 
 Edit the server configuration.
 
     $ sudo nano /etc/apache2/sites-available/default-ssl.conf
 
-Detailed instructions at [How To Create ...](https://www.digitalocean.com/community/tutorials/how-to-create-a-ssl-certificate-on-apache-for-ubuntu-14-04).
+Detailed editing instructions at [How To Create a SSL ...](https://www.digitalocean.com/community/tutorials/how-to-create-a-ssl-certificate-on-apache-for-ubuntu-14-04). **NOTE:** In default-ssl.conf set the DocumentRoot to point to the secure server root <code>/var/www/ssl</code> .
+
+    ...
+    DocumentRoot /var/www/ssl
+    ...
 
 
 ## Sanity check procedures
@@ -235,6 +252,10 @@ The Sanity Check Procedures are the steps that a System Administrator will take 
 You can do a quick test to see if everything is up and running by accessing the following URL:
 
     http://hostname/poi_dp/radial_search?lat=1&lon=1&category=test_poi
+
+For secure server use:
+
+    https://hostname/poi_dp/radial_search?lat=1&lon=1&category=test_poi
 
 You should get a JSON structure representing a test POI as a response.
 
