@@ -11,6 +11,7 @@ This document is associated to the latest release of the POI Data Provider. Link
 | **Release** | **Date** | **Description** |
 | ----------- |:--------:|:--------------- |
 | [r3.3](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/POI_Data_Provider_r3.3_-_Installation_and_Administration_Guide "POI Data Provider r3.3 - Installation and Administration Guide") | 2014-09-17 | Original release - a POI belongs to exactly one category |
+| **r5.1** | 2016-04-07 | This release - Dynamic POIs & Quality Boost |
 
 ## System Requirements
 
@@ -278,7 +279,7 @@ You can test if MongoDB was succesfully configured with the following commands:
     > use poi_db
     > show collections
 
-The <code>show collections</code> command should list five POI data component collections created by the installation: fw\_contact, fw\_marker, fw\_media, fw\_relationships and fw\_time.
+The <code>show collections</code> command should list five POI data component collections created by the installation: fw\_contact, fw\_marker, fw\_media, and fw\_time.
 
 To exit MongoDB use:
 
