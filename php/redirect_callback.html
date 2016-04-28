@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"></meta>
+<title>Get Parametersz</title>
+</head>
+<body>
+<div id="body_1"></div>
+<script type="text/javascript">
+// <!--
+var body_1_el = document.getElementById("body_1");
+var query_arr;
+
+body_1_el.innerHTML = "<h1>Get Parameters</h1>";
+  function get_query_parameters() {
+
+    var url_wo_fragment = document.URL.split("#")[0];
+    var query_string = url_wo_fragment.split("?")[1];
+    var query_params = {};
+    if (query_string) {
+      query_string = query_string.replace(/;/g, "&"); // to support ; separator
+      query_arr = query_string.split('&');
+      for (var i = 0, query_arr_len = query_arr.length; i < query_arr_len; i++)
+      {
+        var qpar = query_arr[i].split('=');
+        query_params[qpar[0]] = qpar[1];
+      }       
+    }  
+    return query_params;
+  }
+  
+  function get_url_fragment() {
+    var fragment = document.URL.split("#")[1];
+    fragment = (fragment ? fragment : "");
+    return fragment;
+  }
+  
+  window.query_params = get_query_parameters();
+  window.fragment = get_url_fragment();
+  
+  body_1_el.innerHTML += "<p><code>query_parameters = " +
+      JSON.stringify(window.query_params) + "</code></p>";
+
+  body_1_el.innerHTML += "<p><code>url_fragment = " +
+      JSON.stringify(window.fragment) + "</code></p>";
+
+  window.login_done = true;
+
+// -->
+</script>
+</body>
+</html>

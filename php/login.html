@@ -1,0 +1,255 @@
+<html>
+<head>
+  <title>POI DP Login</title>
+  <meta name="google-signin-scope" content="profile email" />
+  <meta name="google-signin-client_id" 
+      content="1032522970282-gtsgnea0phqlo86osef1jg1oo8dhficg.apps.googleusercontent.com"
+  />
+  <meta name="oauth2-signin-callback" content="http://ari.webhop.org/poi_dp/redirect_callback.html">
+  <!-- KeyRock paramters for filab -->
+  <meta name="filab-signin-client_id"
+      content="ca1f7a4345c34d9e9235881f6795591e">
+  <meta name="filab-signin-host" content="https://account.lab.fiware.org">
+  
+  
+  <script src="https://apis.google.com/js/platform.js" async="async" 
+      defer="defer"></script>
+      
+  <script type="text/javascript" src="sha_1a.js"></script>
+
+</head>
+<body>
+  <h2>POI DP Login</h2>
+  <h3>Choose your identity provider</h3>
+    <div>
+      <!-- Google login stuff Begin -->
+      <div>
+      <div id="google_signin_b" style="" class="g-signin2" 
+          data-onsuccess="onSignIn" data-theme="dark"></div>
+      <!-- Google login stuff End -->
+      <br>
+      <!-- KeyRock login stuff Begin -->
+      <div>
+      <button id="keyrock_login_b", onclick="keyrock_login_click(&quot;filab&quot;)">
+        <img src="filab_login_button.png"></button>
+      </div>
+      <!-- KeyRock login stuff End -->
+      <span id="result"></span>
+    </div>
+<script>
+//<!--
+"use strict"; // reveal bad scripting
+var this_href = location.href;
+var this_path = this_href.substring(0, this_href.lastIndexOf("/") + 1);
+
+// The interface for the results
+var done = false; // to be polled. true, when the logged_in is assigned
+var logged_in = false; //
+var user_token = "";
+var user_id_info = {name: "", 
+    image: "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA="}; // empty
+
+var BACKEND_ADDRESS_POI = "";
+
+var user_id_token; // To be used in server calls
+function onSignIn(googleUser) {
+  // Useful data for your client-side scripts:
+  var profile = googleUser.getBasicProfile();
+  console.log("ID: " + profile.getId()); // Don't send this directly 
+                                         // to your server!
+  user_id_info.name = profile.getName(); // AOk
+  user_id_info.image = profile.getImageUrl();  // AOk
+  user_id_info.email = profile.getEmail(); // AOk
+  
+  // The ID token you need to pass to your backend:
+  user_id_token = googleUser.getAuthResponse().id_token;
+  
+  go_login("google", user_id_token, go_signInResp); // AOk
+  
+};
+
+function finished() { // the place for final debut printing
+  done = true;
+  
+  console.log( JSON.stringify({
+      done: done, 
+      logged_in: logged_in,
+      user_token: user_token,
+      user_id_info: user_id_info
+      }));
+}
+
+function go_signInResp(response) {
+
+console.log("SignIn response: \"" + JSON.stringify(response) + "\"");
+  var auth2 = gapi.auth2.getAuthInstance();
+
+  if (response.login) {
+    logged_in = true;
+  } else {
+    alert("Sorry to inform you that\n" +
+          "the user is not known by this service.");
+  }
+  auth2.signOut();
+  finished();
+}
+
+
+var kr_user_id_info = {};
+
+function fl_signInResp(response) {
+
+console.log("SignIn response: \"" + JSON.stringify(response) + "\"");
+
+  if (response.login) {
+  
+    logged_in = true;
+    user_token = Sha1.hash(user_id_token);
+
+    get_ext_json(kr_user_id_info, keyrock_signin_host + "/user?" +
+        "access_token=" + user_id_token, fl_got_user_data, fl_no_user_data);
+    
+  } else {
+    alert("Sorry to inform you that\n" +
+          "the user is not known by this service.");
+  }
+}
+
+function fl_got_user_data() {
+    user_id_info.name = kr_user_id_info.displayName;
+    user_id_info.image = "kr_default_avatar.jpg";
+    
+    finished();
+}
+
+function fl_no_user_data() {
+    user_id_info.name = "KeyRock User";
+    user_id_info.image = this_path +
+        "kr_default_avatar.jpg"; // avatar in the same directory
+    
+    finished();
+}
+
+function go_login(auth_p, id_token, callback) {
+  var xhr = new XMLHttpRequest();
+  var restQueryURL = BACKEND_ADDRESS_POI + "login?auth_p=" + auth_p;
+  
+  xhr.open('POST', restQueryURL, true);
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  xhr.onload = function() {
+    var response, err;
+    try {
+      console.log("go_login response: " + xhr.responseText);
+      response = JSON.parse(xhr.responseText);
+      if (response.login) { // We're in!
+        user_token = Sha1.hash(id_token);
+      }
+    } catch(err) {
+      response = {"login":false,"message":"Bad response: " + err.message};
+    }
+    callback(response);
+  };
+  xhr.onerror = function() {
+      response = {"login":false,"message":"Login to server failed"};
+      callback(response);
+  };
+  xhr.send(id_token);
+}
+
+function parse_query_params(query_string) {
+  var query_arr;
+  var query_params = {};
+  if (query_string) {
+    query_string = query_string.replace(/;/g, "&"); // to support ; separator
+    query_arr = query_string.split('&');
+    for (var i = 0, query_arr_len = query_arr.length; i < query_arr_len; i++)
+    {
+      var qpar = query_arr[i].split('=');
+      query_params[qpar[0]] = qpar[1];
+    }       
+  }  
+  return query_params;
+}
+
+function ultimate_callback(params, fragment) {
+  var query_params = parse_query_params(fragment);
+  user_id_token = query_params.access_token;
+  go_login("fiware_lab", user_id_token, fl_signInResp);
+}
+
+var login_popup;
+var login_poll_timer;
+
+function poll_logged_in() {
+  try {
+    if(login_popup.login_done) {
+      clearInterval(login_poll_timer);
+      ultimate_callback(login_popup.query_params, login_popup.fragment);
+      login_popup.close();
+    }
+  }
+  catch(e) {}
+    
+}
+
+var keyrock_signin_host;
+
+function keyrock_login_click(auth_p_name) {
+  var client_id = document.head.querySelector("[name=" + auth_p_name + 
+      "-signin-client_id]").content;
+  var signin_callback = document.head.querySelector("[name=" + 
+      "oauth2-signin-callback]").content;
+      
+  keyrock_signin_host = document.head.querySelector("[name=" + auth_p_name + 
+      "-signin-host]").content;
+ // OAuth2 Implicit Grant requested
+  login_popup = window.open(keyrock_signin_host + "/oauth2/authorize/?" + 
+      "response_type=token&" +
+      "state=" + Math.random() + "&" +
+      "client_id=" + client_id + "&" + 
+      "redirect_uri=" + signin_callback,
+      "_blank", "width=500, height=610");
+  login_poll_timer = setInterval(poll_logged_in, 2000);
+}
+
+// Library stuff
+// =============
+     
+function deleteProperties(objectToClean) {
+  for (var x in objectToClean) if (objectToClean.hasOwnProperty(x)) 
+    delete objectToClean[x];
+}
+
+function get_ext_json(buf, url, success, fail) {
+  var xhr = new XMLHttpRequest();
+  
+  xhr.onreadystatechange = function () {
+    var key;
+    if(xhr.readyState === 4) {
+      if(xhr.status  === 200) { 
+        console.log("get_ext_json response: " + xhr.responseText);
+        var json = JSON.parse(xhr.responseText);
+        deleteProperties(buf);
+        for (key in json) {
+          buf[key] = json[key];
+        }
+        success(xhr);
+      }
+      else if (xhr.status === 404) { 
+        fail(xhr);
+      }
+    }
+  };
+
+  xhr.onerror = function (e) {
+    fail(xhr);
+  };
+  xhr.open("GET", url, true);
+  xhr.setRequestHeader("Accept", "application/json");
+  xhr.send();
+}
+
+// -->
+</script>
+</body>
+</html>

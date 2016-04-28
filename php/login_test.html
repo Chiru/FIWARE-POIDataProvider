@@ -1,0 +1,51 @@
+<html>
+<head>
+  <title>POI DP Login Test</title>
+</head>
+<body>
+  <h2>POI DP Login Test using lib</h2>
+  <div>
+    <!-- Begin access control elements: buttons, name, and image -->
+    <button id="login_b" style="" type="button" 
+        onclick="login_click();"><b>Log In</b></button>
+    <button id="logout_b" style="display:none" type="button" 
+        onclick="logout_click();"><b>Log Out</b></button>
+    <span id="login_user_name"></span>&nbsp;
+    <img id="login_user_image" 
+        src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" 
+        width="32" height="32"><br>
+    <!-- End access control elements -->
+    <!-- Include login library -->
+    <script type="text/javascript" src="login_lib.js"></script>
+  </div>
+  <div>
+    <h3>Status</h3>
+    <span id="status">Loaded</span>
+  </div>
+<script>
+//<!--
+"use strict"; // reveal bad scripting
+var LOGIN_SERVER = ""; // can be left blank if in the same location 
+
+var login_user_token = ""; // to be used in subsequent requests
+                           // as the auth_t parameter
+var login_user_info = {}; // {name: string, image: url_string}
+
+var login_completed = my_logged_in; // called when login completed
+var logout_completed = my_logged_out; // called when logout completed
+
+function my_logged_in() {
+    document.getElementById("status").innerHTML = "Logged in";
+}
+
+function my_logged_out() {  
+  document.getElementById("status").innerHTML = "Logged out";
+}
+
+document.getElementById("login_b").disabled = false;
+
+//-->
+</script>
+
+</body>
+</html>
