@@ -37,13 +37,16 @@ body_1_el.innerHTML = "<h1>Get Parameters</h1>";
   
   window.query_params = get_query_parameters();
   window.fragment = get_url_fragment();
-  
+
+  body_1_el.innerHTML += "One moment, please.";
+
+/*  
   body_1_el.innerHTML += "<p><code>query_parameters = " +
       JSON.stringify(window.query_params) + "</code></p>";
 
   body_1_el.innerHTML += "<p><code>url_fragment = " +
       JSON.stringify(window.fragment) + "</code></p>";
-
+*/
   window.login_done = true;
 
 // -->

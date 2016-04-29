@@ -1,0 +1,219 @@
+<html>
+<head>
+  <title>POI DP Login</title>
+  <!-- Google login parameters -->
+  <meta name="google-signin-scope" content="profile email" />
+  <meta name="google-signin-client_id" 
+      content="1032522970282-gtsgnea0phqlo86osef1jg1oo8dhficg.apps.googleusercontent.com"
+  />
+  <script src="https://apis.google.com/js/platform.js" async="async" 
+      defer="defer"></script>
+  <!-- KeyRock login parameters -->    
+  <meta name="keyrock-signin-callback" 
+      content="http://ari.webhop.org/poi_dp/redirect_callback.html">
+  <!-- KeyRock paramters for FIWARE Lab - Copy and edit for new KeyRock
+       authentication services. See instructions in KeyRock button below -->
+  <meta name="fiware_lab-signin-client_id"
+      content="ca1f7a4345c34d9e9235881f6795591e">
+  <meta name="fiware_lab-signin-host" content="https://account.lab.fiware.org">
+  
+  
+</head>
+<body>
+  <h2>POI DP Login</h2>
+  <h3>Choose your identity provider</h3>
+    <div>
+      <!-- Google login stuff Begin -->
+      <div>
+      <div id="google_signin_b" style="" class="g-signin2" 
+          data-onsuccess="onSignIn" data-theme="dark"></div>
+      <!-- Google login stuff End -->
+      <br>
+      <!-- KeyRock login stuff Begin -->
+      <!-- Copy and edit the following for each KeyRock authentication
+           service used. 
+           1. Replace both (sub)strings "fiware_lab" with your new login 
+           service id. It must be known by the login.php at the server.
+           2. Do the same for KeyRock parameters for FIWARE Lab.
+           3. Replace the image with the new login service logo.
+     -->
+      <div>
+      <button id="fiware_lab_login_b", onclick="keyrock_login_click(&quot;fiware_lab&quot;)">
+        <img src="filab_login_button.png"></button>
+      </div>
+      <!-- KeyRock login stuff End -->
+      <span id="result"></span>
+    </div>
+<script>
+//<!--
+"use strict"; // reveal bad scripting
+var this_href = location.href;
+var this_path = this_href.substring(0, this_href.lastIndexOf("/") + 1);
+
+// The interface for the results
+// =============================
+var done = false; // to be polled. true, when the logged_in is assigned
+var oauth2_token = "";
+var auth_p = ""; // authentication provider
+var user_id_info = {name: "", 
+    image: "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA="}; // empty
+// End interface
+
+// Google authentication
+// =====================
+
+function onSignIn(googleUser) {
+  // Useful data for your client-side scripts:
+  var profile = googleUser.getBasicProfile();
+  var auth2 = gapi.auth2.getAuthInstance();
+
+  console.log("ID: " + profile.getId()); // Don't send this directly 
+                                         // to your server!
+  user_id_info.name = profile.getName(); // AOk
+  user_id_info.image = profile.getImageUrl();  // AOk
+  user_id_info.email = profile.getEmail(); // AOk
+  
+  // The ID token you need to pass to your backend:
+  oauth2_token = googleUser.getAuthResponse().id_token;
+  auth_p  = "google";
+  
+  auth2.signOut();
+  finished();
+  
+};
+
+// KeyRock authentication
+// ======================
+
+var login_popup; // login window
+var login_poll_timer;
+var keyrock_signin_host;
+var keyrock_auth_p_name;
+
+
+// Login click
+
+function keyrock_login_click(auth_p_name) {
+  var client_id = document.head.querySelector("[name=" + auth_p_name + 
+      "-signin-client_id]").content; // KeyRock client id
+  var signin_callback = document.head.querySelector("[name=" + 
+      "keyrock-signin-callback]").content; // redirect after KeyRock
+      
+  keyrock_auth_p_name = auth_p_name;
+  keyrock_signin_host = document.head.querySelector("[name=" + auth_p_name + 
+      "-signin-host]").content;
+ // OAuth2 Implicit Grant requested in a pop-up window
+  login_popup = window.open(keyrock_signin_host + "/oauth2/authorize/?" + 
+      "response_type=token&" +
+      "state=" + Math.random() + "&" +
+      "client_id=" + client_id + "&" + 
+      "redirect_uri=" + signin_callback,
+      "_blank", "width=500, height=610");
+  // Start polling when KeyRock authentication done
+  login_poll_timer = setInterval(kr_poll_authenticated, 1000);
+}
+
+function kr_poll_authenticated() {
+  try {
+    if(login_popup.login_done) {
+      clearInterval(login_poll_timer);
+      kr_authenticated(keyrock_auth_p_name, login_popup.query_params,
+          login_popup.fragment);
+      login_popup.close();
+    }
+  }
+  catch(e) {}
+    
+}
+
+var kr_user_id_info = {}; // Buffer for identification data
+
+// Authenticated, request some user identification data: name, image, whatever
+
+function kr_authenticated(auth_p_name, params, fragment) {
+  var query_params = parse_query_params(fragment);
+  oauth2_token = query_params.access_token;
+  auth_p = auth_p_name;
+  get_ext_json(kr_user_id_info, keyrock_signin_host + "/user?" +
+    "access_token=" + oauth2_token, kr_got_user_data, kr_no_user_data);
+}
+
+function kr_got_user_data() {
+    user_id_info.name = kr_user_id_info.displayName;
+    user_id_info.image = "kr_default_avatar.jpg";
+    
+    finished();
+}
+
+function kr_no_user_data() {
+  // Did not get anything. Show something, anyway
+    user_id_info.name = "KeyRock User";
+    user_id_info.image = this_path +
+        "kr_default_avatar.jpg"; // avatar in the same directory
+    
+    finished();
+}
+
+// Finished
+// ========
+function finished() {
+  done = true; // That's all, folks
+  // If debug logging etc. needed
+}
+
+// Library stuff
+// =============
+     
+function parse_query_params(query_string) {
+  var query_arr;
+  var query_params = {};
+  if (query_string) {
+    query_string = query_string.replace(/;/g, "&"); // to support ; separator
+    query_arr = query_string.split('&');
+    for (var i = 0, query_arr_len = query_arr.length; i < query_arr_len; i++)
+    {
+      var qpar = query_arr[i].split('=');
+      query_params[qpar[0]] = qpar[1];
+    }       
+  }  
+  return query_params;
+}
+
+function deleteProperties(objectToClean) {
+  for (var x in objectToClean) if (objectToClean.hasOwnProperty(x)) 
+    delete objectToClean[x];
+}
+
+function get_ext_json(buf, url, success, fail) {
+  var xhr = new XMLHttpRequest();
+  
+  xhr.onreadystatechange = function () {
+    var key;
+    if(xhr.readyState === 4) {
+      if(xhr.status  === 200) { 
+        console.log("get_ext_json response: " + xhr.responseText);
+        var json = JSON.parse(xhr.responseText);
+        deleteProperties(buf);
+        for (key in json) {
+          buf[key] = json[key];
+        }
+        success(xhr);
+      }
+      else if (xhr.status === 404) { 
+        fail(xhr);
+      }
+    }
+  };
+
+  xhr.onerror = function (e) {
+    fail(xhr);
+  };
+  xhr.open("GET", url, true);
+  xhr.setRequestHeader("Accept", "application/json");
+  xhr.send();
+}
+
+// -->
+</script>
+</body>
+</html>

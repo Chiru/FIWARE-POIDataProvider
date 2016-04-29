@@ -59,6 +59,7 @@
 */
 var login_popup;
 var login_poll_timer;
+var user_token = "";
 
 function login_done(succeeded, login_data) {
   if (succeeded) {
@@ -80,35 +81,78 @@ function login_done(succeeded, login_data) {
   }
 }
 
+function login_authenticated(auth_data) {
+  /*
+    auth_data: {
+      oauth2_token: string,
+      auth_p:       string,
+      user_id_info: {
+        name: string,
+        image: url_string
+      }
+    }
+  */
+
+  var user_token;
+  var succeeded = false;
+  var login_data = {};
+  var response, err;
+  var xhr = new XMLHttpRequest();
+  var restQueryURL = LOGIN_SERVER + "login?auth_p=" + auth_data.auth_p;
+  
+  xhr.open('POST', restQueryURL, true);
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  xhr.onload = function() {
+    try {
+      console.log("go_login response: " + xhr.responseText);
+      response = JSON.parse(xhr.responseText);
+      if (response.login) { // We're in!
+ //       user_token = Sha1.hash(auth_data.oauth2_token);
+        user_token = response.token_sha1;
+        succeeded = true;
+        login_data = {
+          token: user_token,
+          user_info: auth_data.user_id_info
+        };
+          
+      }
+    } catch(err) {
+      console.log("Login failed: " + err.message);
+    }
+    login_done(succeeded, login_data);
+  };
+  xhr.onerror = function() {
+    login_done(false, {});
+  };
+  xhr.send(auth_data.oauth2_token);
+}
 
 function login_poll() {
-  // Polls when the login window finishes
+  // Polls when the authentication window finishes
   try {
     if(login_popup.done) {
       // finished, move to the next phase: login_done
       clearInterval(login_poll_timer);
-      if(login_popup.logged_in) {
-        login_done( true,
-            {
-              token: login_popup.user_token,
-              user_info: login_popup.user_id_info
-            }
-        );
-      } else {// else didn't succeed
-        login_done(false, null, null);
-      }
-
+      login_authenticated(
+        {
+          oauth2_token: login_popup.oauth2_token,
+          auth_p: login_popup.auth_p,
+          user_id_info: login_popup.user_id_info
+        }
+      );
       login_popup.close();
     }
   }
-  catch(e) {}
+  catch(e) {
+    console.log("Error: " + e.message);
+  }
     
 }
 
 function login_click() {
   // disable login button, open login window and start polling it
   document.getElementById("login_b").disabled = true;
-  login_popup = window.open(LOGIN_SERVER + "login.html",
+  login_popup = window.open(LOGIN_SERVER + "authenticate.html",
       "_blank", "width=500, height=610");
   login_poll_timer = setInterval(login_poll, 1000);
 }

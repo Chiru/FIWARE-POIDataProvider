@@ -22,7 +22,21 @@
         }
       }
     },
-    "keyrock": {
+    "fiware_lab": {
+      "ari": {
+        "name": "Ari Okkonen",
+        "photo": "http://www.example.com/ariokkon.jpg",
+        "address": "Kotikatu 60 A 22, 90990 Oulu, Finland",
+        "phone": "+356 8 123 456",
+        "email": "ari.okkonen@gmail.com",
+        "additional_emails": [],
+        "permissions": {
+          "admin": true,
+          "add": false,
+          "update": true,
+          "view": true
+        }
+      }
     }
   }
 }

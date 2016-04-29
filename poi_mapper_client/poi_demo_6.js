@@ -15,7 +15,6 @@ var ontology = "fw_osm";
 
 var poi_categories = {};
 var poi_schema = {};
-var poi_user_tok = ""; // SHA-1 of long user token
 
 /* Local POI database indexed by UUID */
 
@@ -283,44 +282,6 @@ function safe_html (rawstr) {
 
 (function ( namespace ) {
   // Authentication operations
-  namespace.go_login = function(id_token, callback) {
-    var xhr = new XMLHttpRequest();
-    var restQueryURL = BACKEND_ADDRESS_POI + "login?auth_p=google";
-    
-    xhr.open('POST', restQueryURL, true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onload = function() {
-      var response, err;
-      try {
-        response = JSON.parse(xhr.responseText);
-        if (response.login) { // We're in!
-          poi_user_tok = Sha1.hash(id_token);
-        }
-      } catch(err) {
-        response = {"login":false,"message":"Bad response: " + err.message};
-      }
-      callback(response);
-    };
-    xhr.onerror = function() {
-        response = {"login":false,"message":"Login to server failed"};
-        callback(response);
-    };
-    xhr.send(id_token);
-  }
-  
-  namespace.go_logout = function() {
-    var xhr = new XMLHttpRequest();
-    var restQueryURL = BACKEND_ADDRESS_POI + "logout?auth_t=" + poi_user_tok;
-    
-    poi_user_tok = "";
-    xhr.open('GET', restQueryURL, true);
-//    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onload = function() {
-        console.log('Signed out: ' + xhr.responseText);
-      };
-    xhr.send();
-    
-  }
 
   // MarkerOps class for marker events
   function MarkerOps(uuid) {
@@ -469,8 +430,8 @@ function safe_html (rawstr) {
     updating_data[uuid] = poi_data;
     
     restQueryURL = BACKEND_ADDRESS_POI + "update_poi" +
-        ((poi_user_tok != "") ?
-        ("?auth_t=" + poi_user_tok) : "");
+        ((login_user_token != "") ?
+        ("?auth_t=" + login_user_token) : "");
     miwi_poi_xhr = new XMLHttpRequest();
     
 //    miwi_poi_xhr.overrideMimeType("application/json");
@@ -740,8 +701,8 @@ function safe_html (rawstr) {
     
     restQueryURL = BACKEND_ADDRESS_POI + "get_pois?poi_id=" + uuid +
       "&get_for_update=true" +
-      ((poi_user_tok != "") ?
-      ("&auth_t=" + poi_user_tok) : "");
+      ((login_user_token != "") ?
+      ("&auth_t=" + login_user_token) : "");
     
     miwi_3d_xhr = new XMLHttpRequest();
     
@@ -783,8 +744,8 @@ function safe_html (rawstr) {
 //        show_POI_window(poiMarker, uuid);
     
     restQueryURL = BACKEND_ADDRESS_POI + "get_pois?poi_id=" + uuid +
-      ((poi_user_tok != "") ?
-      ("&auth_t=" + poi_user_tok) : "");
+      ((login_user_token != "") ?
+      ("&auth_t=" + login_user_token) : "");
     
     miwi_3d_xhr = new XMLHttpRequest();
     
@@ -825,8 +786,8 @@ function safe_html (rawstr) {
 
     if (cfm) {
       restQueryURL = BACKEND_ADDRESS_POI + "delete_poi?poi_id=" + uuid +
-        ((poi_user_tok != "") ?
-        ("&auth_t=" + poi_user_tok) : "");
+        ((login_user_token != "") ?
+        ("&auth_t=" + login_user_token) : "");
 
       miwi_3d_xhr = new XMLHttpRequest();
 
@@ -898,8 +859,8 @@ function safe_html (rawstr) {
     if (!checkPOI(poi_data)) return;
 
     restQueryURL = BACKEND_ADDRESS_POI + "add_poi" +
-        ((poi_user_tok != "") ?
-        ("?auth_t=" + poi_user_tok) : "");
+        ((login_user_token != "") ?
+        ("?auth_t=" + login_user_token) : "");
     miwi_poi_xhr = new XMLHttpRequest();
     
     miwi_poi_xhr.overrideMimeType("application/json");
@@ -1399,8 +1360,8 @@ function safe_html (rawstr) {
             searchRadius + "&component=fw_core" + 
             ((miwi_active_categories != "") ?
             ("&category=" + miwi_active_categories) : "") +
-            ((poi_user_tok != "") ?
-            ("&auth_t=" + poi_user_tok) : "");
+            ((login_user_token != "") ?
+            ("&auth_t=" + login_user_token) : "");
             
         miwi_poi_xhr = new XMLHttpRequest();
         
@@ -2094,7 +2055,7 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
         }
     }
 
-    function updateMap() {
+    namespace.updateMap = function() {
         searchPOIs();
     }
 

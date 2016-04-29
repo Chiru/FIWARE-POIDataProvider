@@ -1,12 +1,6 @@
 <html>
 <head>
   <title>POI DP User Management</title>
-  <meta name="google-signin-scope" content="profile email" />
-  <meta name="google-signin-client_id" 
-      content="1032522970282-gtsgnea0phqlo86osef1jg1oo8dhficg.apps.googleusercontent.com"
-  />
-  <script src="https://apis.google.com/js/platform.js" async="async" 
-      defer="defer"></script>
       
   <script type="text/javascript" src="sbje_json_edit.js"></script>
   <script type="text/javascript" src="sha_1a.js"></script>
@@ -17,19 +11,20 @@
 <body>
   <h2>POI DP User Account Management</h2>
     <div>
-      <!-- Google login stuff Begin -->
-      <div id="google_signin_b" style="" class="g-signin2" 
-          data-onsuccess="onSignIn" data-theme="dark"></div>
-      <button id="signout_b" style="display:none" type="button" 
-          onclick="signOut();"><b>Sign out</b></button>
-      <!-- Google login stuff End -->
-      <br>
-      <span id="user_name"></span>&nbsp;
-      <img id="user_photo" 
-          src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" 
-          width="32" height="32"><br>
-      <span id="result"></span>
+          <!-- Begin access control elements: buttons, name, and image -->
+          <button id="login_b" style="" type="button" 
+              onclick="login_click();"><b>Log In</b></button>
+          <button id="logout_b" style="display:none" type="button" 
+              onclick="logout_click();"><b>Log Out</b></button>
+          <span id="login_user_name"></span>&nbsp;
+          <img id="login_user_image" 
+              src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" 
+              width="32" height="32"><br>
+          <!-- End access control elements -->
+          <!-- Include login library -->
+          <script type="text/javascript" src="login_lib.js"></script>
     </div>
+    <hr>
     <div>
       <div style="float:left;width:50%">
         <div id="user_choices">
@@ -88,101 +83,29 @@ function str2html (rawstr) {
 }
 
 var user_schema = {};
-var poi_user_tok = ""; // SHA-1 of long user token
 
-var user_id_token; // To be used in server calls
-var user_id_info = {}; // {name: string, photo: url_string}
-function onSignIn(googleUser) {
-  // Useful data for your client-side scripts:
-  var profile = googleUser.getBasicProfile();
-  console.log("ID: " + profile.getId()); // Don't send this directly 
-                                         // to your server!
-  user_id_info.name = profile.getName(); // AOk
-  user_id_info.photo = profile.getImageUrl();  // AOk
-  
-  console.log("Name: " + profile.getName());
-  console.log("Image URL: " + profile.getImageUrl());
-  console.log("Email: " + profile.getEmail());
+// var LOGIN_SERVER = "http://www.example.org/poi_dp/"; // Note 
+                                                   // trailing slash!
+var LOGIN_SERVER = ""; // can be left blank if in the same location 
 
-  // The ID token you need to pass to your backend:
-  user_id_token = googleUser.getAuthResponse().id_token;
-  console.log("ID Token: " + user_id_token);
-  
-  go_login(user_id_token, signInResp); // AOk
-  
-};
+var login_user_token = ""; // to be used in subsequent requests
+                           // as the auth_t parameter
+var login_user_info = {}; // {name: string, image: url_string}
 
-function signInResp(response) {
+var login_completed = my_logged_in; // called when login completed
+var logout_completed = my_logged_out; // called when logout completed
 
-console.log("SignIn response: \"" + JSON.stringify(response) + "\"");
-  var auth2 = gapi.auth2.getAuthInstance();
-
-  if (response.login) {
-    document.getElementById("user_name").innerHTML = user_id_info.name;
-    document.getElementById("user_photo").setAttribute("src", 
-        user_id_info.photo);
-    auth2.signOut();
-  } else {
-    auth2.signOut().then(function() {
-        alert("Sorry to inform you that\n" +
-              "the user is not known by this service.");});
-  }
-  document.getElementById("google_signin_b").style.display = "none";
-  document.getElementById("signout_b").style.display = "inline";
-  
+function my_logged_in() {
   stm.fn.signed_in();
 }
 
-function signOut() {
-  var auth2 = gapi.auth2.getAuthInstance();
-  auth2.signOut().then(function () {
-      document.getElementById("user_name").innerHTML = "";
-      document.getElementById("user_photo").setAttribute("src",
-          "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=");
-      document.getElementById("google_signin_b").style.display = "inline";
-      document.getElementById("signout_b").style.display = "none";
-      go_logout();
-  });
+function my_logged_out() {  
+  stm.fn.signed_out();
 }
 
-function go_logout() {
-  var xhr = new XMLHttpRequest();
-  var restQueryURL = BACKEND_ADDRESS_POI + "logout?auth_t=" + poi_user_tok;
-  
-  poi_user_tok = "";
-  xhr.open('GET', restQueryURL, true);
-  xhr.onload = function() {
-      console.log('Signed out: ' + xhr.responseText);
-      stm.fn.signed_out();
-    };
-  xhr.send();
-  
-}
 
-function go_login(id_token, callback) {
-  var xhr = new XMLHttpRequest();
-  var restQueryURL = BACKEND_ADDRESS_POI + "login?auth_p=google";
-  
-  xhr.open('POST', restQueryURL, true);
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.onload = function() {
-    var response, err;
-    try {
-      response = JSON.parse(xhr.responseText);
-      if (response.login) { // We're in!
-        poi_user_tok = Sha1.hash(id_token);
-      }
-    } catch(err) {
-      response = {"login":false,"message":"Bad response: " + err.message};
-    }
-    callback(response);
-  };
-  xhr.onerror = function() {
-      response = {"login":false,"message":"Login to server failed"};
-      callback(response);
-  };
-  xhr.send(id_token);
-}
+// Ensure that the login button is enabled if the page is reloaded.
+document.getElementById("login_b").disabled = false;
 
 function click_new() {
   user_under_editing_id = "new";
@@ -354,9 +277,9 @@ var user_data_buffer = {};
 
 function get_user_data(user_id, success, fail) {
   var url = BACKEND_ADDRESS_POI + "get_user?user_id=" + user_id +
-    "&auth_t=" + poi_user_tok;
+    "&auth_t=" + login_user_token;
     
-  get_ext_json(user_data_buffer, url, success, fail)
+  get_ext_json(user_data_buffer, url, success, fail);
   
 }
 
@@ -495,7 +418,7 @@ var user_data_list; // accounts from the server
 function load_user_list() {
   var response; // why this?
   var xhr = new XMLHttpRequest();
-  var restQueryURL = BACKEND_ADDRESS_POI + "find_users?auth_t=" + poi_user_tok;
+  var restQueryURL = BACKEND_ADDRESS_POI + "find_users?auth_t=" + login_user_token;
   // ToDo: add skip & limit parameters
   xhr.open('GET', restQueryURL, true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -537,7 +460,7 @@ function update_user( user_data , success) {
 //  if (!checkPOI(user_data)) return;
 
   restQueryURL = BACKEND_ADDRESS_POI + "update_user" +
-      "?auth_t=" + poi_user_tok;
+      "?auth_t=" + login_user_token;
   xhr = new XMLHttpRequest();
   
   xhr.overrideMimeType("application/json");
@@ -579,7 +502,7 @@ function add_user( user_data , success) {
 //  if (!checkPOI(user_data)) return;
 
   restQueryURL = BACKEND_ADDRESS_POI + "add_user" +
-      "?auth_t=" + poi_user_tok;
+      "?auth_t=" + login_user_token;
   xhr = new XMLHttpRequest();
   
   xhr.overrideMimeType("application/json");
@@ -615,7 +538,7 @@ function add_user( user_data , success) {
 
 function confirmed_remove_user(user_id, success) {
   var restQueryURL = BACKEND_ADDRESS_POI + "delete_user?user_id=" + user_id +
-        "&auth_t=" + poi_user_tok;
+        "&auth_t=" + login_user_token;
 
   var xhr = new XMLHttpRequest();
 
@@ -650,6 +573,7 @@ function get_ext_json(buf, url, success, fail) {
     var key;
     if(xhr.readyState === 4) {
       if(xhr.status  === 200) { 
+        console.log("get_ext_json response: " + xhr.responseText);
         var json = JSON.parse(xhr.responseText);
         deleteProperties(buf);
         for (key in json) {
@@ -667,6 +591,7 @@ function get_ext_json(buf, url, success, fail) {
     fail(xhr);
   };
   xhr.open("GET", url, true);
+  xhr.setRequestHeader("Accept", "application/json");
   xhr.send();
 }
 

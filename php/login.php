@@ -63,17 +63,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
             )
           );
     }
-  } else if ($auth_p == 'keyrock') {
-    // to be done
-    $user = null; $user_id = null; // set either
-    $identification = array(
-      'provider' => 'keyrock',
-      'keyrock' => array(
-        'email' => $email, // or something
-        'token' => $request_body // or something
-      )
-    );
+  } else if ($auth_p == 'fiware_lab') {
+    
+    $output_msg = http_get('https://account.lab.fiware.org/user?' .
+        'access_token=' . $request_body);
+    
+    $output_data = http_parse_message($output_msg);
+    
+    $gauth_body = json_decode($output_data->body);
 
+    $id = $gauth_body->id;
+    if ($id) { // recognized by fiware_lab
+      if ($hard_auths['fiware_lab'][$id]) {
+        $user = $hard_auths['fiware_lab'][$id];
+      } else {
+        $auth_fiware_lab = $mongodb->_auth_fiware_lab;
+            // fiware_lab authentication mappings
+        
+        $user_id = $auth_fiware_lab->findOne(array("_id" => $id), 
+            array("_id" => false))['user'];
+
+      }
+      $identification = array(
+            'provider' => 'fiware_lab',
+            'fiware_lab' => array(
+              'id' => $id,
+              'token' => $request_body
+            )
+          );
+    }
   } 
   // $user or $user_id is set, $identification is set
   

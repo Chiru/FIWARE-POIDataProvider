@@ -82,10 +82,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
         header("HTTP/1.0 401 Unauthorized");
         echo '{"registration":false,"msg":"Denied by authorization provider"}';
       }
-    } else if ($auth_p == 'keyrock') {
-      // KeyRock not yet implemented
-      header("HTTP/1.0 401 Unauthorized");
-      echo '{"registration":false,"msg":"KeyRock not implemented."}';
+    } else if ($auth_p == 'fiware_lab') {
+      $output_msg = http_get('https://account.lab.fiware.org/user?' .
+          'access_token=' . $request_body);
+      $output_data = http_parse_message($output_msg);
+      $gauth_body = json_decode($output_data->body);
+      
+      $id = $gauth_body->id;
+      $email = $gauth_body->email;
+      if ($id) { // recognized by keyrock
+
+        $auth_fiware_lab = $mongodb->_auth_fiware_lab; // FIWARE Lab 
+                                                    // authentication mappings
+        // Check for double registration
+        if(!$auth_fiware_lab->findOne(array("_id" => $id), 
+            array("_id" => false))) {
+          $auth_mapping = array(
+            '_id' => $id,
+            'user' => $user_id,
+            'registration_time' => time()
+          );
+        
+          $auth_fiware_lab->insert($auth_mapping);
+          $users = $mongodb->_users;
+          $user = $users->findOne(array("_id" => $user_id), 
+            array("_id" => false));
+          $user['identification']['fiware_lab'] = array('id' => $id);
+          $users->update(array("_id" => $user_id),$user);
+        }
+        echo '{"registration":true,"name":"' . $user['name'] . '"}';
+      } else {
+        header("HTTP/1.0 401 Unauthorized");
+        echo '{"registration":false,"msg":"Denied by authorization provider"}';
+      }
     } else {
       header("HTTP/1.0 401 Unauthorized");
       echo '{"registration":false,"msg":"Unknown authorization provider"}';
