@@ -6,7 +6,7 @@ CREATE TABLE fw_core
   categories character varying(64)[],
   location geography,
   geometry geometry,
-  osm_id integer, -- OpenStreetMap ID (for POIs imported from OSM)
+  osm_id bigint, -- OpenStreetMap ID (for POIs imported from OSM)
   thumbnail text,
   "timestamp" bigint,
   userid uuid,
