@@ -163,7 +163,7 @@ function popup_fill(menu_id, menu, canc_text) {
   menu_div_html +=            
       "<hr></hr>" +
       "<p style=\"font-style:italic\" class=\"sl_option\" data=\"\">" + 
-      canc_text + "<p>" + "</div>";
+      canc_text + "</p>" + "</div>";
 
   menu_div_el = htmlToElement(menu_div_html);
   

@@ -1,4 +1,4 @@
-/* poi_demo_6.js v.5.2.1.1 2016-01-29 ariokkon */
+/* poi_demo_6.js v.5.3.2.1 2016-05-24 ariokkon */
 
 // "use strict"; // useful in debugging
 
@@ -208,8 +208,8 @@ function html_ent2xml (rawstr) {
       }
     }
     i++;
-	}
-	return result;
+  }
+  return result;
 }
 /*-------------*/
 
@@ -230,11 +230,11 @@ function html_ent2xml (rawstr) {
         
         
 var str2html_table = {
-	"<": "&lt;",
-	"&": "&amp;",
-	"\"": "&quot;",
-	"'": "&apos;",
-	">": "&gt;",
+  "<": "&lt;",
+  "&": "&amp;",
+  "\"": "&quot;",
+  "'": "&apos;",
+  ">": "&gt;",
 };
 
 function str2html (rawstr) {
@@ -257,25 +257,25 @@ function str2html (rawstr) {
 /*-----------------*/
 
 var safe_html_table = {
-	"<": "&lt;"
+  "<": "&lt;"
 };
 
 function safe_html (rawstr) {
-	var result = "";
+  var result = "";
     var code;
     if (!rawstr) {
         rawstr = "";
     }
-	for (var i = 0; i < rawstr.length; i++) {
+  for (var i = 0; i < rawstr.length; i++) {
         code = rawstr.charCodeAt(i);
         if (code < 0x7f) {
             result = result + (safe_html_table[rawstr[i]] ? 
-				(safe_html_table[rawstr[i]]) : (rawstr[i]));
+        (safe_html_table[rawstr[i]]) : (rawstr[i]));
         } else {
             result = result + "&#x" + code.toString(16) + ";";
         }
-	}
-	return result;
+  }
+  return result;
 }
 
 /**/
@@ -292,28 +292,7 @@ function safe_html (rawstr) {
         Right click shows context menu
       */
       var my = this; // 'this' does not seem to behave well in closure
-      POIMenu.show(mouseEvent.latLng);
-      google.maps.event.clearListeners(POIMenu, 'menu_item_selected');
-      google.maps.event.addListener(POIMenu, 'menu_item_selected', function(latLng, eventName){
-        my.menu_item_selected(latLng, eventName);
-      });
-
-    };
-    this.menu_item_selected = function(latLng, eventname){
-      switch (eventname) {
-        case 'toggle_poi_select_click': {
-        
-        } break;
-        case 'edit_poi_click': {
-          POI_edit(uuid);
-        
-        } break;
-        case 'delete_poi_click': {
-          POI_delete(uuid);
-        
-        } break;
-
-      };
+      POIMenu.show(mouseEvent.latLng, null, uuid);
     };
   };
 
@@ -434,13 +413,11 @@ function safe_html (rawstr) {
         ("?auth_t=" + login_user_token) : "");
     miwi_poi_xhr = new XMLHttpRequest();
     
-//    miwi_poi_xhr.overrideMimeType("application/json");
     miwi_poi_xhr.onreadystatechange = function () {
       var data;
       var poiMarker;
       if(miwi_poi_xhr.readyState === 4) {
         if(miwi_poi_xhr.status  === 200) { 
-  //                alert( "success: " + miwi_poi_xhr.responseText);
           POI_edit_cancel();
   // Todo: Combine the following 3 operations everywhere!   
           removePOI_UUID_FromMap(uuid);
@@ -800,7 +777,6 @@ function safe_html (rawstr) {
             removePOI_UUID_FromMap(uuid);
             delete miwi_poi_pois[uuid];
             unstorePoi(uuid);
-//                        alert("Success: " + miwi_3d_xhr.responseText);
           } else {
             alert("Failed: "+miwi_3d_xhr.status+" "+miwi_3d_xhr.responseText);
           }
@@ -811,7 +787,6 @@ function safe_html (rawstr) {
         log("failed to delete POI " + JSON.stringify(e));
       };
 
-//        miwi_3d_xhr.open("GET", restQueryURL, true);
       miwi_3d_xhr.open("DELETE", restQueryURL, true);
       miwi_3d_xhr.send();
     }
@@ -852,7 +827,7 @@ function safe_html (rawstr) {
   namespace.initialize = function () {
     console.log( "Callback from GMaps. Initialising the demo." );
 
-  function addPOI( poi_data, dummy ) {
+  namespace.addPOI = function ( poi_data, dummy ) {
     var restQueryURL;
     var responseText;
 
@@ -904,158 +879,10 @@ function safe_html (rawstr) {
     };
 
     miwi_poi_xhr.open("POST", restQueryURL, true);
-  //        miwi_poi_xhr.setRequestHeader('Content-Type', 'application/json');
-  //alert("### "+JSON.stringify(poi_data));
     miwi_poi_xhr.send(JSON.stringify(poi_data));
 
   }
   
-    
-
-
-  /* ContextMenu.js copied below 
-     =========================== */
-  /*
-    ContextMenu v1.0
-    
-    A context menu for Google Maps API v3
-    http://code.martinpearman.co.uk/googlemapsapi/contextmenu/
-    
-    Copyright Martin Pearman
-    Last updated 21st November 2011
-    
-    developer@martinpearman.co.uk
-    
-    This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  */
-
-  function ContextMenu(map, options) {
-    options=options || {};
-    var key;
-    this.setMap(map);
-    
-    this.classNames_=options.classNames || {};
-    this.map_=map;
-    this.mapDiv_=map.getDiv();
-    this.menuItems_=options.menuItems || [];
-    this.pixelOffset=options.pixelOffset || new google.maps.Point(10, -5);
-  }
-
-  ContextMenu.prototype=new google.maps.OverlayView();
-
-  ContextMenu.prototype.draw=function(){
-    if(this.isVisible_){
-      var mapSize=new google.maps.Size(this.mapDiv_.offsetWidth, this.mapDiv_.offsetHeight);
-      var menuSize=new google.maps.Size(this.menu_.offsetWidth, this.menu_.offsetHeight);
-      var mousePosition=this.getProjection().fromLatLngToDivPixel(this.position_);
-      
-      var left=mousePosition.x;
-      var top=mousePosition.y;
-      
-      if(mousePosition.x>mapSize.width-menuSize.width-this.pixelOffset.x){
-        left=left-menuSize.width-this.pixelOffset.x;
-      } else {
-        left+=this.pixelOffset.x;
-      }
-      
-      if(mousePosition.y>mapSize.height-menuSize.height-this.pixelOffset.y){
-        top=top-menuSize.height-this.pixelOffset.y;
-      } else {
-        top+=this.pixelOffset.y;
-      }
-      
-      this.menu_.style.left=left+'px';
-      this.menu_.style.top=top+'px';
-    }
-  };
-
-  ContextMenu.prototype.getVisible=function(){
-    return this.isVisible_;
-  };
-
-  ContextMenu.prototype.hide=function(){
-    if(this.isVisible_){
-      this.menu_.style.display='none';
-      this.isVisible_=false;
-    }
-  };
-
-  ContextMenu.prototype.onAdd=function() {
-    function createMenuItem(values){
-      var menuItem=document.createElement('div');
-      menuItem.innerHTML=values.label;
-      if(values.className){
-        menuItem.className=values.className;
-      }
-      if(values.id){
-        menuItem.id=values.id;
-      }
-      menuItem.style.cssText='cursor:pointer; white-space:nowrap';
-      menuItem.onclick=function(){
-        google.maps.event.trigger($this, 'menu_item_selected', $this.position_, values.eventName);
-      };
-      return menuItem;
-    }
-    function createMenuSeparator(){
-      var menuSeparator=document.createElement('div');
-      if($this.classNames_.menuSeparator){
-        menuSeparator.className=$this.classNames_.menuSeparator;
-      }
-      return menuSeparator;
-    }
-    var $this=this;	//	used for closures
-    
-    var menu=document.createElement('div');
-    if(this.classNames_.menu){
-      menu.className=this.classNames_.menu;
-    }
-    menu.style.cssText='display:none; position:absolute';
-    
-    for(var i=0, j=this.menuItems_.length; i<j; i++){
-      if(this.menuItems_[i].label && this.menuItems_[i].eventName){
-        menu.appendChild(createMenuItem(this.menuItems_[i]));
-      } else {
-        menu.appendChild(createMenuSeparator());
-      }
-    }
-    
-    delete this.classNames_;
-    delete this.menuItems_;
-    
-    this.isVisible_=false;
-    this.menu_=menu;
-    this.position_=new google.maps.LatLng(0, 0);
-    
-    google.maps.event.addListener(this.map_, 'click', function(mouseEvent){
-      $this.hide();
-    });
-    
-    this.getPanes().floatPane.appendChild(menu);
-  };
-
-  ContextMenu.prototype.onRemove=function(){
-    this.menu_.parentNode.removeChild(this.menu_);
-    delete this.mapDiv_;
-    delete this.menu_;
-    delete this.position_;
-  };
-
-  ContextMenu.prototype.show=function(latLng){
-    if(!this.isVisible_){
-      this.menu_.style.display='block';
-      this.isVisible_=true;
-    }
-    this.position_=latLng;
-    this.draw();
-  };
-
-
-  /* end ContextMenu.js
-     ================== */
 
   function adjust_search_radius() {
     var bounds = map.getBounds();
@@ -1072,8 +899,7 @@ function safe_html (rawstr) {
  
   document.querySelector( '#button1' ).onclick = locate;
   document.querySelector( '#button2' ).onclick = codeAddress;
-//       document.querySelector( '#categories' ).onchange = category_changed;
-//       document.querySelector( '#button4' ).onclick = updateMap;
+  document.querySelector( '#address' ).onchange = codeAddress; // enter, etc.
 
   geocoder = new google.maps.Geocoder();
 
@@ -1127,8 +953,6 @@ function safe_html (rawstr) {
       var mapCenter = map.getCenter(), dist, minDist = Infinity, i, len,
         searchPoints = oldSearchPoints[searchRadius + ''];
 
-      //TODO: Experimental feature. Reducing amount of queries to backend.
-      // (wip)
       dist = distHaversine( mapCenter, oldMapCenter );
       // Center has to move enough before looking through old search 
       // points. Reduces processing amount.
@@ -1174,45 +998,35 @@ function safe_html (rawstr) {
       function(){}, function (){alert("POI schema not available");});
   /*  Context menu setup
       ==================
-  */
-	//	create the ContextMenuOptions object
-	var contextMenuOptions={};
-	contextMenuOptions.classNames={menu:'context_menu', menuSeparator:'context_menu_separator'};
+  //  create the ContextMenuOptions object
+  var contextMenuOptions={};
+  contextMenuOptions.classNames={menu:'context_menu', menuSeparator:'context_menu_separator'};
 
-	//	create an array of ContextMenuItem objects
-	var menuItems=[];
-//	menuItems.push({className:'context_menu_item', eventName:'zoom_in_click', label:'Zoom in'});
-//	menuItems.push({className:'context_menu_item', eventName:'zoom_out_click', label:'Zoom out'});
+  //  create an array of ContextMenuItem objects
+  var menuItems=[];
+//  menuItems.push({className:'context_menu_item', eventName:'zoom_in_click', label:'Zoom in'});
+//  menuItems.push({className:'context_menu_item', eventName:'zoom_out_click', label:'Zoom out'});
   if (fw_editAllowed) {
       menuItems.push({className:'context_menu_item', eventName:'add_poi_click', label:'Add POI'});
   }
-	//	a menuItem with no properties will be rendered as a separator
-	menuItems.push({});
-	menuItems.push({className:'context_menu_item', eventName:'center_map_click', label:'Center map here'});
-	contextMenuOptions.menuItems=menuItems;
-	
-	//	create the ContextMenu object
-	var contextMenu=new ContextMenu(map, contextMenuOptions);
-	
-	//	display the ContextMenu on a Map right click
-	google.maps.event.addListener(map, 'rightclick', function(mouseEvent){
-		contextMenu.show(mouseEvent.latLng);
-	});
-	
-	//	listen for the ContextMenu 'menu_item_selected' event
-	google.maps.event.addListener(contextMenu, 'menu_item_selected', function(latLng, eventName){
-		//	latLng is the position of the ContextMenu
-		//	eventName is the eventName defined for the clicked ContextMenuItem in the ContextMenuOptions
-		switch(eventName){
-/*    
-			case 'zoom_in_click':
-				map.setZoom(map.getZoom()+1);
-				break;
-			case 'zoom_out_click':
-				map.setZoom(map.getZoom()-1);
-				break;
- */
-			case 'add_poi_click':
+  //  a menuItem with no properties will be rendered as a separator
+  menuItems.push({});
+  menuItems.push({className:'context_menu_item', eventName:'center_map_click', label:'Center map here'});
+  contextMenuOptions.menuItems=menuItems;
+  //  create the ContextMenu object
+ XX  
+  var contextMenu=new ContextMenu(map, contextMenuOptions);
+  //  display the ContextMenu on a Map right click
+  google.maps.event.addListener(map, 'rightclick', function(mouseEvent){
+    contextMenu.show(mouseEvent.latLng);
+  });
+  
+  //  listen for the ContextMenu 'menu_item_selected' event
+  google.maps.event.addListener(contextMenu, 'menu_item_selected', function(latLng, eventName){
+    //  latLng is the position of the ContextMenu
+    //  eventName is the eventName defined for the clicked ContextMenuItem in the ContextMenuOptions
+    switch(eventName){
+      case 'add_poi_click':
                 poi_edit_buffer = {
                     "fw_core": {
                         "location": {
@@ -1227,13 +1041,13 @@ function safe_html (rawstr) {
                 };        
                 OpenAndEditInPOIEditWindow("Add POI", "Fill-in values for new POI", 
                     poi_edit_buffer, null, POI_edit_cancel, addPOI);
-				break;
+        break;
 
-			case 'center_map_click':
-				map.panTo(latLng);
-				break;
-		}
-	});
+      case 'center_map_click':
+        map.panTo(latLng);
+        break;
+    }
+  });
 
 /* end context menu setup */
 
@@ -1241,54 +1055,55 @@ function safe_html (rawstr) {
     ==================
 */
 
-	//	create the ContextMenuOptions object
-	var POIMenuOptions={};
-	POIMenuOptions.classNames={menu:'context_menu', menuSeparator:'context_menu_separator'};
-	
-	//	create an array of ContextMenuItem objects
-	var POImenuItems=[];
-	POImenuItems.push({className:'context_menu_item', eventName:'toggle_poi_select_click', label:'Toggle selection'});
-	//	a menuItem with no properties will be rendered as a separator
-	POImenuItems.push({});
+  //  create the ContextMenuOptions object
+  /*
+  var POIMenuOptions={};
+  POIMenuOptions.classNames={menu:'context_menu', menuSeparator:'context_menu_separator'};
+  
+  //  create an array of ContextMenuItem objects
+  var POImenuItems=[];
+  POImenuItems.push({className:'context_menu_item', eventName:'toggle_poi_select_click', label:'Toggle selection'});
+  //  a menuItem with no properties will be rendered as a separator
+  POImenuItems.push({});
     if (fw_editAllowed) {
         POImenuItems.push({className:'context_menu_item', eventName:'edit_poi_click', label:'Edit this POI'});
         POImenuItems.push({className:'context_menu_item', eventName:'delete_poi_click', label:'DELETE this POI'});
     }
-	POIMenuOptions.menuItems=POImenuItems;
-	
-	//	create the ContextMenu object
-	POIMenu=new ContextMenu(map, POIMenuOptions);
-	
-	//	display the ContextMenu on a Map right click
-/*
- 	google.maps.event.addListener(map, 'rightclick', function(mouseEvent){
-		POIMenu.show(mouseEvent.latLng);
-	});
-*/	
-	//	listen for the ContextMenu 'menu_item_selected' event
-	google.maps.event.addListener(POIMenu, 'menu_item_selected', function(latLng, eventName){
-		//	latLng is the position of the ContextMenu
-		//	eventName is the eventName defined for the clicked ContextMenuItem in the ContextMenuOptions
-    
-		switch(eventName){
-			case 'toggle_poi_select_click': {
-				map.setZoom(map.getZoom()+1);
-			} break;
-			case 'edit_poi_click': {
-				map.setZoom(map.getZoom()-1);
-			} break;
-  	}
-	});
+  POIMenuOptions.menuItems=POImenuItems;
+  */
+  var POIMenuOptions = {
+      id: "poi_menu_id",
+      options: {},
+      cancel: "Cancel", // The item to dismiss the menu
+      select: poi_menu_click // Called, when a menu item is selected
+    };
 
-/* end POI menu setup */
-
-
-
+  if (fw_editAllowed) {
+    POIMenuOptions.options["edit_poi_click"] = "Edit this POI";
+    POIMenuOptions.options["delete_poi_click"] = "DELETE this POI";
+  }
+  //  create the ContextMenu object
+  POIMenu = new Overlay_menu_gm(map, POIMenuOptions);
     
         // HTML5 Geolocation
         
         locate();
         searchPOIs();
+        
+      var mapmenu = {
+        id: "mapmenu",
+        options: {
+          add_poi_click: "Add POI!",
+        },
+        cancel: "Cancel",
+        select: map_menu_click
+      };
+
+      var overlay = new Overlay_menu_gm(map, mapmenu);
+            
+      google.maps.event.addListener(map, 'rightclick', function(mouseEvent){
+        overlay.show(mouseEvent.latLng);
+      });
 
     };
 
@@ -1856,7 +1671,7 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
         google.maps.event.addListener( poiMarker, op, function () {
             POI_onClick(poiMarker, uuid);
         });
-    }	
+    } 
         
     function addPOI_UUID_ToMap( pos, data, uuid ) {
         var poiMarker, contents, content, i, j, len, poi_data,
@@ -2379,11 +2194,48 @@ if (poiCore && poiCore.hasOwnProperty("category") && !poiCore.hasOwnProperty("ca
         return map;
     };
 
-// For POI polling, enable this or something
-//    setInterval(searchPOIs, 10000);
 
-  //window.onload = loadScript;
- 
+
+// Popup
+function map_menu_click(id, eventName, lat, lng, data){
+  //  (lat, lng) is the position of the ContextMenu
+  //  eventName is the key of the menu option
+  switch(eventName){
+    case 'add_poi_click': {
+          poi_edit_buffer = {
+            "fw_core": {
+              "location": {
+                "wgs84": {
+                  "latitude": lat,
+                  "longitude": lng
+                }
+              },
+              "categories": [ "_undefined" ],
+              "name": {}
+            }
+          };        
+          OpenAndEditInPOIEditWindow("Add POI", "Fill-in values for new POI", 
+              poi_edit_buffer, null, POI_edit_cancel, demo4.addPOI);
+    } break;
+  }
+}
+
+function poi_menu_click(id, eventName, lat, lng, uuid){
+  switch (eventName) {
+    case 'toggle_poi_select_click': {
+    
+    } break;
+    case 'edit_poi_click': {
+      POI_edit(uuid);
+    
+    } break;
+    case 'delete_poi_click': {
+      POI_delete(uuid);
+    
+    } break;
+
+  };
+}
+
 }( window['demo4'] = window.demo4 || {} ));
 
-// alert(document.URL);

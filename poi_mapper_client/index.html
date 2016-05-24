@@ -9,6 +9,7 @@
 
   <!-- Style -->
   <link rel="stylesheet" type="text/css" media="all" href="layout.css" />
+  <link rel="stylesheet" type="text/css" media="all" href="selection_list.css" />
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 
   <script>
@@ -17,6 +18,8 @@
       // double negation normalizes the result to true or false
   </script>
       
+ <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+  <script src="ol_menu_gm.js"></script>
   <script type="text/javascript" src="category_3_3.js"></script>
   <script type="text/javascript" src="sbje_json_edit.js"></script>
   <script type="text/javascript" src="sha_1a.js"></script>
@@ -84,7 +87,7 @@
 		    </a>
         <div id="buttons">
             Position:
-            <input type="text" id="address" style="width:300px;" value="address/lat lon"/>
+            <input type="text" id="address" style="width:300px;"  onchange="XXX" value="address/lat lon"/>
             <button id="button2">Go to position</button>
             <button id="button1" title="Find my true location">Locate me</button>
         </div>
@@ -109,11 +112,10 @@
         </div>
     </div>
 </div>
-
+ 
 <script type="text/javascript" src="Util.js"></script>
 <script type="text/javascript" src="poi_demo_6.js"></script>
 <script type="text/javascript" src="icon_strings.js"></script>
-<script type="text/javascript" async defer src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=true&amp;callback=demo4.initialize"></script>
 
 <script type="text/javascript">
 // var LOGIN_SERVER = "http://www.example.org/poi_dp/"; // Note 
@@ -176,8 +178,11 @@ function show_help() {
 }
 
 window.onload = loaded;
+google.maps.event.addDomListener(window, 'load', demo4.initialize);
 
 </script>
+<!--
+-->
 
 
 </body>
