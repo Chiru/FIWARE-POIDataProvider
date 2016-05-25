@@ -9,8 +9,7 @@
   <script src="https://apis.google.com/js/platform.js" async="async" 
       defer="defer"></script>
   <!-- KeyRock login parameters -->    
-  <meta name="keyrock-signin-callback" 
-      content="http://ari.webhop.org/poi_dp/redirect_callback.html">
+  <meta name="keyrock-signin-callback" content="redirect_callback.html">
   <!-- KeyRock paramters for FIWARE Lab - Copy and edit for new KeyRock
        authentication services. See instructions in KeyRock button below -->
   <meta name="fiware_lab-signin-client_id"
@@ -89,6 +88,7 @@ var login_popup; // login window
 var login_poll_timer;
 var keyrock_signin_host;
 var keyrock_auth_p_name;
+var keyrock_state;
 
 
 // Login click
@@ -96,16 +96,17 @@ var keyrock_auth_p_name;
 function keyrock_login_click(auth_p_name) {
   var client_id = document.head.querySelector("[name=" + auth_p_name + 
       "-signin-client_id]").content; // KeyRock client id
-  var signin_callback = document.head.querySelector("[name=" + 
+  var signin_callback = get_url_path() + document.head.querySelector("[name=" + 
       "keyrock-signin-callback]").content; // redirect after KeyRock
       
   keyrock_auth_p_name = auth_p_name;
+  keyrock_state = "" + Math.random();
   keyrock_signin_host = document.head.querySelector("[name=" + auth_p_name + 
       "-signin-host]").content;
  // OAuth2 Implicit Grant requested in a pop-up window
   login_popup = window.open(keyrock_signin_host + "/oauth2/authorize/?" + 
       "response_type=token&" +
-      "state=" + Math.random() + "&" +
+      "state=" + keyrock_state + "&" +
       "client_id=" + client_id + "&" + 
       "redirect_uri=" + signin_callback,
       "_blank", "width=500, height=610");
@@ -132,10 +133,19 @@ var kr_user_id_info = {}; // Buffer for identification data
 
 function kr_authenticated(auth_p_name, params, fragment) {
   var query_params = parse_query_params(fragment);
-  oauth2_token = query_params.access_token;
-  auth_p = auth_p_name;
-  get_ext_json(kr_user_id_info, keyrock_signin_host + "/user?" +
-    "access_token=" + oauth2_token, kr_got_user_data, kr_no_user_data);
+  var state = query_params.state;
+  
+  if (state == keyrock_state) { // Ensure genuine correspondence
+    oauth2_token = query_params.access_token;
+    auth_p = auth_p_name;
+    get_ext_json(kr_user_id_info, keyrock_signin_host + "/user?" +
+      "access_token=" + oauth2_token, kr_got_user_data, kr_no_user_data);
+  } else {
+    // State changed. Something funny going on. Abort.
+    alert("State sent = " + keyrock_state + "\n" +
+        "received = " + state);
+    oauth2_token = "";
+  }
 }
 
 function kr_got_user_data() {
@@ -213,6 +223,13 @@ function get_ext_json(buf, url, success, fail) {
   xhr.send();
 }
 
+function get_url_path() {
+  var url_wo_fragment = document.URL.split("#")[0]; // discard fragement
+  var query_string = url_wo_fragment.split("?")[0]; // discard query
+  var len = query_string.lastIndexOf("/"); // find the last slash
+  
+  return query_string.substr(0, len + 1);  // leave only the directory path
+}
 // -->
 </script>
 </body>
