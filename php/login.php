@@ -112,13 +112,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
   // ===============
   // Create session data to MongoDB
   
-  $token_sha1 = sha1($request_body);
+  $auth_t = sha1($request_body);
   $sessions = $mongodb->_sessions;
   // Check for double login
-  if(!$sessions->findOne(array("_id" => $token_sha1), 
+  if(!$sessions->findOne(array("_id" => $auth_t), 
       array("_id" => false))) {
     $session = array(
-      '_id' => $token_sha1,
+      '_id' => $auth_t,
       'user' => $user_id,
       'begin_time' => time(),
       'permissions' => $user['permissions'],
@@ -128,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     $sessions->insert($session);
   }
   
-  echo '{"login":true,"token_sha1":"' . $token_sha1 . '"}';
+  echo '{"login":true,"auth_t":"' . $auth_t . '"}';
 
 /*  
   $mres = mail( $gauth_body->email, 'POI login', 'Successfull login');

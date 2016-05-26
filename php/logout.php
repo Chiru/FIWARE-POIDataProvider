@@ -14,12 +14,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
 {
   if (isset($_GET['auth_t']))
   {
-    $token_sha1 = pg_escape_string($_GET['auth_t']);
+    $auth_t = pg_escape_string($_GET['auth_t']);
     // Remove session from database
     $db_opts = get_db_options();
     $mongodb = connectMongoDB($db_opts['mongo_db_name']);
     $sessions = $mongodb->_sessions;
-    $sessions->remove(array("_id" => $token_sha1));
+    $sessions->remove(array("_id" => $auth_t));
 
     echo 'Logged out';
   } else {

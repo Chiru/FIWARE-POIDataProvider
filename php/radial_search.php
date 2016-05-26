@@ -30,13 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
     } else { // not open data, check credentials
       if (isset($_GET['auth_t']))
       {
-        $token_sha1 = pg_escape_string($_GET['auth_t']);
+        $auth_t = pg_escape_string($_GET['auth_t']);
 
         // Find the session from the database
         $db_opts = get_db_options();
         $mongodb = connectMongoDB($db_opts['mongo_db_name']);
         $sessions = $mongodb->_sessions;
-        $session = $sessions->findOne(array("_id" => $token_sha1), 
+        $session = $sessions->findOne(array("_id" => $auth_t), 
             array("_id" => false));
         $view_permission = $session['permissions']['view'];
       }      

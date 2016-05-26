@@ -34,7 +34,7 @@
                                                              // trailing slash!
           var LOGIN_SERVER = ""; // can be left blank if in the same location 
 
-          var login_user_token = ""; // to be used in subsequent requests
+          var auth_t = ""; // to be used in subsequent requests
                                      // as the auth_t parameter
           var login_user_info = {}; // {name: string, image: url_string}
 
@@ -59,7 +59,7 @@
 */
 var login_popup;
 var login_poll_timer;
-var user_token = "";
+var auth_t = "";
 
 function login_done(succeeded, login_data) {
   if (succeeded) {
@@ -67,7 +67,7 @@ function login_done(succeeded, login_data) {
     // Finally tell the application that the user has logged in
     document.getElementById("login_b").style.display = "none";
     document.getElementById("logout_b").style.display = "inline";
-    login_user_token = login_data.token; // proof of identity for subsequent ops
+    auth_t = login_data.token; // proof of identity for subsequent ops
     login_user_info = login_data.user_info; // get user info to show
     document.getElementById("login_user_name").innerHTML =
         login_user_info.name;
@@ -93,7 +93,7 @@ function login_authenticated(auth_data) {
     }
   */
 
-  var user_token;
+  var _auth_t;
   var succeeded = false;
   var login_data = {};
   var response, err;
@@ -107,11 +107,10 @@ function login_authenticated(auth_data) {
       console.log("go_login response: " + xhr.responseText);
       response = JSON.parse(xhr.responseText);
       if (response.login) { // We're in!
- //       user_token = Sha1.hash(auth_data.oauth2_token);
-        user_token = response.token_sha1;
+        _auth_t = response.auth_t;
         succeeded = true;
         login_data = {
-          token: user_token,
+          token: _auth_t,
           user_info: auth_data.user_id_info
         };
           
@@ -177,9 +176,9 @@ function logout_click() {
     on the response calls the logout_click_done for the next phase.
 */
   var xhr = new XMLHttpRequest();
-  var restQueryURL = LOGIN_SERVER + "logout?auth_t=" + login_user_token;
+  var restQueryURL = LOGIN_SERVER + "logout?auth_t=" + auth_t;
   
-  login_user_token = "";
+  auth_t = "";
   xhr.open('GET', restQueryURL, true);
   xhr.onload = function() {
       logout_click_done();

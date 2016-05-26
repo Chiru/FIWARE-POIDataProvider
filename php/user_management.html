@@ -88,7 +88,7 @@ var user_schema = {};
                                                    // trailing slash!
 var LOGIN_SERVER = ""; // can be left blank if in the same location 
 
-var login_user_token = ""; // to be used in subsequent requests
+var auth_t = ""; // to be used in subsequent requests
                            // as the auth_t parameter
 var login_user_info = {}; // {name: string, image: url_string}
 
@@ -277,7 +277,7 @@ var user_data_buffer = {};
 
 function get_user_data(user_id, success, fail) {
   var url = BACKEND_ADDRESS_POI + "get_user?user_id=" + user_id +
-    "&auth_t=" + login_user_token;
+    "&auth_t=" + auth_t;
     
   get_ext_json(user_data_buffer, url, success, fail);
   
@@ -418,7 +418,7 @@ var user_data_list; // accounts from the server
 function load_user_list() {
   var response; // why this?
   var xhr = new XMLHttpRequest();
-  var restQueryURL = BACKEND_ADDRESS_POI + "find_users?auth_t=" + login_user_token;
+  var restQueryURL = BACKEND_ADDRESS_POI + "find_users?auth_t=" + auth_t;
   // ToDo: add skip & limit parameters
   xhr.open('GET', restQueryURL, true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -460,7 +460,7 @@ function update_user( user_data , success) {
 //  if (!checkPOI(user_data)) return;
 
   restQueryURL = BACKEND_ADDRESS_POI + "update_user" +
-      "?auth_t=" + login_user_token;
+      "?auth_t=" + auth_t;
   xhr = new XMLHttpRequest();
   
   xhr.overrideMimeType("application/json");
@@ -502,7 +502,7 @@ function add_user( user_data , success) {
 //  if (!checkPOI(user_data)) return;
 
   restQueryURL = BACKEND_ADDRESS_POI + "add_user" +
-      "?auth_t=" + login_user_token;
+      "?auth_t=" + auth_t;
   xhr = new XMLHttpRequest();
   
   xhr.overrideMimeType("application/json");
@@ -538,7 +538,7 @@ function add_user( user_data , success) {
 
 function confirmed_remove_user(user_id, success) {
   var restQueryURL = BACKEND_ADDRESS_POI + "delete_user?user_id=" + user_id +
-        "&auth_t=" + login_user_token;
+        "&auth_t=" + auth_t;
 
   var xhr = new XMLHttpRequest();
 

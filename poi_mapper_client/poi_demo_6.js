@@ -409,8 +409,8 @@ function safe_html (rawstr) {
     updating_data[uuid] = poi_data;
     
     restQueryURL = BACKEND_ADDRESS_POI + "update_poi" +
-        ((login_user_token != "") ?
-        ("?auth_t=" + login_user_token) : "");
+        ((auth_t != "") ?
+        ("?auth_t=" + auth_t) : "");
     miwi_poi_xhr = new XMLHttpRequest();
     
     miwi_poi_xhr.onreadystatechange = function () {
@@ -678,8 +678,8 @@ function safe_html (rawstr) {
     
     restQueryURL = BACKEND_ADDRESS_POI + "get_pois?poi_id=" + uuid +
       "&get_for_update=true" +
-      ((login_user_token != "") ?
-      ("&auth_t=" + login_user_token) : "");
+      ((auth_t != "") ?
+      ("&auth_t=" + auth_t) : "");
     
     miwi_3d_xhr = new XMLHttpRequest();
     
@@ -721,8 +721,8 @@ function safe_html (rawstr) {
 //        show_POI_window(poiMarker, uuid);
     
     restQueryURL = BACKEND_ADDRESS_POI + "get_pois?poi_id=" + uuid +
-      ((login_user_token != "") ?
-      ("&auth_t=" + login_user_token) : "");
+      ((auth_t != "") ?
+      ("&auth_t=" + auth_t) : "");
     
     miwi_3d_xhr = new XMLHttpRequest();
     
@@ -763,8 +763,8 @@ function safe_html (rawstr) {
 
     if (cfm) {
       restQueryURL = BACKEND_ADDRESS_POI + "delete_poi?poi_id=" + uuid +
-        ((login_user_token != "") ?
-        ("&auth_t=" + login_user_token) : "");
+        ((auth_t != "") ?
+        ("&auth_t=" + auth_t) : "");
 
       miwi_3d_xhr = new XMLHttpRequest();
 
@@ -834,8 +834,8 @@ function safe_html (rawstr) {
     if (!checkPOI(poi_data)) return;
 
     restQueryURL = BACKEND_ADDRESS_POI + "add_poi" +
-        ((login_user_token != "") ?
-        ("?auth_t=" + login_user_token) : "");
+        ((auth_t != "") ?
+        ("?auth_t=" + auth_t) : "");
     miwi_poi_xhr = new XMLHttpRequest();
     
     miwi_poi_xhr.overrideMimeType("application/json");
@@ -1175,8 +1175,8 @@ function safe_html (rawstr) {
             searchRadius + "&component=fw_core" + 
             ((miwi_active_categories != "") ?
             ("&category=" + miwi_active_categories) : "") +
-            ((login_user_token != "") ?
-            ("&auth_t=" + login_user_token) : "");
+            ((auth_t != "") ?
+            ("&auth_t=" + auth_t) : "");
             
         miwi_poi_xhr = new XMLHttpRequest();
         

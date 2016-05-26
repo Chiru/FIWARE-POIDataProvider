@@ -51,6 +51,10 @@ First draft of Release 5.1<br/>
 | style="border-style: solid; border-width: 1px"| 2015-12-29
 | style="border-style: solid; border-width: 1px"| 
 <b>Release 5.1</b><br/> 
+|-
+| style="border-style: solid; border-width: 1px"| 2016-05-26
+| style="border-style: solid; border-width: 1px"| 
+<b>Release 5.3</b><br/> 
 |}
 
 == How to Read This Document ==
@@ -92,7 +96,15 @@ The structure of a POI data item in JSON format:
 
 ==Authentication==
 
-Authentication is out of this specification's scope. For example the standard authentication mechanisms provided by the web server used in the implementation can be utilized.
+'''NOTE:''' Since the release 5.3 user authentication is '''mandatory''' for ''add_poi'', ''update_poi'', and ''delete_poi'' requests. Authentication is '''optional''' for ''get_components'', ''radial_search'', ''bbox_search'', and ''get_pois''.
+
+User authentication is left to external service providers. Currently supported authentication services are:
+* FIWARE Lab
+* Google
+
+An ''authentication'' token from an authentication service is used to get an ''authorization'' token from the POI data provider using the '''login''' request. The client uses the authorization token as the '''auth_t''' parameter ''(NEW)'' in the subsequent requests to the POI data provider. The authorization token is invalidated using the '''logout''' request.
+
+POI data providers configured to provide ''open_data'' assume <code>view</code> permission to everyone without authorization.
 
 ==Representation Format==
 
@@ -232,7 +244,9 @@ A textual description of the fault that occurred will be provided in addition to
 
 =API Operations=
 
-The following section provides the detail for each RESTful operation giving the expected input and output for each request. For simplicity sake the API operations have been grouped into following categories: ''Platform'', ''Query'', and ''Update''.
+The following section provides the detail for each RESTful operation giving the expected input and output for each request. For simplicity sake the API operations have been grouped into following categories: ''Platform'', ''Query'', ''Update'', ''Access control'', and ''User management''.
+
+'''NOTE:''' <code>auth_t</code> parameter value for the requests must be obtained by ''login'' request. 
 
 == Platform ==
 
@@ -259,9 +273,19 @@ The following section provides the detail for each RESTful operation giving the 
 
 Return the list of POI data components available from this server.
 
+Requires '''view''' permission.
+
 <pre>
-GET /get_components
+GET /get_components?{parameters}
 </pre>
+Mandatory parameters:<br/>
+<code>auth_t=</code>''authorization token'' - Not needed, if POI-DP is configured as ''open_data''.<br/>
+
+Example request:
+<pre>
+GET http://{poi server}/get_components?auth_t=1207fbad2f158011dafe594f6db0e7f0e9221a19
+</pre>
+
 
 Sample result:
 
@@ -301,12 +325,15 @@ Sample result:
 
 Return the data of POIs within a given distance from a given location.
 
+Requires '''view''' permission.
+
 <pre>
 GET /radial_search?{parameters}
 </pre>
 Mandatory parameters:<br/>
 <code>lat=</code>''latitude'' - Latitude of the center of the search circle [degrees]<br/>
 <code>lon=</code>''longitude'' - Longitude of the center of the search circle [degrees]<br/>
+<code>auth_t=</code>''authorization_token'' - Not needed, if POI-DP is configured as ''open_data''.<br/>
 Optional parameters:<br/>
 <code>radius=</code>''radius'' - Radius of the search circle [meters], default is implementation dependent<br/>
 <code>category=</code>''category'' - POI category/categories to be included to results. Several categories can be given by separating them with commas. If this parameter is not given, all categories are included.<br/>
@@ -322,7 +349,7 @@ Basic rule: ISO 8601 adaptation format [http://www.w3.org/TR/NOTE-datetime] is u
 
 Sample query:
 <pre>
-GET http://{poi server}/radial_search?lat=65.059254&lon=25.470997&radius=250&category=cafe,restaurant&begin_time=2014-01-23T11:30&end_time=2014-01-23T13:00&min_minutes=30&max_results=2
+GET http://{poi server}/radial_search?lat=65.059254&lon=25.470997&radius=250&category=cafe,restaurant&begin_time=2014-01-23T11:30&end_time=2014-01-23T13:00&min_minutes=30&max_results=2&auth_t=1207fbad2f158011dafe594f6db0e7f0e9221a19
 </pre>
 
 Sample result:
@@ -369,6 +396,8 @@ Sample result:
 
 Return the data of POIs within a given bounding box.
 
+Requires '''view''' permission.
+
 <pre>
 GET /bbox_search?{parameters}
 </pre>
@@ -377,6 +406,7 @@ Mandatory parameters:<br/>
 <code>south=</code>''latitude'' - Latitude of the southern edge of the bounding box [degrees]<br/>
 <code>east=</code>''longitude'' - Longitude of the eastern edge of the bounding box [degrees]<br/>
 <code>west=</code>''longitude'' - Longitude of the western edge of the bounding box [degrees]<br/>
+<code>auth_t=</code>''authorization_token'' - Not needed, if POI-DP is configured as ''open_data''.<br/>
 Optional parameters:<br/>
 <code>category=</code>''category'' - POI category/categories to be included to results. Several categories can be given by separating them with commas. If this parameter is not given, all categories are included.<br/>
 <code>component=</code>''component'' - POI data component name(s) to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included. <br>
@@ -387,7 +417,7 @@ Optional parameters:<br/>
 
 Sample query:
 <pre>
-GET http://{poi server}/bbox_search?north=65.1&south=64.9&east=25.6&west=25.3&category=cafe,restaurant&max_results=2
+GET http://{poi server}/bbox_search?north=65.1&south=64.9&east=25.6&west=25.3&category=cafe,restaurant&max_results=2&auth_t=1207fbad2f158011dafe594f6db0e7f0e9221a19
 </pre>
 
 Results as in /radial_search.
@@ -396,11 +426,14 @@ Results as in /radial_search.
 
 Return the data of POIs listed in the query. This is intended to get additional information - other components - about interesting POIs.
 
+Requires '''view''' permission.
+
 <pre>
 GET /get_pois?{parameters}
 </pre>
 Mandatory parameters:<br/>
 <code>poi_id=</code>''UUID'' - UUID of the POI. Several UUIDs can be given by separating them with commas.<br/>
+<code>auth_t=</code>''authorization_token'' - Not needed, if POI-DP is configured as ''open_data''.<br/>
 Optional parameters:<br/>
 <code>component=</code>''component'' - POI data component name(s) to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.<br>
 <code>get_for_update=true</code> - The components requested are returned with all language and other variants and possible metadata for inspection and edit.<br/>
@@ -464,11 +497,16 @@ Update operations should require authorization in order to prevent misuse. The d
 
 This function is used for adding a new POI entity into a database. The POI data is given as JSON in HTTP POST request. It generates a UUID for the new POI and returns it to the client in JSON format including the timestamp of the POI creation. The client can include different data components to the new POI by sending them along with the request. 
 
+Requires '''add''' permission.
+
+Mandatory parameters:<br/>
+<code>auth_t=</code>''authorization_token''
+
 The POSTed JSON must include only the content of a single POI, i.e. it must not contain a UUID as key as it is automatically generated by the server.
 
 Example request:
 <pre>
-POST http://{poi server}/add_poi
+POST http://{poi server}/add_poi?auth_t=1207fbad2f158011dafe594f6db0e7f0e9221a19
 {
   "fw_core": {
 	"categories": ["cafe"], 
@@ -505,9 +543,14 @@ This function is used for updating data of an existing POI entity. Existing data
 
 The updated POI data is given as JSON in HTTP POST request. The server responds with HTTP status messages indicating the success or failure of the operation.
 
+Requires '''update''' permission.
+
+Mandatory parameters:<br/>
+<code>auth_t=</code>''authorization_token''
+
 Example request:
 <pre>
-POST http://{poi server}/update_poi
+POST http://{poi server}/update_poi?auth_t=1207fbad2f158011dafe594f6db0e7f0e9221a19
 { 
   "30ddf703-59f5-4448-8918-0f625a7e1122": {
     "fw_core": {
@@ -542,9 +585,14 @@ POI data updated succesfully
 
 Delete existing POI using HTTP DELETE request. The UUID of the POI to be deleted is given in the request as a URL parameter
 
+Requires '''update''' permission.
+
+Mandatory parameters:<br/>
+<code>auth_t=</code>''authorization_token''
+
 Example request:
 <pre>
-DELETE http://{poi server}/delete_poi?poi_id=30ddf703-59f5-4448-8918-0f625a7e1122
+DELETE http://{poi server}/delete_poi?poi_id=30ddf703-59f5-4448-8918-0f625a7e1122&auth_t=1207fbad2f158011dafe594f6db0e7f0e9221a19
 </pre>
 
 Example result:
@@ -552,6 +600,141 @@ Example result:
 HTTP/1.1 200 OK
 POI entity deleted succesfully
 </pre>
+
+== Access control ==
+
+Access control is used to limit who can view or modify information in the data provider.
+
+{| style="border-collapse: collapse; border-width: 1px; border-style: solid; border-color: #000"
+|-
+! style="border-style: solid; border-width: 1px"| Verb
+! style="border-style: solid; border-width: 1px"| URI
+! style="border-style: solid; border-width: 1px"| Description
+|-
+| style="border-style: solid; border-width: 1px"| POST
+| style="border-style: solid; border-width: 1px"| /login
+| style="border-style: solid; border-width: 1px"| Obtain an authorization token for further use
+|-
+| style="border-style: solid; border-width: 1px"| GET
+| style="border-style: solid; border-width: 1px"| /logout
+| style="border-style: solid; border-width: 1px"| Invalidate the authorization token
+|}
+
+==== /login ====
+
+This function is used for logging in to a POI data provider and obtaining the authorization token for further use. 
+
+The <code>auth_p</code> parameter specifies the authentication server that is used to obtain the identity of the user. The possible values are implementation dependent, e.g.:
+* <code>google</code> - for Google authentication
+* <code>fiware_lab</code> - for FIWARE Lab authentication
+
+The content is the authentication token got from the authentication provider.
+
+The result is a JSON object containing 
+* <code>login</code> - true, if the user is authorized by the service, false otherways.
+* <code>token_sha1</code> - authorization token to be used in further request, if authorized
+ 
+Example request:
+<pre>
+POST http://{poi server}/login?auth_p=google
+ayJhbGciOiJSUzI1NiIsImtpZCI6ImY5MzM22GExYjcxMzAzMDQ4MTZiOGI1MjkzMGNhMDcwODc4OGNj
+YWYifQ.eyJpc3MiOiJhY2NvdW50c95nb29nbGUuY29tI...
+</pre>
+
+Example result:
+<pre>
+{
+  "login":true,
+  "auth_t":"1207fbad2f158011dafe594f6db0e7f0e9221a19"
+}
+</pre>
+
+==== /logout ====
+
+This function is used for finishing the session and invalidate the authorization token.
+
+Example request:
+<pre>
+GET http://{poi server}/logout?auth_t=1207fbad2f158011dafe594f6db0e7f0e9221a19
+</pre>
+
+Example result:
+<pre>
+HTTP/1.1 200 OK
+Logged out
+</pre>
+
+== User management ==
+
+User management is used to control access permissions of the users. 
+
+{| style="border-collapse: collapse; border-width: 1px; border-style: solid; border-color: #000"
+|-
+! style="border-style: solid; border-width: 1px"| Verb
+! style="border-style: solid; border-width: 1px"| URI
+! style="border-style: solid; border-width: 1px"| Description
+|-
+| style="border-style: solid; border-width: 1px"| POST
+| style="border-style: solid; border-width: 1px"| /add_user
+| style="border-style: solid; border-width: 1px"| Add a user with credentials
+|-
+| style="border-style: solid; border-width: 1px"| DELETE
+| style="border-style: solid; border-width: 1px"| /delete_user
+| style="border-style: solid; border-width: 1px"| Remove a user with all related information<br/>'''Be careful!'''
+|-
+| style="border-style: solid; border-width: 1px"| GET
+| style="border-style: solid; border-width: 1px"| /find_users
+| style="border-style: solid; border-width: 1px"| Get a list of users
+|-
+| style="border-style: solid; border-width: 1px"| GET
+| style="border-style: solid; border-width: 1px"| /get_user
+| style="border-style: solid; border-width: 1px"| Get user information
+|-
+| style="border-style: solid; border-width: 1px"| POST
+| style="border-style: solid; border-width: 1px"| /register_user
+| style="border-style: solid; border-width: 1px"| Bind user to authentication
+|-
+| style="border-style: solid; border-width: 1px"| POST
+| style="border-style: solid; border-width: 1px"| /update_user
+| style="border-style: solid; border-width: 1px"| Update user information with credentials
+|}
+
+==== /add_user ====
+
+This function is used to add a new user with permissions.
+
+Requires admin permission.
+
+==== /delete_user ====
+
+This function is used to delete the user from the database.
+
+'''NOTE:''' The user references in updated data are lost for the deleted user!   
+
+Requires admin permission.
+
+==== /find_users ====
+
+This function is used list users.
+
+Requires admin permission.
+
+==== /get_user ====
+
+This function is used to get information of a user for viewing or updating.
+
+Requires admin permission.
+
+==== /register_user ====
+
+This function connects an authentication service to a user. 
+
+
+==== /update_user ====
+
+This function is used to update user information including permissions.
+
+Requires admin permission.
 
 = POI Data Model Definitions =
 
