@@ -420,7 +420,7 @@ Sample result:
       "fw_core": {
         "categories": ["cafe"], 
         "location": {
-          "wgs84" { 
+          "wgs84": { 
             "latitude": 65.059334, 
             "longitude": 25.4664775
           }
@@ -473,13 +473,13 @@ POST http://{poi server}/add_poi
   "fw_core": {
 	"categories": ["cafe"], 
 	"location": {
-	 "wgs84" { 
+	  "wgs84": { 
 		"latitude": 65.059334, 
 		"longitude": 25.4664775
-	 }
+	  }
 	}, 
 	"name": {
-	 "__": "Aulakahvila"
+	  "__": "Aulakahvila"
 	}
   }
 }
@@ -511,22 +511,24 @@ POST http://{poi server}/update_poi
 { 
   "30ddf703-59f5-4448-8918-0f625a7e1122": {
     "fw_core": {
-	 "categories": ["cafe"], 
-	 "location": {
-	   "wgs84" { 
-		 "latitude": 65.059334, 
-		 "longitude": 25.4664775
-	   }
-  	 }, 
-	 "name": {
-	   "__": "Aulakahvila"
-	 },
-	 "description": {
-	   "__": "Cafe at the Univesity of Oulu"
+      "categories": ["cafe"], 
+      "location": {
+        "wgs84": { 
+          "latitude": 65.059334, 
+          "longitude": 25.4664775
+        }
+      }, 
+      "name": {
+        "__": "Aulakahvila"
+      },
+      "description": {
+        "__": "Cafe at the Univesity of Oulu"
+      },
+      "last_update": {
+        "timestamp":1463733633
       }
     }
   }
-}
 </pre>
 
 Sample result:
@@ -1278,7 +1280,7 @@ This defines the availability of a thing. This may be used to define service tim
            {"wd": [6], "bhr": [8], "ehr": [12]}
          ]
        };
-	  
+	   
 
 '''JSON schema'''
  {
