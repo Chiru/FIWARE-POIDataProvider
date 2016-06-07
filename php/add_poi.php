@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
 {
   // adding a POI requires add permission
   $session = get_session();
+  $user_id = $session['user'];
   $add_permission = $session['permissions']['add'];
   if(!$add_permission) {
     header("HTTP/1.0 401 Unauthorized");
@@ -117,8 +118,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
       }
       
       $fw_core_tbl = $db_opts['fw_core_table_name'];
-      $insert = "INSERT INTO $fw_core_tbl (uuid, categories, location, thumbnail, timestamp, source_name, source_website, source_license, source_id) " . 
-      "VALUES('$uuid', '$pg_categories', ST_GeogFromText('POINT($lon $lat)'), '$thumbnail', $timestamp, '$source_name', '$source_website', '$source_license', '$source_id');";
+      $insert = "INSERT INTO $fw_core_tbl (uuid, categories, " . 
+          "location, thumbnail, timestamp, userid, source_name, " . 
+          "source_website, source_license, source_id) " . 
+          "VALUES('$uuid', '$pg_categories', " . 
+          "ST_GeogFromText('POINT($lon $lat)'), '$thumbnail', " . 
+          "$timestamp, '$user_id', '$source_name', " . 
+          "'$source_website', '$source_license', '$source_id');";
       
       $insert_result = pg_query($insert);
       if (!$insert_result)
@@ -151,6 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
           $comp_data['last_update'] = array();
         }
         $comp_data['last_update']['timestamp'] = $timestamp;
+        $comp_data['last_update']['responsible'] = $user_id;
         
 
         $collection = $mongodb->$comp_name;

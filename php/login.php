@@ -35,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
   // Hard authorizations set $user, others set $user_id
   
   $hard_auths = $auth_conf['hard_auths'];
+  $hard_users = $auth_conf['hard_users'];
   $user = null; $user_id = null; // set either
   
   if ($auth_p == 'google') {  
@@ -47,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     $email = $gauth_body->email;
     if ($email) { // recognized by google
       if ($hard_auths['google'][$email]) {
-        $user = $hard_auths['google'][$email];
+        $user_id = $hard_auths['google'][$email]['user'];
       } else {
         $auth_google = $mongodb->_auth_google; // Google authentication mappings
         
@@ -75,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     $id = $gauth_body->id;
     if ($id) { // recognized by fiware_lab
       if ($hard_auths['fiware_lab'][$id]) {
-        $user = $hard_auths['fiware_lab'][$id];
+        $user_id = $hard_auths['fiware_lab'][$id]['user'];
       } else {
         $auth_fiware_lab = $mongodb->_auth_fiware_lab;
             // fiware_lab authentication mappings
@@ -93,13 +94,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
           );
     }
   } 
-  // $user or $user_id is set, $identification is set
+  // $user_id is set, $identification is set
   
-  if (!$user) {
-    if (!$user_id) {
-      header("HTTP/1.0 401 Unauthorized");
-      die("Permission denied A.");
-    }
+  if (!$user_id) {
+    header("HTTP/1.0 401 Unauthorized");
+    die("Permission denied A.");
+  }
+
+  $user = $hard_users[$user_id]; // try first hard ones
+  if(!$user) {
+    // No, get from database
     $users = $mongodb->_users;
     $user = $users->findOne(array("_id" => $user_id), 
           array("_id" => false));

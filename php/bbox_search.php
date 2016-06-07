@@ -56,9 +56,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
         }
         
         else {
-            $query = "SELECT uuid, array_to_string(categories, ',') as categories, thumbnail, st_x(location::geometry) as lon, st_y(location::geometry) as lat, st_astext(geometry) as geometry, timestamp, " .
+            $query = "SELECT uuid, array_to_string(categories, ',') as " .
+            "categories, thumbnail, st_x(location::geometry) as lon, " .
+            "st_y(location::geometry) as lat, st_astext(geometry) as geometry, " .
+            "timestamp, userid, " .
             "source_name, source_website, source_id, source_license " .
-            "FROM $fw_core_tbl WHERE ST_Intersects(ST_Geogfromtext('POLYGON(($west $south, $east $south, $east $north, $west $north, $west $south))'), location) LIMIT " . $common_params['max_results'];
+            "FROM $fw_core_tbl WHERE ST_Intersects(ST_Geogfromtext('POLYGON(" .
+            "($west $south, $east $south, $east $north, $west $north, $west " .
+            "$south))'), location) LIMIT " . $common_params['max_results'];
         }
     //     echo "<br>" . $query;
 

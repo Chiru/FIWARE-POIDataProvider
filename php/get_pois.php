@@ -68,8 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
       $query = "SELECT uuid, array_to_string(categories, ',') as categories," .
           " thumbnail, st_x(location::geometry) as lon, st_y(" .
           "location::geometry) as lat, st_astext(geometry) as geometry, " .
-          "timestamp, source_name, source_website, source_id, source_license " .
-          "FROM $fw_core_tbl WHERE uuid IN ($esc_ids)";
+          "timestamp, userid, source_name, source_website, source_id, " .
+          "source_license FROM $fw_core_tbl WHERE uuid IN ($esc_ids)";
 
       $core_result = pg_query($query);
       

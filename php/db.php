@@ -7,7 +7,7 @@
 */
 
 function update_fw_core($db_opts, $pgcon, $uuid, $fw_core, $fw_core_tbl, 
-    $new_timestamp)
+    $new_timestamp, $user_id)
 {
   $description = NULL;
   $label = NULL;
@@ -61,9 +61,12 @@ function update_fw_core($db_opts, $pgcon, $uuid, $fw_core, $fw_core_tbl,
           $source_license = pg_escape_string($src['license']);
   }
   
-  $update = "UPDATE $fw_core_tbl SET categories='$pg_categories', location=ST_GeogFromText('POINT($lon $lat)'), " .
-  "thumbnail='$thumbnail', timestamp=$new_timestamp, source_name='$source_name', source_website='$source_website', " .
-  "source_id='$source_id', source_license='$source_license' WHERE uuid='$uuid';";
+  $update = "UPDATE $fw_core_tbl SET categories='$pg_categories', " . 
+      "location=ST_GeogFromText('POINT($lon $lat)'), " .
+      "thumbnail='$thumbnail', timestamp=$new_timestamp, " . 
+      "userid='$user_id', source_name='$source_name', " . 
+      "source_website='$source_website', source_id='$source_id', " .
+      "source_license='$source_license' WHERE uuid='$uuid';";
   
   $update_result = pg_query($update);
   if (!$update_result)
@@ -123,13 +126,21 @@ function fw_core_pgsql2array($core_result, $incl_fw_core)
             $core_component["location"] = array("wgs84" => array("latitude" => floatval($row['lat']), "longitude" => floatval($row['lon'])));
             $core_component["categories"] = explode(',', $row['categories']);
             
-            if ($row['timestamp'] != NULL)
+//            if ($row['timestamp'] != NULL)
+            if (($row['timestamp'] != NULL) || ($row['userid'] != NULL))
             {
+              $core_component['last_update'] = array();
+              if ($row['timestamp'] != NULL) {
+                $core_component['last_update']['timestamp'] = intval($row['timestamp']);
+              }
+              if ($row['userid'] != NULL) {
+                $core_component['last_update']['responsible'] = $row['userid'];
+              }
 //                 if ($row['userid'] != NULL) {
 //                     $core_component['last_update'] = array('timestamp' => $row['timestamp'], 'user_id' => $row['userid']);
 //                 }
 //                 else {
-                    $core_component['last_update'] = array('timestamp' => intval($row['timestamp']));
+//                    $core_component['last_update'] = array('timestamp' => intval($row['timestamp']));
 //                 }
             }
             

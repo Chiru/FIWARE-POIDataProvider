@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
 {
   // updating a POI requires update permission
   $session = get_session();
+  $user_id = $session['user'];
   $update_permission = $session['permissions']['update'];
   if(!$update_permission) {
     header("HTTP/1.0 401 Unauthorized");
@@ -113,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
       }
 
 
-      update_fw_core($db_opts, $pgcon, $uuid, $fw_core, $fw_core_tbl, $new_timestamp);
+      update_fw_core($db_opts, $pgcon, $uuid, $fw_core, $fw_core_tbl, $new_timestamp, $user_id);
 
     }
     
@@ -249,6 +250,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
           $comp_data['last_update'] = array();
         }
         $comp_data['last_update']['timestamp'] = $new_timestamp;
+        $comp_data['last_update']['responsible'] = $user_id;
         
         $comp_data["_id"] = $uuid;               
         $upd_criteria = array("_id" => $uuid);

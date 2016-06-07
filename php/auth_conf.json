@@ -2,40 +2,38 @@
   "description": [
     "These permissions override those in the database.",
     "Mainly this is to define the root administrator for the POI database,",
-    "but this can be used generally to define hard-coded permissions."
+    "but this can be used generally to define hard-coded permissions.",
+    "Use e.g. https://www.uuidgenerator.net/ to get UUIDs for hard users.",
+    "open_data = true allows anyone to view data.",
+    "google - email is used as a key",
+    "keyrock (fiware_lab) - id is used as a key"
   ],
   "open_data": false,
   "hard_auths": {
     "google": {
-      "ariokkonen@gmail.com": {
-        "name": "Ari Okkonen",
-        "photo": "http://www.example.com/ariokkon.jpg",
-        "address": "Kotikatu 60 A 22, 90990 Oulu, Finland",
-        "phone": "+356 8 999 999",
-        "email": "ari.okkonen@gmail.com",
-        "additional_emails": [],
-        "permissions": {
-          "admin": true,
-          "add": true,
-          "update": true,
-          "view": true
-        }
+      "john_doe@gmail.com": {
+        "user": "4d1a77c0-6cfb-4468-86fa-bff784012816"
       }
     },
     "fiware_lab": {
-      "ari": {
-        "name": "Ari Okkonen",
-        "photo": "http://www.example.com/ariokkon.jpg",
-        "address": "Kotikatu 60 A 22, 90990 Oulu, Finland",
-        "phone": "+356 8 123 456",
-        "email": "ari.okkonen@gmail.com",
-        "additional_emails": [],
-        "permissions": {
-          "admin": true,
-          "add": false,
-          "update": true,
-          "view": true
-        }
+      "j_d": {
+        "user": "4d1a77c0-6cfb-4468-86fa-bff784012816"
+      }
+    }
+  },
+  "hard_users": {
+    "4d1a77c0-6cfb-4468-86fa-bff784012816": {
+      "name": "John Doe",
+      "photo": "http://www.example.com/johndoe.jpg",
+      "address": "Kotikatu 60 A 22, 90990 Oulu, Finland",
+      "phone": "+356 8 999 999",
+      "email": "john.doe@example.com",
+      "additional_emails": [],
+      "permissions": {
+        "admin": true,
+        "add": true,
+        "update": true,
+        "view": true
       }
     }
   }

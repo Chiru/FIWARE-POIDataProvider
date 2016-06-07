@@ -217,7 +217,7 @@ Rewrite is used to default the .php extension from service requests. E.g. http//
     $ sudo service apache2 restart
 
 ## Enabling secure server (SSL)
-*Optional feature - for confidetial or dependable information*
+*Optional feature - for confidential or dependable information*
 
 In general you have to enable the ssl mode in the server
 
@@ -244,6 +244,30 @@ Detailed editing instructions at [How To Create a SSL ...](https://www.digitaloc
     ...
 
 
+## Setting up user authentication
+User authentication is needed, if
+
+* the server will contain confidential data not for anyone's eyes, or
+* the REST interface will be used to add or update data.
+
+### Register the POI data provider to authentication services
+Currently supported authentication services are:
+
+* Google
+* KeyRock
+
+Notes:
+
+* Google requires a name server entry for your server. A numeric IP address does not work.
+* KeyRock does not support CORS and so does not reveal the identity of the user to the client program.
+
+Register the POI data provider to the authentication services suitable for your purposes. The redirect callback is {your\_poi\_server}`/poi_dp/redirect_callback.html` , if needed. When you register, you get a client id to be used in authentication requests.
+### Configuring authentication client
+* authenticate.html - update signin-client_id values for the authentication services
+### Configuring the basic access rights
+Edit the file `poi_dp/auth_conf.json` .
+
+To be continued...
 ## Sanity check procedures
 
 The Sanity Check Procedures are the steps that a System Administrator will take to verify that an installation is ready to be tested. This is therefore a preliminary set of tests to ensure that obvious or basic malfunctioning is fixed before proceeding to unit tests, integration tests and user validation.
@@ -278,7 +302,7 @@ The output of the command should be something like the following:
 18845 ?        S      0:00 /usr/sbin/apache2 -k start
 21262 ?        S      0:00 /usr/sbin/apache2 -k start
 21263 ?        S      0:00 /usr/sbin/apache2 -k start
-27956 ?        S      0:00 /usr/lib/postgresql/9.1/bin/postgres -D /var/lib/postgresql/9.1/main -c config_file=/etc/postgresql/9.1/main/postgresql.conf
+27956 ?        S      0:00 /usr/lib/postgresql/9.3/bin/postgres -D /var/lib/postgresql/9.3/main -c config_file=/etc/postgresql/9.3/main/postgresql.conf
 27958 ?        Ss     0:00 postgres: writer process
 27959 ?        Ss     0:00 postgres: wal writer process
 27960 ?        Ss     0:00 postgres: autovacuum launcher process
