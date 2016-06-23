@@ -1,11 +1,11 @@
-<?php // add_user.php v.5.1.3.1 ariokkon 2016-02-01
+<?php // resend_user_reg.php v.5.1.3.1 ariokkon 2016-02-01
 
 /*
 * Project: FI-WARE
 * Copyright (c) 2014 Center for Internet Excellence, University of Oulu, All Rights Reserved
 * For conditions of distribution and use, see copyright notice in LICENSE
 */
-define('SERVICE_NAME', 'add_user');
+define('SERVICE_NAME', 'resend_user_reg');
 
 require_once 'db.php';
 require_once 'user_data_manager.php';
@@ -31,74 +31,65 @@ function getDirUrl() {
  
 // BEGIN Resource
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' )
+if ($_SERVER['REQUEST_METHOD'] == 'GET' )
 {
-  // adding a user requires admin permission
+  // handling a user requires admin permission
   $session = get_session();
   $admin_permission = $session['permissions']['admin'];
   if(!$admin_permission) {
     header("HTTP/1.0 403 Forbidden");
     die("Permission denied.");
   }
-
   
   $no_mail = FALSE;
   if (isset ($_GET['no_mail'])) {
     $no_mail = strtoupper(pg_escape_string($_GET['no_mail'])) != 'FALSE';
   }
   
-  $request_body = file_get_contents('php://input');
-//     print $request_body;
-  
-  $user_data = json_decode($request_body, true);
-  
-  if ($user_data != NULL)
+  if (isset ($_GET['user_id']))
   {
-//         print "JSON decoded succesfully!";
-    
-    $is_valid = validate_user_data($user_data);
-    if (!($is_valid))
-    {
-      header("HTTP/1.0 400 Bad Request");
-      die ("Invalid user data");
-    }
-    
-    if(!$user_data['email']) {
-      header("HTTP/1.0 400 Bad Request");
-      die("Email address missing.");
-    }
-    $email = $user_data['email'];
+    $user_id = pg_escape_string($_GET['user_id']);
+
     $db_opts = get_db_options();
-    
-    $user_id = poi_new_uuid_v4();
+
     $timestamp = time();
     
     $mongodb = connectMongoDB($db_opts['mongo_db_name']);
 
-    $registration_key = poi_new_key();
+    $users = $mongodb->_users;
     
-    $user_data["_id"] = $user_id;
-    $user_data['last_update'] = array();
-    $user_data['last_update']['timestamp'] = $timestamp;
-    $user_data['reg_call'] = $registration_key;
+    $user_data = $users->findOne(array("_id" => $user_id), 
+        array("_id" => false));
+    if($old_user_data == NULL) {
+      header("HTTP/1.0 404 Not found");
+      die('User unrecognized');
+    }
     
-    $collection = $mongodb->_users;
-    $collection->insert($user_data);
-    
-    $new_user_info = array();
-    $new_user_info['uuid'] = $user_id;
-    $new_user_info['timestamp'] = $timestamp;
-    $ret_val_arr = array('description' => 'User added.');
+    $registration_key = $user_data['reg_call'];
+    $_reg_calls = $mongodb->_reg_calls;
+    if ($registration_key) {
+      $registration_call = $_reg_calls[$registration_key];
+      $registration_call['timestamp'] = $timestamp;
+      $_reg_calls->update($registration_call);
+    } else {
+      $registration_call = NULL;
+    }
+    if (!$registration_call) { // New registration Id needed
+      $registration_key = poi_new_key();
+
+      $user_data['reg_call'] = $registration_key;
+      $users->update($user_data);
+      
+      $registration_call = array();
+      $registration_call['_id'] = $registration_key;
+      $registration_call['user_id'] = $user_id;
+      $registration_call['timestamp'] = $timestamp;
+      $_reg_calls->insert($registration_call);
+    }
+
+    $ret_val_arr = array('description' => 'Recalled invitation to register.');
     
     $ret_val_arr['service_info'] = get_service_info(SERVICE_NAME);
-
-    $registration_call = array();
-    $registration_call['_id'] = $registration_key;
-    $registration_call['user_id'] = $user_id;
-    $registration_call['timestamp'] = $timestamp;
-
-    $_reg_calls = $mongodb->_reg_calls;
-    $_reg_calls->insert($registration_call);
 
     $registration_url = getDirUrl() . '/register_me.html?key=' .
         $registration_key;
@@ -111,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
           $registration_url . "\n";
       $mres = mail( $email, $msubject, $mmessage); 
     }
-
+    
     $ret_val_arr['name'] = $user_data['name'];
     $ret_val_arr['user_id'] = $user_id;
     $ret_val_arr['email'] = $email;

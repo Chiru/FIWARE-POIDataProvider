@@ -125,19 +125,34 @@ function click_save() {
 
 function saved_new(response) {
   var data1 = JSON.stringify(response, null, "  ");
-  var user_id = response.created_user.uuid;
+  var user_id = response.user_id;
   
   user_data_list[user_id] = user_data_under_editing["new"];
   display_user_list(user_data_list);
   
   document.getElementById("status").innerHTML = 
-      "<h3>Added user data</h3>" +
-      (response.mail_data.mail_sent ?
-      "<p><b>Remember to send the registration request to the user!</b></p>" : 
-      "") +
-      "<pre>" + str2html(data1) + 
-      "</pre>";
+      "<h3>" + response.description + "</h3>" +
+      "Name: " + response.name + "<br>" +
+      "User Id: " + response.user_id + "<br>" +
+      "Email: " + response.email + "<br>" +
+      "Registration URL: " + response.registration_url + "<br>" +
+      (response.mail_sent ?
+        "Invitation to register sent." :
+        "<b>Remember to send the registration request to the user!</b>"
+      );
 
+  if (!response.mail_sent) {
+    var message = "You may now register to the POI database using the" +
+          " following link:\r\n" +
+          response.registration_url + "\r\n";
+    var coded_msg = encodeURIComponent(message)
+    var w = window.open("mailto:" + response.email +
+        '?subject=Invitation%20to%20Register%20' +
+        'to%20a%20POI%20Data%20Provider&body=' + 
+        coded_msg);
+    w.close();
+  }
+      
   stm.fn.stop_editing();
 }
 

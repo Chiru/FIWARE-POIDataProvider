@@ -43,10 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     die ($errmsg);
   }
   
-  
   // Find the call from the database
-  $db_opts = get_db_options();
-  $mongodb = connectMongoDB($db_opts['mongo_db_name']);
+
   $_reg_calls = $mongodb->_reg_calls;
   $registration_call = $_reg_calls->findOne(array("_id" => $key), 
       array("_id" => false));

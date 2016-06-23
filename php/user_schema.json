@@ -11,7 +11,7 @@
     },
     "email": {
       "title": "E-mail address",
-      "description": "Principal email address",
+      "description": "for invitation to register, etc.",
       "type": "string",
       "format": "email"
     },
