@@ -1,8 +1,9 @@
-<?php // resend_user_reg.php v.5.1.3.1 ariokkon 2016-02-01
+<?php // resend_user_reg.php 5.4.2.1 2016-08-03 ariokkon
 
 /*
 * Project: FI-WARE
-* Copyright (c) 2014 Center for Internet Excellence, University of Oulu, All Rights Reserved
+* Copyright (c) 2014 Center for Internet Excellence, University of Oulu, All 
+* Rights Reserved
 * For conditions of distribution and use, see copyright notice in LICENSE
 */
 define('SERVICE_NAME', 'resend_user_reg');
@@ -40,6 +41,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
     header("HTTP/1.0 403 Forbidden");
     die("Permission denied.");
   }
+
+  $site_info_s = file_get_contents("./site_info.json");
+  $site_info = json_decode($site_info_s, true);
   
   $no_mail = FALSE;
   if (isset ($_GET['no_mail'])) {
@@ -65,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
       die('User unrecognized');
     }
     
+    $email = $user_data['email'];
     $registration_key = $user_data['reg_call'];
     $_reg_calls = $mongodb->_reg_calls;
     if ($registration_key) {
@@ -95,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
         $registration_key;
 
     $mres = false;
+    /*
     if (!$no_mail) { // Send invitation, if not forbidden.
       $msubject = 'Invitation to Register to a POI Data Provider';
       $mmessage = 'You may now register to the POI database using the' .
@@ -102,12 +108,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
           $registration_url . "\n";
       $mres = mail( $email, $msubject, $mmessage); 
     }
-    
+    */
+    $ret_val_arr['registration_call'] = call_to_register($email,
+        $user_data['name'], $registration_url, $site_info['name'], 
+        !$no_mail);
+
     $ret_val_arr['name'] = $user_data['name'];
     $ret_val_arr['user_id'] = $user_id;
     $ret_val_arr['email'] = $email;
     $ret_val_arr['registration_url'] = $registration_url;
-    $ret_val_arr['mail_sent'] = $mres;
+    $ret_val_arr['mail_sent'] = $ret_vall_arr['registration_call']['sent'];
     
     $ret_val = json_encode($ret_val_arr);
       

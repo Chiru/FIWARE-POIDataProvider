@@ -11,18 +11,20 @@
 <body>
   <h2>POI DP User Account Management</h2>
     <div>
-          <!-- Begin access control elements: buttons, name, and image -->
-          <button id="login_b" style="" type="button" 
-              onclick="login_click();"><b>Log In</b></button>
-          <button id="logout_b" style="display:none" type="button" 
-              onclick="logout_click();"><b>Log Out</b></button>
-          <span id="login_user_name"></span>&nbsp;
-          <img id="login_user_image" 
-              src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" 
-              width="32" height="32"><br>
-          <!-- End access control elements -->
-          <!-- Include login library -->
-          <script type="text/javascript" src="login_lib.js"></script>
+      <!-- Begin access control elements: buttons, name, and image -->
+      <button id="login_b" style="" type="button" 
+          onclick="document.getElementById('status').innerHTML = '';login_click();">
+      <b>Log In</b></button>
+      <button id="logout_b" style="display:none" type="button" 
+          onclick="document.getElementById('status').innerHTML = '';logout_click();">
+      <b>Log Out</b></button>
+      <span id="login_user_name"></span>&nbsp;
+      <img id="login_user_image" 
+          src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" 
+          width="32" height="32"><br>
+      <!-- End access control elements -->
+      <!-- Include login library -->
+      <script type="text/javascript" src="login_lib.js"></script>
     </div>
     <hr>
     <div>
@@ -46,6 +48,7 @@
       </div>
     </div>      
 <script>
+<!--
 "use strict"; // reveal bad scripting
 
 var BACKEND_ADDRESS_POI = "";
@@ -108,6 +111,7 @@ function my_logged_out() {
 document.getElementById("login_b").disabled = false;
 
 function click_new() {
+  document.getElementById("status").innerHTML = "";
   user_under_editing_id = "new";
   user_data_under_editing = {"new": {}};
   sbje.make_form("editor", user_schema, 
@@ -142,6 +146,7 @@ function saved_new(response) {
       );
 
   if (!response.mail_sent) {
+  /*
     var message = "You may now register to the POI database using the" +
           " following link:\r\n" +
           response.registration_url + "\r\n";
@@ -150,6 +155,14 @@ function saved_new(response) {
         '?subject=Invitation%20to%20Register%20' +
         'to%20a%20POI%20Data%20Provider&body=' + 
         coded_msg);
+    */
+    var coded_msg = encodeURIComponent(response.registration_call.message);
+    var coded_subj = encodeURIComponent(response.registration_call.subject);
+    var mail_uri = "mailto:" + response.registration_call.to +
+        '?subject=' + coded_subj +
+        '&body=' + coded_msg;
+alert(mail_uri);
+    var w = window.open(mail_uri);
     w.close();
   }
       
@@ -173,24 +186,32 @@ function saved_old(response) {
 }
 
 function click_cancel() {
-
+  document.getElementById("status").innerHTML = "";
   stm.fn.stop_editing();
 }
 
 function user_account_action(user_id, action) {
-  switch ( action ) {
-    case "wiev": {
-      view_user(user_id);
-    } break;
-    case "edit": {
-      edit_user(user_id);
-    } break;
-    case "disable": {
-      disable_user(user_id);
-    } break;
-    case "remove": {
-      remove_user(user_id);
-    } break;
+  if (stm.state == STM_EDITING) {
+    alert("Please, finish editing first: Save or Cancel.");
+  } else {
+    switch ( action ) {
+      case "wiev": {
+        document.getElementById("status").innerHTML = "";
+        view_user(user_id);
+      } break;
+      case "edit": {
+        document.getElementById("status").innerHTML = "";
+        edit_user(user_id);
+      } break;
+      case "disable": {
+        document.getElementById("status").innerHTML = "";
+        disable_user(user_id);
+      } break;
+      case "remove": {
+        document.getElementById("status").innerHTML = "";
+        remove_user(user_id);
+      } break;
+    }
   }
 }
 
@@ -461,7 +482,8 @@ function display_user_list(user_data_list) {
     user_data = user_data_list[user_id];
     
     account_diplay[user_id] =  
-        user_data.name + ", " + user_data.email;
+        user_data.name + ", " + user_data.email + 
+        (user_data.identification ? "" : " ?");
   }
   selection_list_fill("user_choices", account_diplay, user_account_ops, 
           user_account_action, "Cancel");
@@ -588,7 +610,6 @@ function get_ext_json(buf, url, success, fail) {
     var key;
     if(xhr.readyState === 4) {
       if(xhr.status  === 200) { 
-        console.log("get_ext_json response: " + xhr.responseText);
         var json = JSON.parse(xhr.responseText);
         deleteProperties(buf);
         for (key in json) {
@@ -615,6 +636,8 @@ get_ext_json(user_schema, BACKEND_ADDRESS_POI + "user_schema.json",
     function(){}, function (){alert("User schema not available");});
 
 stm.fn.enable(); // start it
+
+//-->
 </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<?php // add_user.php v.5.1.3.1 ariokkon 2016-02-01
+<?php // add_user.php v.5.4.2.1 ariokkon 2016-08-04
 
 /*
 * Project: FI-WARE
@@ -35,12 +35,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
 {
   // adding a user requires admin permission
   $session = get_session();
+  $operator_id = $session['user'];
   $admin_permission = $session['permissions']['admin'];
   if(!$admin_permission) {
     header("HTTP/1.0 403 Forbidden");
     die("Permission denied.");
   }
 
+  $site_info_s = file_get_contents("./site_info.json");
+  $site_info = json_decode($site_info_s, true);
   
   $no_mail = FALSE;
   if (isset ($_GET['no_mail'])) {
@@ -80,14 +83,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     $user_data["_id"] = $user_id;
     $user_data['last_update'] = array();
     $user_data['last_update']['timestamp'] = $timestamp;
+    $user_data['last_update']['responsible'] = $operator_id;
     $user_data['reg_call'] = $registration_key;
     
     $collection = $mongodb->_users;
     $collection->insert($user_data);
     
-    $new_user_info = array();
-    $new_user_info['uuid'] = $user_id;
-    $new_user_info['timestamp'] = $timestamp;
     $ret_val_arr = array('description' => 'User added.');
     
     $ret_val_arr['service_info'] = get_service_info(SERVICE_NAME);
@@ -103,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     $registration_url = getDirUrl() . '/register_me.html?key=' .
         $registration_key;
 
+    /*
     $mres = false;
     if (!$no_mail) { // Send invitation, if not forbidden.
       $msubject = 'Invitation to Register to a POI Data Provider';
@@ -111,12 +113,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
           $registration_url . "\n";
       $mres = mail( $email, $msubject, $mmessage); 
     }
+    */
+    $ret_val_arr['registration_call'] = call_to_register($email,
+        $user_data['name'], $registration_url, $site_info['name'], 
+        !$no_mail);
 
     $ret_val_arr['name'] = $user_data['name'];
     $ret_val_arr['user_id'] = $user_id;
     $ret_val_arr['email'] = $email;
     $ret_val_arr['registration_url'] = $registration_url;
-    $ret_val_arr['mail_sent'] = $mres;
+    $ret_val_arr['mail_sent'] = $ret_vall_arr['registration_call']['sent'];
     
     $ret_val = json_encode($ret_val_arr);
       

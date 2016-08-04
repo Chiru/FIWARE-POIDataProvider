@@ -263,9 +263,11 @@ Notes:
 
 Register the POI data provider to the authentication services suitable for your purposes. The redirect callback is {your\_poi\_server}`/poi_dp/redirect_callback.html` , if needed. When you register, you get a client id to be used in authentication requests.
 ### Configuring authentication client
-* authenticate.html - update signin-client_id values for the authentication services
+* `authenticate.html` - update signin-client_id values for the authentication services
 ### Configuring the basic access rights
-Edit the file `poi_dp/auth_conf.json` .
+* `poi_dp/auth_conf.json`
+** Set the user information for the POI root user.
+** Set `"open_data": true,` - if anybody can view the data
 
 To be continued...
 ## Sanity check procedures

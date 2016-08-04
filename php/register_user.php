@@ -74,8 +74,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
             array("_id" => false));
           $user['identification']['google'] = array('email' => $email);
           $users->update(array("_id" => $user_id),$user);
+          echo '{"registration":true,"name":"' . $user['name'] . '"}';
+        } else {
+          echo '{"registration":false,"msg":"User already registered"}';
         }
-        echo '{"registration":true,"name":"' . $user['name'] . '"}';
       } else {
         header("HTTP/1.0 401 Unauthorized");
         echo '{"registration":false,"msg":"Denied by authorization provider"}';
@@ -107,8 +109,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
             array("_id" => false));
           $user['identification']['fiware_lab'] = array('id' => $id);
           $users->update(array("_id" => $user_id),$user);
+          echo '{"registration":true,"name":"' . $user['name'] . '"}';
+        } else {
+          echo '{"registration":false,"msg":"User already registered"}';
         }
-        echo '{"registration":true,"name":"' . $user['name'] . '"}';
       } else {
         header("HTTP/1.0 401 Unauthorized");
         echo '{"registration":false,"msg":"Denied by authorization provider"}';

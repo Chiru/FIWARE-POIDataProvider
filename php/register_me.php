@@ -1,12 +1,50 @@
+<?php // register_me.php v.5.4.2.1 ariokkon 2016-08-03
+/*
+* Project: FI-WARE
+* Copyright (c) 2016 Center for Internet Excellence, University of Oulu, All
+* Rights Reserved
+* For conditions of distribution and use, see copyright notice in LICENSE
+*/
+require_once 'db.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'GET' )
+{
+  $site_info_s = file_get_contents("./site_info.json");
+  $site_info = json_decode($site_info_s, true);
+  $server_info_s = file_get_contents("./server_info.json");
+  $server_info = json_decode($server_info_s, true);
+  $owner = $site_info['owner'];
+  $owner_website = $owner['website'];
+  $support = $site_info['support'];
+  $support_contact = $support['contact'];
+  
+  if (isset($_GET['key']))
+  {
+    $key = pg_escape_string($_GET['key']);
+  }
+  $db_opts = get_db_options();
+  $mongodb = connectMongoDB($db_opts['mongo_db_name']);
+  $_reg_calls = $mongodb->_reg_calls;
+  $registration_call = $_reg_calls->findOne(array("_id" => $key), 
+      array("_id" => false));
+  $user_id = $registration_call['user_id'];
+  $users = $mongodb->_users;
+  $user = $users->findOne(array("_id" => $user_id), 
+      array("_id" => false));
+
+}  
+?>
 <html>
 <head>
-  <title>POI DP User Registration</title>
+  <title>User Registration - <?php print $site_info['title']; ?></title>
 
 </head>
 <body>
   <h2>Select Your POI DP Authentication</h2>
-  <span id="result">Register to this POI DP by logging in using your 
-  authentication provider.</span><br>
+  <span id="result">   <?php print $user['name']; ?>, please, register to this 
+    <?php print $site_info['name']; ?> by logging in using your 
+    authentication provider.
+  </span><br>
   <!-- Begin access control elements: buttons, name, and image -->
   <button id="login_b" style="" type="button" 
       onclick="login_click();"><b>Register</b></button>

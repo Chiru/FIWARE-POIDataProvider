@@ -104,7 +104,6 @@ function login_authenticated(auth_data) {
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.onload = function() {
     try {
-      console.log("go_login response: " + xhr.responseText);
       response = JSON.parse(xhr.responseText);
       if (response.login) { // We're in!
         _auth_t = response.auth_t;

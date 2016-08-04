@@ -1,5 +1,22 @@
 {
-  "site_name": "FIWARE POI-DP",
-  "site_version": "5.1.3",
-  "api_version": "5.1.a"
+  "description": "Site identity configuration",
+  "title": "POI Data Provider",
+  "name": "FIWARE POI Data Provider",
+  "owner": {
+    "name": "Example inc.",
+    "website": {
+      "linkname": "www.example.org",
+      "url": "http://www.example.org"
+    },
+    "postal_address": [""],
+    "visiting_address": [""],
+    "phone": ""
+  },
+  "support": {
+    "browse": "http://www.example.org",
+    "contact": {
+      "name": "John Doe",
+      "email": "john.doe@example.org"
+    }
+  }
 }

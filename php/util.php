@@ -1,8 +1,9 @@
-<?php // util.php 5.1.3.1 2015-12-10 ariokkon
+<?php // util.php 5.4.2.1 2016-08-03 ariokkon
 
 /*
 * Project: FI-WARE
-* Copyright (c) 2014 Center for Internet Excellence, University of Oulu, All Rights Reserved
+* Copyright (c) 2014 Center for Internet Excellence, University of Oulu, All 
+* Rights Reserved
 * For conditions of distribution and use, see copyright notice in LICENSE
 */
 
@@ -202,8 +203,11 @@ function &array_merge_r2(array &$array1, &$array2 = null)
 
 function get_service_info($service_name)
 {
+  $service_info = array();
+  $s_infos = file_get_contents("./server_info.json");
+  $service_info['server_info'] = json_decode($s_infos, true);
   $s_infos = file_get_contents("./site_info.json");
-  $service_info = json_decode($s_infos, true);
+  $service_info['site_info'] = json_decode($s_infos, true);
   
   $service_info['name'] = $service_name;
   
@@ -232,5 +236,23 @@ function poi_new_key()
   $hex1= bin2hex($base_str);
   
   return $hex1;
+}
+
+function call_to_register($email, $name, $registration_url, 
+    $site_name, $send) {
+  $msubject = 'Invitation to Register to a POI database.';
+  $mmessage = 'You may now register as '. $name . ' to the ' . 
+      $site_name . ' using the following link:' . "\r\n" .
+      $registration_url . "\r\n";
+  $mres = false;
+  if ($send) $mres = mail( $email, $msubject, $mmessage); 
+  
+  $result = array(
+      'sent' => $mres,
+      'to' => $email,
+      'subject' => $msubject,
+      'message' => $mmessage
+      );
+  return $result;
 }
 ?>

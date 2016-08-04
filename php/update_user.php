@@ -1,4 +1,4 @@
-<?php // update_user.php v.5.1.3.1 ariokkon 2016-02-09
+<?php // update_user.php v.5.4.2.1 ariokkon 2016-08-04
 /*
 * Project: FI-WARE
 * Copyright (c) 2014 Center for Internet Excellence, University of Oulu, 
@@ -13,11 +13,14 @@ require_once 'util.php';
 require 'security.php';
 
 $debug_log = array();
+$fields_to_update = array('name', 'email', 'permissions', 'address', 'phone',
+    'last_update');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' )
 {
   // updating user data requires administrator permission
   $session = get_session();
+  $operator_id = $session['user'];
   $permission = $session['permissions']['admin'];
   if(!$permission) {
     header("HTTP/1.0 403 Forbidden");
@@ -31,7 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
   {
     $new_timestamp = time();
     $user_id = pg_escape_string(key($request_array));
-    $new_user_data = $request_array[$user_id];
+    $received_user_data = $request_array[$user_id];
+    $new_user_data = array();
+    
+    foreach ($fields_to_update as $key) {
+      if (isset( $received_user_data[$key] )) {
+        $new_user_data[$key] = $received_user_data[$key];
+      }
+    }    
     $is_valid = validate_user_data($new_user_data);
     if (!$is_valid)
     {
@@ -49,6 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
       header("HTTP/1.0 404 Not found");
       die('User unrecognized');
     }
+    
+    // guard for update conflicts
     $update_timestamp = 0;
     $curr_timestamp = 0;
     if (isset($new_user_data['last_update']))
@@ -81,12 +93,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     {
       $new_user_data['last_update'] = array();
     }
-    $new_user_data['last_update']['timestamp'] = $new_timestamp;
+    // end update guard
     
-    $new_user_data["_id"] = $user_id;               
+    // update editable values in old_user_data    
+    foreach ($fields_to_update as $key) {
+      if (isset( $new_user_data[$key] )) {
+        $old_user_data[$key] = $new_user_data[$key];
+      } else {
+        unset($old_user_data[$key]);
+      }
+    }    
+    
+    $old_user_data['last_update']['timestamp'] = $new_timestamp;
+    $old_user_data['last_update']['responsible'] = $operator_id;
+    $old_user_data["_id"] = $user_id;               
     $upd_criteria = array("_id" => $user_id);
     try {
-      $users->update($upd_criteria, $new_user_data, 
+      $users->update($upd_criteria, $old_user_data, 
           array("upsert" => true));
     } catch(Exception $e) {
       echo '{"msg":"*ERROR: Exception when updating ' . $user_id . '.' . 
