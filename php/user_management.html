@@ -56,6 +56,7 @@ var BACKEND_ADDRESS_POI = "";
 var user_account_ops = {
   wiev: "View",
   edit: "Edit",
+  new_call_to_register: "New Call to Register",
   disable: "Disable",
   remove: "DELETE!"
 };
@@ -127,6 +128,34 @@ function click_save() {
   }
 }
 
+function call_again(response) {
+  var data1 = JSON.stringify(response, null, "  ");
+  var user_id = response.user_id;
+  
+  document.getElementById("status").innerHTML = 
+      "<h3>" + response.description + "</h3>" +
+      "Name: " + response.name + "<br>" +
+      "User Id: " + response.user_id + "<br>" +
+      "Email: " + response.email + "<br>" +
+      "Registration URL: " + response.registration_url + "<br>" +
+      (response.mail_sent ?
+        "Invitation to register sent." :
+        "<b>Remember to send the registration request to the user!</b>"
+      );
+
+  if (!response.mail_sent) {
+    var coded_msg = encodeURIComponent(response.registration_call.message);
+    var coded_subj = encodeURIComponent(response.registration_call.subject);
+    var mail_uri = "mailto:" + response.registration_call.to +
+        '?subject=' + coded_subj +
+        '&body=' + coded_msg;
+    var w = window.open(mail_uri);
+    w.close();
+  }
+}
+
+
+
 function saved_new(response) {
   var data1 = JSON.stringify(response, null, "  ");
   var user_id = response.user_id;
@@ -146,22 +175,11 @@ function saved_new(response) {
       );
 
   if (!response.mail_sent) {
-  /*
-    var message = "You may now register to the POI database using the" +
-          " following link:\r\n" +
-          response.registration_url + "\r\n";
-    var coded_msg = encodeURIComponent(message)
-    var w = window.open("mailto:" + response.email +
-        '?subject=Invitation%20to%20Register%20' +
-        'to%20a%20POI%20Data%20Provider&body=' + 
-        coded_msg);
-    */
     var coded_msg = encodeURIComponent(response.registration_call.message);
     var coded_subj = encodeURIComponent(response.registration_call.subject);
     var mail_uri = "mailto:" + response.registration_call.to +
         '?subject=' + coded_subj +
         '&body=' + coded_msg;
-alert(mail_uri);
     var w = window.open(mail_uri);
     w.close();
   }
@@ -202,6 +220,10 @@ function user_account_action(user_id, action) {
       case "edit": {
         document.getElementById("status").innerHTML = "";
         edit_user(user_id);
+      } break;
+      case "new_call_to_register": {
+        document.getElementById("status").innerHTML = "";
+        send_new_call_to_user(user_id);
       } break;
       case "disable": {
         document.getElementById("status").innerHTML = "";
@@ -247,6 +269,10 @@ function edit_user_succ() {
 function edit_user_fail() {
 }
 
+function send_new_call_to_user(user_id) {
+  resend_call_user(user_id,  call_again);
+}
+
 function disable_user(user_id) {
   user_under_editing_id = user_id;
   get_user_data(user_id, disable_user_succ_1, disable_user_fail);
@@ -260,7 +286,7 @@ function disable_user_succ_1() {
       update: false,
       view: false
   };
-  update_user( user_data_under_editing, disable_user_succ_2 );
+  update_user( user_data_under_editing, disable_user_succ_2, "disable=true" );
 }
 
 function disable_user_succ_2(response) {
@@ -489,7 +515,7 @@ function display_user_list(user_data_list) {
           user_account_action, "Cancel");
 }
 
-function update_user( user_data , success) {
+function update_user( user_data , success, xparam) {
   var restQueryURL;
   var responseText;
   var xhr;
@@ -497,7 +523,7 @@ function update_user( user_data , success) {
 //  if (!checkPOI(user_data)) return;
 
   restQueryURL = BACKEND_ADDRESS_POI + "update_user" +
-      "?auth_t=" + auth_t;
+      "?auth_t=" + auth_t + (xparam ? "&" + xparam : "");
   xhr = new XMLHttpRequest();
   
   xhr.overrideMimeType("application/json");
@@ -546,9 +572,6 @@ function add_user( user_data , success) {
 
   xhr.onreadystatechange = function () {
     var json;
-    var uuid;
-    var data;
-    var poiMarker;
     if(xhr.readyState === 4) {
       responseText = xhr.responseText;
       if(xhr.status  === 200) {
@@ -573,6 +596,39 @@ function add_user( user_data , success) {
 
 }
 
+function resend_call_user(user_id, success) {
+  var restQueryURL = BACKEND_ADDRESS_POI + "resend_call_user?user_id=" + 
+      user_id + "&auth_t=" + auth_t;
+
+  var xhr = new XMLHttpRequest();
+  var responseText;
+
+  xhr.overrideMimeType("application/json");
+
+  xhr.onreadystatechange = function () {
+    var json;
+    if(xhr.readyState === 4) {
+      responseText = xhr.responseText;
+      if(xhr.status  === 200) {
+        if (responseText.substring(0,6) != "Error:") { 
+          json = JSON.parse(xhr.responseText);
+          success(json);
+        } else {
+          alert(responseText);
+        }
+      } else { 
+        alert("failed "+xhr.status+": " + responseText);
+      }
+    }
+  }
+
+  xhr.onerror = function (e) {
+    alert("error" + JSON.stringify(e));
+  };
+  xhr.open("POST", restQueryURL, true);
+  xhr.send();
+}
+      
 function confirmed_remove_user(user_id, success) {
   var restQueryURL = BACKEND_ADDRESS_POI + "delete_user?user_id=" + user_id +
         "&auth_t=" + auth_t;

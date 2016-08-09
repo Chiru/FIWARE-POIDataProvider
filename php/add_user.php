@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     $_reg_calls = $mongodb->_reg_calls;
     $_reg_calls->insert($registration_call);
 
-    $registration_url = getDirUrl() . '/register_me.html?key=' .
+    $registration_url = getDirUrl() . '/register_me.php?key=' .
         $registration_key;
 
     /*
