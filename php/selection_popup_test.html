@@ -1,0 +1,30 @@
+<html>
+<head>
+<title>selection_popup.js - test</title>
+<script src="selection_popup.js"></script>
+<script src="string_html.js"></script>
+</head>
+<body>
+<button onclick="start();">Start</button><br>
+<div id="status"></div>
+<script>
+var list = {
+  one: "Yksi",
+  two: "Kaksi",
+  three: "Kolme",
+  four: "Neljä"
+};
+
+function callback(ctext, data) {
+  ctext.innerHTML = "hei, " + data;
+  document.getElementById("status").innerHTML += " OK?";
+}
+
+var context = document.getElementById("status");
+
+function start() {
+  selection_popup("Testi-ikkuna", "Valitse näistä", list, callback, context);
+}
+</script>
+</body>
+</html>

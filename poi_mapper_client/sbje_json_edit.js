@@ -1,4 +1,4 @@
-/* sbje_json_edit.js 0.2 2014-09-18 Ari Okkonen
+/* sbje_json_edit.js 0.3 2016-08-16 Ari Okkonen
 
   Schema Based JSON Edit
   
@@ -63,7 +63,6 @@ sbje.icons = {
   info: sbje.path + "info_icon.gif",
   add: sbje.path + "add_icon.gif"
 };
-  
 
 sbje.str2html_table = {
         "<": "&lt;",
@@ -82,10 +81,32 @@ sbje.str2html = function  (rawstr) {
   return result;
 }
 
+// Symbol table to allow annyoing strings as keys of object members.
+sbje.symbols = {
+  encode: {},
+  decode: {},
+  next: 1
+};
+
+sbje.key_encode = function (key) {
+  var keyc = sbje.symbols.encode[key];
+  var next = sbje.symbols.next;
+  
+  if (!keyc) {  // new one to the symbol table
+    next = sbje.symbols.next;
+    sbje.symbols.next = next + 1; // next will be different
+    keyc = "sbje_" + next;
+    sbje.symbols.encode[key] = keyc;
+    sbje.symbols.decode[keyc] = key;
+  }
+  return keyc;
+}
+
 sbje.section_open = {}; // indicates open sections by "path": true
       
-sbje.split_path = function (path, head_tail) { // sets tail == null for last item
-// because empty string is a valid key
+sbje.split_path = function (path, head_tail) {
+      // sets tail == null for the last item,
+      // because empty string is a valid key
   var period_pos, l_brac_pos, r_brac_pos, pos, fchar;
   
   period_pos = path.indexOf(".");
@@ -141,10 +162,12 @@ sbje.analyze_id = function (id) {
   var parent_key;
   var specifier;
   var id_body;
+  var key;
+  var keyc;
 
   /* remove tag at the beginning "xyz:" */
   id_body = id.slice(id.indexOf(":") + 1);
-  specifier = id.slice(0, id.indexOf(":") - 1);
+  specifier = id.slice(0, id.indexOf(":"));
   path = sbje.html_id2path(id);
   var doc = sbje.get_doc(path);
   var add_icon_el = doc.getElementById("ai:" + id_body);
@@ -158,21 +181,23 @@ sbje.analyze_id = function (id) {
   cur_schema = binding.schema;
   /* find the correct field */
   sbje.split_path(head_tail.tail, head_tail);
+  keyc = head_tail.head;
+  key = sbje.symbols.decode[keyc];
   while (head_tail.tail != null) {
-    parent_path = parent_path + "." + head_tail.head;
+    parent_path = parent_path + "." + keyc;
     parent_node = cur_node;
-    cur_node = cur_node[head_tail.head];
+    cur_node = cur_node[key];
     cur_schema = sbje.get_effective_schema(cur_schema, binding.schema);
-    cur_schema = sbje.get_sub_schema(cur_schema, head_tail.head);
-//    cur_schema = cur_schema.properties[head_tail.head];
+    cur_schema = sbje.get_sub_schema(cur_schema, key);
     parent_key = head_tail.head;
     sbje.split_path(head_tail.tail, head_tail);
+    keyc = head_tail.head;
+    key = sbje.symbols.decode[keyc];
   }
   cur_schema = sbje.get_effective_schema(cur_schema, binding.schema);
   parent_type = sbje.get_schema_type(cur_schema);
   parent_schema = cur_schema;
-  cur_schema = sbje.get_sub_schema(cur_schema, head_tail.head);
-  //  cur_schema = cur_schema.properties[head_tail.head];
+  cur_schema = sbje.get_sub_schema(cur_schema, key);
   cur_schema = sbje.get_effective_schema(cur_schema, binding.schema);
   node_type = sbje.get_schema_type(cur_schema);
   
@@ -191,7 +216,7 @@ sbje.analyze_id = function (id) {
   result.target = {
     node: cur_node,
     path: path,
-    key: head_tail.head,
+    key: sbje.symbols.decode[head_tail.head],
     schema: cur_schema,
     type: node_type
   };
@@ -199,7 +224,7 @@ sbje.analyze_id = function (id) {
   result.parent = {
     node: parent_node,
     path: parent_path,
-    key: parent_key,
+    key: sbje.symbols.decode[parent_key],
     schema: parent_schema,
     type: parent_type
   }
@@ -215,7 +240,6 @@ sbje.field_changed = function(id, value) {
 
   if(type_handler) {
     p.target.node[p.target.key] = type_handler.parse_input(value);
-//    console.log("field_changed -> " + cur_node[p.target.key]);
   }
 };
 
@@ -233,14 +257,28 @@ sbje.get_schema_type = function(schema) {
   return type;
 }
 
+/*
+sbje.get_sub_schema = function(schema, keyc) {
+  var result = null;
+  var type;
+  var key;
+  
+  if(keyc) key = sbje.symbols.decode[keyc];
+*/
 sbje.get_sub_schema = function(schema, key) {
   var result = null;
   var type;
+  var key;
   
   if((key != undefined) && schema) {
     type = sbje.get_schema_type(schema);
     if(type == "object") {
-      result = schema.properties[key];
+      if (schema.properties) {
+        result = schema.properties[key];
+      }
+      if(!result) {
+        result = schema["additionalProperties"];
+      }
     } else if (type == "array") {
       result = schema.items;
     }
@@ -287,9 +325,9 @@ sbje.add_field = function (id) {
   if(p.elements.add_icon) p.elements.add_icon.style.display = "none";
   
   if(p.parent.type == "array") {
-    form_slot =   p.doc.getElementById("sf:" + sbje.path2id_body(p.parent.path));
-    form_slot.innerHTML = sbje.make_array_form_internals(p.parent.path, p.parent.schema, 
-      p.parent.node, p.parent.key, p.binding.schema);
+    form_slot = p.doc.getElementById("sf:" + sbje.path2id_body(p.parent.path));
+    form_slot.innerHTML = sbje.make_array_form_internals(p.parent.path, 
+        p.parent.schema, p.parent.node, p.parent.key, p.binding.schema);
   }
 };
 
@@ -319,18 +357,17 @@ sbje.delete_field = function (id) {
     }
   }
   /* remove field */
-  console.log(JSON.stringify(p));
   p.target.node[p.target.key] = undefined;
   if (p.target.type == "object") {
     form_slot =   p.doc.getElementById("sf:" + p.field_id);
     form_slot.innerHTML = sbje.make_object_form_internals(p.target.path, 
         p.target.schema, 
-        p.target.node, p.target.key);
+        p.target.node, p.target.key, p.binding.schema);
   } else if (p.target.type == "array") {
     form_slot =   p.doc.getElementById("sf:" + p.field_id);
     form_slot.innerHTML = sbje.make_array_form_internals(p.target.path, 
         p.target.schema, 
-        p.target.node, p.target.key);
+        p.target.node, p.target.key, p.binding.schema);
   }
   if(p.elements.field) p.elements.field.style.display = "none";
   if(p.elements.add_icon) p.elements.add_icon.style.display = "inline";
@@ -338,7 +375,8 @@ sbje.delete_field = function (id) {
   if(p.parent.type == "array") {
     p.target.node.splice(parseInt(p.target.key),1);
   
-    form_slot =   p.doc.getElementById("sf:" + sbje.path2id_body(p.parent.path));
+    form_slot =   p.doc.getElementById("sf:" + 
+        sbje.path2id_body(p.parent.path));
     form_slot.innerHTML = sbje.make_array_form_internals(p.parent.path, 
         p.parent.schema, 
         p.parent.node,  p.parent.key, p.binding.schema);
@@ -361,11 +399,11 @@ sbje.description = function (id) {
       'location=no,directories=no,status=no,menubar=no,resizable=yes,' + 
       'copyhistory=no,scrollbars=yes,width=480,height=320');
   }
-  sbje.infowin.document.head.innerHTML = "<title>" + (t_string ? t_string  :
+  sbje.infowin.document.head.innerHTML = "<title>" + (t_string ? sbje.str2html(t_string)  :
       p.target.key) + "</title>";
   sbje.infowin.document.body.innerHTML = "<code>" + p.target.path + "</code><br/>" +
-      (t_string ? ("<h2>" + t_string + "</h2>") : "") +
-      d_string;
+      (t_string ? ("<h2>" + sbje.str2html(t_string) + "</h2>") : "") +
+      sbje.str2html(d_string);
 };
 
 sbje.toggle_section = function (path) {
@@ -398,7 +436,8 @@ sbje.toggle_section = function (path) {
    ================
 */
 
-sbje.make_object_form_internals = function (path, schema, data, key, schema_root) { // : string
+sbje.make_object_form_internals = function (path, schema, data, key, 
+    schema_root) { // : string
   var result = "";
   var data_exists = (data[key] != undefined) && (data[key] != null);
   var subkey;
@@ -406,6 +445,8 @@ sbje.make_object_form_internals = function (path, schema, data, key, schema_root
   var info_icon = "";
   var is_open = sbje.section_open[path];
   var field_id = sbje.path2id_body(path);
+  var additional_properties;
+  var subkeyc; // encoded subkey
 
   if ( schema.description ) {
     info_icon = ' <img src="' + sbje.icons.info + '" alt="info" ' + 
@@ -417,6 +458,7 @@ sbje.make_object_form_internals = function (path, schema, data, key, schema_root
  
     // info icon for description
 
+    additional_properties = schema["additionalProperties"];
     
     shown_data = data[key];
     result += 
@@ -438,9 +480,23 @@ sbje.make_object_form_internals = function (path, schema, data, key, schema_root
               'title="delete field" />' +
             info_icon + '</span><div style="position:relative;left:20">';
     for ( subkey in schema.properties ) {
-      result += sbje.make_sub_form(path + "." + subkey, schema.properties[subkey], 
-          shown_data, subkey, schema_root);
+      subkeyc = sbje.key_encode(subkey);
+      result += sbje.make_sub_form(path + "." + subkeyc, 
+          schema.properties[subkey], shown_data, subkey, schema_root);
     }
+
+    if (additional_properties) {
+      for (subkey in shown_data) {
+        subkeyc = sbje.key_encode(subkey);
+        if ((!schema.properties) || (!schema.properties[subkey])) {
+          result += sbje.make_sub_form(path + "." + subkeyc, 
+              additional_properties, shown_data, subkey, schema_root);
+         }
+      }
+    }
+    
+
+
     result += '</div>' +
               '}' +
           '</span>' +
@@ -509,13 +565,6 @@ sbje.make_array_form_internals = function (path, schema, data, key, schema_root)
     result += sbje.make_sub_form(path + "." + shown_data.length, schema.items, 
         shown_data, /*"[" +*/ shown_data.length /*+ "]"*/, schema_root);
 
-/*
-    for ( subkey in schema.properties ) {
-      result += sbje.make_sub_form(path + "." + subkey, schema.properties[subkey], 
-          shown_data, subkey, schema_root);
-    }
-*/
-    
     result += '</div>' +
               ']' +
           '</span>' +
@@ -541,7 +590,8 @@ sbje.make_object_form = function (path, schema, data, key, schema_root) { // : s
   var field_id = sbje.path2id_body(path);
   var result = '<div id="sf:' + field_id + '">';
   
-  result += sbje.make_object_form_internals(path, schema, data, key, schema_root);
+  result += sbje.make_object_form_internals(path, schema, data, key, 
+      schema_root);
   result += '</div>';
   
   return result;
@@ -551,7 +601,8 @@ sbje.make_array_form = function (path, schema, data, key, schema_root) { // : st
   var field_id = sbje.path2id_body(path);
   var result = '<div id="sf:' + field_id + '">';
   
-  result += sbje.make_array_form_internals(path, schema, data, key, schema_root);
+  result += sbje.make_array_form_internals(path, schema, data, key, 
+      schema_root);
   result += '</div>';
   
   return result;
@@ -601,11 +652,9 @@ sbje.enum_type_handler = {
   
   set_input_field: function(input_field, value) {
     input_field.value = value;
-    console.log("Setting enum field to " + value);
     for(var i = 0; i < input_field.options.length; i++) {
       if(input_field.options[i].value == value) {
         input_field.options[i].selected = true;
-        console.log(value + " selected");
       }
     }
   },
@@ -781,7 +830,8 @@ sbje.make_generic_form =
     field_visibility + '">';
   // edit box by externally provided function
   
-  result += type_handler.make_form_field(input_id, path, shown_data, eff_schema);
+  result += type_handler.make_form_field(input_id, path, shown_data, 
+      eff_schema);
   // delete icon
   result += ' <img src="' + sbje.icons.del + '" alt="delete field" ' + 
     'onclick="sbje.delete_field(\'i:' + id_body + '\')" title="delete field"/>';
@@ -823,7 +873,8 @@ sbje.get_effective_schema = function (schema, schema_root) { // : schema
   
   if(schema["$ref"]) {
     eff_schema = sbje.get_reference(schema["$ref"], schema_root);
-    if ( !eff_schema ) console.log("Bad ref? " + JSON.stringify(schema["$ref"]));
+    if ( !eff_schema ) console.log("Bad ref? " + 
+        JSON.stringify(schema["$ref"]));
     for ( subkey in schema ) {
       if ( subkey != "$ref" ) {
         eff_schema[subkey] = schema[subkey];
@@ -834,7 +885,8 @@ sbje.get_effective_schema = function (schema, schema_root) { // : schema
 }
 
 
-sbje.make_sub_form = function (path, schema, data, key, schema_root) { // : string
+sbje.make_sub_form = function (path, schema, data, key, schema_root) { 
+    // : string
   var eff_schema = schema;
   var result = "";
   var node_type;
@@ -845,7 +897,8 @@ sbje.make_sub_form = function (path, schema, data, key, schema_root) { // : stri
   if (node_type) {
     switch (node_type) {
       case "object": {
-        result = sbje.make_object_form(path, eff_schema, data, key, schema_root);
+        result = sbje.make_object_form(path, eff_schema, data, key, 
+            schema_root);
       } break;
       case "array": {
         result = sbje.make_array_form(path, eff_schema, data, key, schema_root);
@@ -877,17 +930,29 @@ sbje.make_form = function (id, schema, data, doc) {
   var div_generated = doc.getElementById( id );
   var form_string;
   var properties, key;
+  var additional_properties;
+  var keyc; // coded key
 
-// console.log("schema = " + JSON.stringify(schema).slice(0, 15));  
-  
   if(schema.type == "object") {
     sbje.form_bindings[id] = {"data": data, "schema": schema, "doc": doc};  
     form_string = '<div style="position:relative;left:20">';
     properties = schema.properties;
+    additional_properties = schema["additionalProperties"];
 
     for (key in properties) {
-      form_string += sbje.make_sub_form(id + "." + key, properties[key], 
-        data, key, schema);
+      keyc = sbje.key_encode(key);
+      form_string += sbje.make_sub_form(id + "." + keyc, properties[key], 
+          data, key, schema);
+    }
+    
+    if (additional_properties) {
+      for (key in data) {
+        if (!properties[key]) {
+          keyc = sbje.key_encode(key);
+          form_string += sbje.make_sub_form(id + "." + keyc, 
+              additional_properties, data, key, schema);
+        }
+      }
     }
     
     form_string += "</div>";
@@ -908,6 +973,7 @@ sbje.remove_form = function (id) {
 
 /*
   0.2  2014-09-18  aok  delete_field does not delete required data.
+  0.3  2016-08-16  aok  Dots allowed in data keys
   
 */
 

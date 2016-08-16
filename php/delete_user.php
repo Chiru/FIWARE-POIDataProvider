@@ -33,8 +33,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE' )
     $user = $users->findOne(array("_id" => $user_id), 
       array("_id" => false));
     
-    if($user != NULL) {
+    if($user != NULL) { // remove user
     
+      // remove registration call
+      if($user['reg_call']) {
+        $_reg_calls = $mongodb->_reg_calls;
+        $_reg_calls->remove(array("_id" => $user['reg_call']));
+      }
+      
+      // remove identifications
+      if ($user['identifications']) {
+        $_auth = $mongodb->_auth;
+        foreach ($user['identifications'] as $auth_id => $temp ) {
+          // to be removed
+          $auth_reg = $_auth->findOne(array("_id" => $auth_id), 
+               array("_id" => false));
+          unset($auth_reg['accounts'][user_id]);
+          if(count($auth_reg['accounts']) < 1) {  // no accounts left
+            $_auth->remove(array("_id" => $user_id));
+          } else { // still accounts
+            $upd_criteria = array("_id" => $auth_id);
+            $_auth->update($upd_criteria, $auth_reg, 
+                array("upsert" => true));
+          }
+        }
+      }
+
+      // remove user record
       $users->remove(array("_id" => $user_id));
     } else {
       header("HTTP/1.0 404 Not found");

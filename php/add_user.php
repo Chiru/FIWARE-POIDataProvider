@@ -85,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     $user_data['last_update']['timestamp'] = $timestamp;
     $user_data['last_update']['responsible'] = $operator_id;
     $user_data['reg_call'] = $registration_key;
+    $user_data['identifications'] = array();
     
     $collection = $mongodb->_users;
     $collection->insert($user_data);
@@ -104,16 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     $registration_url = getDirUrl() . '/register_me.php?key=' .
         $registration_key;
 
-    /*
-    $mres = false;
-    if (!$no_mail) { // Send invitation, if not forbidden.
-      $msubject = 'Invitation to Register to a POI Data Provider';
-      $mmessage = 'You may now register to the POI database using the' .
-          ' following link:' . "\n" .
-          $registration_url . "\n";
-      $mres = mail( $email, $msubject, $mmessage); 
-    }
-    */
     $ret_val_arr['registration_call'] = call_to_register($email,
         $user_data['name'], $registration_url, $site_info['name'], 
         !$no_mail);

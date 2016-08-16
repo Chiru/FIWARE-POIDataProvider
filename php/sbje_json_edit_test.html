@@ -1,5 +1,42 @@
-{
+<html>
+<head>
+  <title>TEST sbje_json_edit.js</title>
+      
+  <script type="text/javascript" src="sbje_json_edit.js"></script>
 
+</head>
+<body>
+  <h2><code>sbje_jeson_edit.js</code> Test</h2>
+
+  <div style="float:left;width:50%">
+    <button id="button_sbje" type="button" onclick="click_sbje()">
+        Save</button>
+    <div id="sbje">
+      [empty]
+    </div>
+  </div>
+  <div style="float:left;width:49%">
+    <button id="button_text" type="button" onclick="click_text()">
+        Save</button>
+    <div>
+      <textarea id="text" rows="25" cols="80">{
+  "a": "some text",
+  "b": {
+    "avain1": "Avain 1",
+    "toinen_avain": "- ja siihenkin juttua"
+  }
+}  
+      </textarea>
+    </div>
+    <div id="status">
+    </div>
+  </div>
+
+<script>
+<!--
+"use strict"; // reveal bad scripting
+
+var user_schema = {
   "title": "User information",
   "description": "For user identification",
   "type": "object",
@@ -90,5 +127,35 @@
       "additionalProperties": false
     }
   }
+};
+
+var data_buffer = {};
+
+
+function click_text() {
+  var data1 = document.getElementById("text").value;
+  
+  data_buffer = JSON.parse(data1);
+
+  sbje.make_form("sbje", user_schema, 
+      data_buffer, document);
+
 }
 
+
+function click_sbje() {
+
+  var data1 = JSON.stringify(data_buffer, null, "  ");
+  document.getElementById("text").value = data1;
+
+}
+
+window.onload = function() {
+  click_text();
+}
+
+
+//-->
+</script>
+</body>
+</html>

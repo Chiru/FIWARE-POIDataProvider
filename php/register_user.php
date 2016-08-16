@@ -48,8 +48,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
   $_reg_calls = $mongodb->_reg_calls;
   $registration_call = $_reg_calls->findOne(array("_id" => $key), 
       array("_id" => false));
+  $auth_s = '';
   if($registration_call) {
     $user_id = $registration_call['user_id'];
+    $auth_id = null;
     if ($auth_p == 'google') {  
       $output_msg = http_get('https://www.googleapis.com/oauth2/v3/tokeninfo?' .
           'id_token=' . $request_body);
@@ -57,27 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
       $gauth_body = json_decode($output_data->body);
       $email = $gauth_body->email;
       if ($email) { // recognized by google
-
-        $auth_google = $mongodb->_auth_google; // Google authentication mappings
-        // Check for double registration
-        if(!$auth_google->findOne(array("_id" => $email), 
-            array("_id" => false))) {
-          $auth_mapping = array(
-            '_id' => $email,
-            'user' => $user_id,
-            'registration_time' => time()
-          );
-        
-          $auth_google->insert($auth_mapping);
-          $users = $mongodb->_users;
-          $user = $users->findOne(array("_id" => $user_id), 
-            array("_id" => false));
-          $user['identification']['google'] = array('email' => $email);
-          $users->update(array("_id" => $user_id),$user);
-          echo '{"registration":true,"name":"' . $user['name'] . '"}';
-        } else {
-          echo '{"registration":false,"msg":"User already registered"}';
-        }
+        $auth_s = $email;
       } else {
         header("HTTP/1.0 401 Unauthorized");
         echo '{"registration":false,"msg":"Denied by authorization provider"}';
@@ -91,28 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
       $id = $gauth_body->id;
       $email = $gauth_body->email;
       if ($id) { // recognized by keyrock
-
-        $auth_fiware_lab = $mongodb->_auth_fiware_lab; // FIWARE Lab 
-                                                    // authentication mappings
-        // Check for double registration
-        if(!$auth_fiware_lab->findOne(array("_id" => $id), 
-            array("_id" => false))) {
-          $auth_mapping = array(
-            '_id' => $id,
-            'user' => $user_id,
-            'registration_time' => time()
-          );
-        
-          $auth_fiware_lab->insert($auth_mapping);
-          $users = $mongodb->_users;
-          $user = $users->findOne(array("_id" => $user_id), 
-            array("_id" => false));
-          $user['identification']['fiware_lab'] = array('id' => $id);
-          $users->update(array("_id" => $user_id),$user);
-          echo '{"registration":true,"name":"' . $user['name'] . '"}';
-        } else {
-          echo '{"registration":false,"msg":"User already registered"}';
-        }
+        $auth_s = $id;
       } else {
         header("HTTP/1.0 401 Unauthorized");
         echo '{"registration":false,"msg":"Denied by authorization provider"}';
@@ -120,9 +81,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     } else {
       header("HTTP/1.0 401 Unauthorized");
       echo '{"registration":false,"msg":"Unknown authorization provider"}';
-      
     }
-    //  $_reg_calls->remove(array("_id" => $key));
+    $auth_id = $auth_p . ':' . $auth_s;
+    
+    if($auth_id) {
+      $timestamp = time();
+      // $auth_id == "<provider>:<id_in_provider>"
+  
+      $_auth = $mongodb->_auth; // authentication mappings
+      $auth_mapping = $_auth->findOne(array("_id" => $auth_id));
+      if(!$auth_mapping) {
+        $auth_mapping = array(
+          '_id' => $auth_id,
+          'accounts' => array()
+        );
+      }
+      // $auth_mapping OK
+      $auth_mapping['accounts'][$user_id] = array(
+        'registration_time' => $timestamp
+      );
+      $upd_criteria = array("_id" => $auth_id);
+      $_auth->update($upd_criteria, $auth_mapping, 
+          array("upsert" => true));
+        
+      $users = $mongodb->_users;
+      $user = $users->findOne(array("_id" => $user_id), 
+        array("_id" => false));
+      $user['identifications'][$auth_id] = true;
+      $user['reg_call'] = null;
+      $users->update(array("_id" => $user_id),$user);
+      
+      $_reg_calls->remove(array("_id" => $key));
+//      echo '{"registration":true,"name":"' . $user['name'] . '"}';
+      echo json_encode(array(
+            'registration' => true,
+            'name' => $user['name']
+          ));
+    } else {
+      header("HTTP/1.0 401 Unauthorized");
+      echo '{"registration":false,' .
+          '"msg":"register_user.php internal error: no $auth_id"}';
+    }
   } else {
     header("HTTP/1.0 401 Unauthorized");
     echo '{"registration":false,"msg":"Key not recognized."}';

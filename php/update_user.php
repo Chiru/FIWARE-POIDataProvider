@@ -30,6 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
   $request_body = file_get_contents('php://input');
   $request_array = json_decode($request_body, true);
   
+  $disable = FALSE;
+  if (isset ($_GET['disable'])) {
+    $disable = strtoupper(pg_escape_string($_GET['disable'])) != 'FALSE';
+  }
+  
   if ($request_array != NULL)
   {
     $new_timestamp = time();
@@ -52,12 +57,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     $db_opts = get_db_options();
     $mongodb = connectMongoDB($db_opts['mongo_db_name']);
     $users = $mongodb->_users;
+    $_auth = $mongodb->_auth;
     
     $old_user_data = $users->findOne(array("_id" => $user_id), 
         array("_id" => false));
     if($old_user_data == NULL) {
       header("HTTP/1.0 404 Not found");
-      die('User unrecognized');
+      die('User unrecognized or cannot be modified');
     }
     
     // guard for update conflicts
@@ -102,7 +108,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
       } else {
         unset($old_user_data[$key]);
       }
-    }    
+    }
+    // handle possible registration removals
+    if ($old_user_data['identifications']) {
+      foreach ($old_user_data['identifications'] as $auth_id => $temp ) {
+        if ($disabled || !$new_user_data['identifications'][$auth_id]) {
+          // to be removed
+          unset($old_user_data['identifications'][$auth_id]);
+          $auth_reg = $_auth->findOne(array("_id" => $auth_id), 
+               array("_id" => false));
+          unset($auth_reg['accounts'][user_id]);
+          if(count($auth_reg['accounts']) < 1) {  // no accounts left
+            $_auth->remove(array("_id" => $user_id));
+          } else { // still accounts
+            $upd_criteria = array("_id" => $auth_id);
+            $_auth->update($upd_criteria, $auth_reg, 
+                array("upsert" => true));
+          }
+        }
+      }
+    }
     
     $old_user_data['last_update']['timestamp'] = $new_timestamp;
     $old_user_data['last_update']['responsible'] = $operator_id;

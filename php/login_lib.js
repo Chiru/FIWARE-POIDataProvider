@@ -103,6 +103,68 @@ function login_authenticated(auth_data) {
   xhr.open('POST', restQueryURL, true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.onload = function() {
+    var done = true;
+    try {
+      response = JSON.parse(xhr.responseText);
+      if (response.login) { // We're in!
+        _auth_t = response.auth_t;
+        succeeded = true;
+        login_data = {
+          token: _auth_t,
+          user_info: auth_data.user_id_info
+        };
+          
+      } else if (response.choices) { // multiple accounts available
+        done = false;
+        login_select_account(auth_data, response.choices);
+      }
+        
+    } catch(err) {
+      console.log("Login failed: " + err.message);
+    }
+    if(done) {
+      login_done(succeeded, login_data);
+    }
+  };
+  xhr.onerror = function() {
+    login_done(false, {});
+  };
+  xhr.send(auth_data.oauth2_token);
+}
+
+function login_select_account(auth_data, account_choices) {
+  /*
+    auth_data: {
+      oauth2_token: string,
+      auth_p:       string,
+      user_id_info: {
+        name: string,
+        image: url_string
+      }
+    }
+    
+    account_choices: {
+      "<user_id>": "<user_name>, <user_email>", ...
+    }
+  */
+  selection_popup("POI Accounts", "Select your POI DP account", account_choices,
+      login_account_selected, auth_data);
+}
+
+function login_account_selected(auth_data, user_id) {
+  
+  var _auth_t;
+  var succeeded = false;
+  var login_data = {};
+  var response, err;
+  var xhr = new XMLHttpRequest();
+  var restQueryURL = LOGIN_SERVER + "login?auth_p=" + auth_data.auth_p +
+      "&user_id=" + user_id;
+  
+  xhr.open('POST', restQueryURL, true);
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  xhr.onload = function() {
+    var done = true;
     try {
       response = JSON.parse(xhr.responseText);
       if (response.login) { // We're in!
@@ -114,10 +176,13 @@ function login_authenticated(auth_data) {
         };
           
       }
+        
     } catch(err) {
       console.log("Login failed: " + err.message);
     }
-    login_done(succeeded, login_data);
+    if(done) {
+      login_done(succeeded, login_data);
+    }
   };
   xhr.onerror = function() {
     login_done(false, {});

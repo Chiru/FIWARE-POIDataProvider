@@ -5,19 +5,19 @@
     "but this can be used generally to define hard-coded permissions.",
     "Use e.g. https://www.uuidgenerator.net/ to get UUIDs for hard users.",
     "open_data = true allows anyone to view data.",
-    "google - email is used as a key",
-    "keyrock (fiware_lab) - id is used as a key"
+    "google - google:<email> is used as a key",
+    "keyrock (fiware_lab) - fiware_lab:<id> is used as a key"
   ],
   "open_data": false,
   "hard_auths": {
-    "google": {
-      "john_doe@gmail.com": {
-        "user": "4d1a77c0-6cfb-4468-86fa-bff784012816"
+    "google:john_doe@gmail.com": {
+      "accounts:" {
+        "4d1a77c0-6cfb-4468-86fa-bff784012816": {"registration_time": 0}
       }
     },
-    "fiware_lab": {
-      "j_d": {
-        "user": "4d1a77c0-6cfb-4468-86fa-bff784012816"
+    "fiware_lab:j_d": {
+      "accounts:" {
+        "4d1a77c0-6cfb-4468-86fa-bff784012816": {"registration_time": 0}
       }
     }
   },
@@ -34,6 +34,10 @@
         "add": true,
         "update": true,
         "view": true
+      },
+      "identifications": {
+        "google:john_doe@gmail.com": true,
+        "fiware_lab:j_d": true
       }
     }
   }
