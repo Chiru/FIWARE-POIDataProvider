@@ -70,9 +70,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     die('User unrecognized');
   }
   $email = $user_data['email'];
-//  $timestamp = time();
+  $timestamp = time();
   
   $registration_key = $user_data['reg_call'];
+  if (! $registratioin_key) {
+    $registration_key = poi_new_key();
+    $registration_call = array();
+    $registration_call['_id'] = $registration_key;
+    $registration_call['user_id'] = $user_id;
+    $registration_call['timestamp'] = $timestamp;
+
+    $_reg_calls = $mongodb->_reg_calls;
+    $_reg_calls->insert($registration_call);
+
+    $user_data['reg_call'] = $registration_key;
+    
+    $upd_criteria = array("_id" => $user_id);
+    $users->update($upd_criteria, $user_data); 
+  }
   $ret_val_arr = array('description' => 'Resend registration call');
   $ret_val_arr['service_info'] = get_service_info(SERVICE_NAME);
   $registration_url = getDirUrl() . '/register_me.php?key=' .

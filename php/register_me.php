@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
 
 </head>
 <body>
-  <h2>Select Your POI DP Authentication</h2>
+  <h2>Select Your Authentication</h2>
   <span id="result">   <?php print $user['name']; ?>, please, register to this 
     <?php print $site_info['name']; ?> by logging in using your 
     authentication provider.
@@ -90,7 +90,7 @@ function login_succeeded(name, login_user_info) {
   
   document.getElementById("result").innerHTML = 
       "Registration completed.<br>" +
-      "You are registered as " + name + " to this service.";
+      "You are registered to this service as " + name + ".";
 }
 
 function login_failed(msg) {

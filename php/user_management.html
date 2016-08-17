@@ -30,6 +30,9 @@
     <hr>
     <div>
       <div style="float:left;width:50%">
+        <button id="refresh_b" type="button" 
+            onclick="click_refresh();" disabled="disabled">
+        <b>Refresh</b></button>
         <div id="user_choices">
           [empty]
         </div>
@@ -126,6 +129,12 @@ function click_save() {
     add_user( user_data_under_editing["new"], saved_new );
   } else {
     update_user( user_data_under_editing, saved_old );
+  }
+}
+
+function click_refresh() {
+  if (stm.state != STM_LOGGED_OUT) {
+    load_user_list();
   }
 }
 
@@ -408,6 +417,7 @@ stm.process_event_2 = function() {
       case STM_LOGGED_OUT: {
         if (stm.enter_state) {
           stm.enter_state = false;
+          document.getElementById("refresh_b").disabled = true;
           document.getElementById("button_new").disabled = true;
           document.getElementById("button_save").disabled = true;
           document.getElementById("button_cancel").disabled = true;
@@ -429,6 +439,7 @@ stm.process_event_2 = function() {
       case STM_LOGGED_IN: {
         if (stm.enter_state) {
           stm.enter_state = false;
+          document.getElementById("refresh_b").disabled = false;
           document.getElementById("button_new").disabled = false;
           document.getElementById("button_save").disabled = true;
           document.getElementById("button_cancel").disabled = true;
@@ -510,7 +521,7 @@ function display_user_list(user_data_list) {
     
     account_diplay[user_id] =  
         user_data.name + ", " + user_data.email + 
-        (user_data.identification ? "" : " ?");
+        (user_data.identifications ? "" : " ?");
   }
   selection_list_fill("user_choices", account_diplay, user_account_ops, 
           user_account_action, "Cancel");
