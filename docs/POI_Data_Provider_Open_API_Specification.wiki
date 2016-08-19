@@ -30,7 +30,7 @@ This version of the POI GE RESTful API Guide replaces and obsoletes all previous
 |-
 | style="border-style: solid; border-width: 1px"| 2013-12-31
 | style="border-style: solid; border-width: 1px"| 
-3.2 - Added: bounding box search, contact information, media, grouping. Improved: location data. Modified: query syntax<br/>[[http://forge.fi-ware.org/plugins/mediawiki/wiki/fi-ware-private/index.php?title=POI_Data_Provider_Open_API_Specification_%28DRAFT%29&oldid=28502 Version 3.2]]
+3.2 - <b>Added:</b> bounding box search, contact information, media, grouping. <b>Improved:</b> location data. <b>Modified:</b> query syntax<br/>[[http://forge.fi-ware.org/plugins/mediawiki/wiki/fi-ware-private/index.php?title=POI_Data_Provider_Open_API_Specification_%28DRAFT%29&oldid=28502 Version 3.2]]
 |-
 | style="border-style: solid; border-width: 1px"| 2014-02-13
 | style="border-style: solid; border-width: 1px"| 
@@ -44,17 +44,13 @@ First draft of Release 3.3<br/>
 | style="border-style: solid; border-width: 1px"| 
 Release 3.3<br/> [http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php?title=POI_Data_Provider_Open_API_Specification_R3.3 Version 3.3]
 |-
-| style="border-style: solid; border-width: 1px"| 2015-12-09
-| style="border-style: solid; border-width: 1px"| 
-First draft of Release 5.1<br/> 
-|-
 | style="border-style: solid; border-width: 1px"| 2015-12-29
 | style="border-style: solid; border-width: 1px"| 
-<b>Release 5.1</b><br/> 
+Release 5.1<br/>  [http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php?title=POI_Data_Provider_Open_API_Specification_R5.1 Version 5.1]
 |-
-| style="border-style: solid; border-width: 1px"| 2016-05-26
+| style="border-style: solid; border-width: 1px"| 2016-08-15
 | style="border-style: solid; border-width: 1px"| 
-<b>Release 5.3</b><br/> 
+<b>Release 5.4</b> - <b>Changed:</b> The key for language-independent text changed to "__" two underscores. <b>Added:</b> Access control.
 |}
 
 == How to Read This Document ==
@@ -92,15 +88,15 @@ The structure of a POI data item in JSON format:
 </pre>
 ==Resources Summary==
 
-[[Image:POI_server_resources.png]]
+[[Image:POI_server_resources_5_4.png]]
 
 ==Authentication==
 
 '''NOTE:''' Since the release 5.3 user authentication is '''mandatory''' for ''add_poi'', ''update_poi'', and ''delete_poi'' requests. Authentication is '''optional''' for ''get_components'', ''radial_search'', ''bbox_search'', and ''get_pois''.
 
-User authentication is left to external service providers. Currently supported authentication services are:
-* FIWARE Lab
-* Google
+The '''reason''' is to diminish accidental and malicious garbling of POI data as well as support storing and viewing of confidential data.
+
+User authentication is left to external service providers. User management and support of authentication services are implementation dependent.
 
 An ''authentication'' token from an authentication service is used to get an ''authorization'' token from the POI data provider using the '''login''' request. The client uses the authorization token as the '''auth_t''' parameter ''(NEW)'' in the subsequent requests to the POI data provider. The authorization token is invalidated using the '''logout''' request.
 
@@ -624,21 +620,33 @@ Access control is used to limit who can view or modify information in the data p
 
 This function is used for logging in to a POI data provider and obtaining the authorization token for further use. 
 
-The <code>auth_p</code> parameter specifies the authentication server that is used to obtain the identity of the user. The possible values are implementation dependent, e.g.:
+The <code>auth_p</code> parameter specifies the authentication provider that is used to obtain the identity of the user. The possible values are implementation dependent, e.g.:
 * <code>google</code> - for Google authentication
 * <code>fiware_lab</code> - for FIWARE Lab authentication
+
+The <code>user_id</code> parameter specifies the user_id for the selected account, if multiple user accounts are associated to the authentication.
 
 The content is the authentication token got from the authentication provider.
 
 The result is a JSON object containing 
-* <code>login</code> - true, if the user is authorized by the service, false otherways.
-* <code>token_sha1</code> - authorization token to be used in further request, if authorized
- 
+# case: user is authorized
+#* <code>login</code> - true
+#* <code>auth_t</code> - authorization token to be used in further requests
+# case: user is not authorized
+#* <code>login</code> - false
+# case: several accounts associated, but user_id not specified
+#* <code>login</code> - false
+#* <code>choices</code> - list of user accounts associated to the authentication
+    "choices": {
+      "<i>{user id}</i>": "<i>{name and email}</i>",
+      ...
+    }
+
+<b>Simple case</b><br/> 
 Example request:
 <pre>
-POST http://{poi server}/login?auth_p=google
-ayJhbGciOiJSUzI1NiIsImtpZCI6ImY5MzM22GExYjcxMzAzMDQ4MTZiOGI1MjkzMGNhMDcwODc4OGNj
-YWYifQ.eyJpc3MiOiJhY2NvdW50c95nb29nbGUuY29tI...
+POST http://{poi server}/login?auth_p=fiware_lab
+rEZhDInMYUVTNCAYyTy7MjXGDYJKR6
 </pre>
 
 Example result:
@@ -646,6 +654,38 @@ Example result:
 {
   "login":true,
   "auth_t":"1207fbad2f158011dafe594f6db0e7f0e9221a19"
+}
+</pre>
+
+<b>Multi-account case</b><br/> 
+Example request:
+<pre>
+POST http://{poi server}/login?auth_p=fiware_lab
+rEZhDInMYUVTNCAYyTy7MjXGDYJKR6
+</pre>
+
+Example result:
+<pre>
+{
+  "login":false,
+  "choices": {
+    "1207fbad2f158011dafe594f6db0e7f0e9221a19": "John Smith, js@example.org",
+    "594f6db0e7f0e9221a191207fbad2f158011dafe": "Dorothy Gale, dg@example.org"
+  }
+}
+</pre>
+Now, we need to specify which one of the available accounts we choose.<br/>
+Example continuation request:
+<pre>
+POST http://{poi server}/login?auth_p=fiware_lab&user_id=594f6db0e7f0e9221a191207fbad2f158011dafe
+rEZhDInMYUVTNCAYyTy7MjXGDYJKR6
+</pre>
+
+Example result:
+<pre>
+{
+  "login":true,
+  "auth_t":"594f6db0e7f0e9221a191207fbad2f158011dafe"
 }
 </pre>
 
@@ -666,75 +706,7 @@ Logged out
 
 == User management ==
 
-User management is used to control access permissions of the users. 
-
-{| style="border-collapse: collapse; border-width: 1px; border-style: solid; border-color: #000"
-|-
-! style="border-style: solid; border-width: 1px"| Verb
-! style="border-style: solid; border-width: 1px"| URI
-! style="border-style: solid; border-width: 1px"| Description
-|-
-| style="border-style: solid; border-width: 1px"| POST
-| style="border-style: solid; border-width: 1px"| /add_user
-| style="border-style: solid; border-width: 1px"| Add a user with credentials
-|-
-| style="border-style: solid; border-width: 1px"| DELETE
-| style="border-style: solid; border-width: 1px"| /delete_user
-| style="border-style: solid; border-width: 1px"| Remove a user with all related information<br/>'''Be careful!'''
-|-
-| style="border-style: solid; border-width: 1px"| GET
-| style="border-style: solid; border-width: 1px"| /find_users
-| style="border-style: solid; border-width: 1px"| Get a list of users
-|-
-| style="border-style: solid; border-width: 1px"| GET
-| style="border-style: solid; border-width: 1px"| /get_user
-| style="border-style: solid; border-width: 1px"| Get user information
-|-
-| style="border-style: solid; border-width: 1px"| POST
-| style="border-style: solid; border-width: 1px"| /register_user
-| style="border-style: solid; border-width: 1px"| Bind user to authentication
-|-
-| style="border-style: solid; border-width: 1px"| POST
-| style="border-style: solid; border-width: 1px"| /update_user
-| style="border-style: solid; border-width: 1px"| Update user information with credentials
-|}
-
-==== /add_user ====
-
-This function is used to add a new user with permissions.
-
-Requires admin permission.
-
-==== /delete_user ====
-
-This function is used to delete the user from the database.
-
-'''NOTE:''' The user references in updated data are lost for the deleted user!   
-
-Requires admin permission.
-
-==== /find_users ====
-
-This function is used list users.
-
-Requires admin permission.
-
-==== /get_user ====
-
-This function is used to get information of a user for viewing or updating.
-
-Requires admin permission.
-
-==== /register_user ====
-
-This function connects an authentication service to a user. 
-
-
-==== /update_user ====
-
-This function is used to update user information including permissions.
-
-Requires admin permission.
+User management - managing access rights and authenticating users - is outside of this specification.
 
 = POI Data Model Definitions =
 
