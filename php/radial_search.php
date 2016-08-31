@@ -1,4 +1,4 @@
-<?php // radial_search.php 5.2.1.1 2016-01-28 ariokkon
+<?php // radial_search.php 5.4.2.1 2016-08-29 ariokkon
 
 /*
 * Project: FI-WARE
@@ -19,31 +19,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' )
   
   $session = get_session();
   $view_permission = $session['permissions']['view'];
-/*  
-  $auth_conf_file = file_get_contents('./auth_conf.json');
-  if($auth_conf_file){
-    // auth_conf.json file is compulsory, so that a possibly sensitive
-    // data won't get open simply by accidentally removing the file.
-    $auth_conf = json_decode($auth_conf_file, true);
-    if($auth_conf['open_data']) {
-      $view_permission = true;
-    } else { // not open data, check credentials
-      if (isset($_GET['auth_t']))
-      {
-        $auth_t = pg_escape_string($_GET['auth_t']);
+  // Special case to facilitate sanity check in installation
+  // This allows to find test_pois without authorization.
+  if (!$view_permission)
+      $view_permission = (pg_escape_string($_GET['category']) == 'test_poi');
 
-        // Find the session from the database
-        $db_opts = get_db_options();
-        $mongodb = connectMongoDB($db_opts['mongo_db_name']);
-        $sessions = $mongodb->_sessions;
-        $session = $sessions->findOne(array("_id" => $auth_t), 
-            array("_id" => false));
-        $view_permission = $session['permissions']['view'];
-      }      
-      
-    }
-  }
-*/
   $radius = 300;
 
   if (isset ($_GET['lat']) and isset ($_GET['lon']))

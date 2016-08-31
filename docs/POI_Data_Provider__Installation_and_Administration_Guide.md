@@ -284,7 +284,9 @@ For secure server use:
 
     https://hostname/poi_dp/radial_search?lat=1&lon=1&category=test_poi
 
-You should get a JSON structure representing a test POI as a response.
+You should get a JSON structure representing a test POI as a response. 
+
+**NOTE:** *Authorization is not needeed in `radial_search` limited to category `test_poi`.*
 
 ### List of Running Processes
 
