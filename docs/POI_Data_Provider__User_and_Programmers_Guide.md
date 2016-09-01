@@ -76,6 +76,12 @@ General case: A POI server combines data from several POI data providers
 
 Interfacing between client and server is defined in [POI Data Provider Open API Specification](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/POI_Data_Provider_Open_API_Specification).
 
+### <a name="Security_concerns" id="Security_concerns"></a>Security concerns
+
+Internet servers are prone to all kinds of haphazard and malicious queries. In order to keep server data in useful condition, it is necessary to require enough secret data to authenticate the queries that change data in the server.
+
+The POI DP API uses the `auth_t` parameter for the authorization token to positively identify the client. The protocol to assign an authorization token to a client is outside of the scope of this manual. However, the reference implementation contains a full mechanism to manage user accounts and logins. You can use it or improve it according to your needs.
+
 ### <a name="Server_programming_guide" id="Server_programming_guide"></a>Server programming guide 
 
 #### Implementing a special-purpose POI Data Provider 
@@ -103,7 +109,6 @@ The get\_pois query is a simpler case than the spatial queries, as you directly 
 1. Loop through the POI backends and request additional data components for each UUID with get\_pois request
 1. Construct the final output JSON by appending the additional data components for each POI
 
-
 ### <a name="Client_programming_guide" id="Client_programming_guide"></a>Client programming guide 
 
 See [Interface reference](#Interface_reference) for
@@ -127,6 +132,12 @@ The common parts used in queries are described in separate section.
 
 [XMLHttpRequest](http://www.w3.org/TR/XMLHttpRequest/)  is used to perform REST queries.
 
+#### Obtaining the authorization token
+
+The `php/login_lib.js` of the reference implementation contains programs and detailed instructions for login and logout operations to obtain and invalidate an authorization token.
+
+
+
 #### Querying available data formats
 
 * **Full data schema** supported by the server is available from `http://<poi_server>/poi_dp/poi_schema.json` e.g.:
@@ -139,7 +150,7 @@ The common parts used in queries are described in separate section.
 
 #### Spatial query 
 
-Spatial query is used to find the POIs based on their location. See [Interface reference](#Interface reference) for complete treatment of available query choices. 
+Spatial query is used to find the POIs based on their location. See [Interface reference](#Interface_reference) for complete treatment of available query choices. 
 
 JavaScript skeleton for requesting POIs in given radius below gives an example how to implement a query in a client.
 
@@ -151,9 +162,12 @@ JavaScript skeleton for requesting POIs in given radius below gives an example h
       lng - longitude of the center point, degrees east
       searchRadius - meters
       languages - a string array containing the accepted language codes
+      auth_t - authorization token, if needed
     */
     var query_url = BACKEND_ADDRESS_POI + "radial_search?" +
-     "lat=" + lat + "&lon=" + lng + "&radius=" + searchRadius + "&component=fw_core";
+     "lat=" + lat + "&lon=" + lng + "&radius=" + searchRadius + "&component=fw_core" +
+        ((auth_t != "") ?
+        ("&auth_t=" + auth_t) : "");
    
     poi_xhr = new XMLHttpRequest();
     poi_xhr.onreadystatechange = function () {
@@ -186,8 +200,11 @@ Additional data for POIs already found can be requested using UUIDs of POIs as k
       BACKEND_ADDRESS_X_POI - example: "http://poi_dp.example.org/poi_dp/"
       uuids[] - string array containing UUIDs of interesting POIs
       languages - a string array containing the accepted language codes
+      auth_t - authorization token, if needed
     */
-    var query_url = BACKEND_ADDRESS_X_POI + "get_pois?poi_id=" + join_strings(uuids, ",");
+    var query_url = BACKEND_ADDRESS_X_POI + "get_pois?poi_id=" + join_strings(uuids, ",") +
+        ((auth_t != "") ?
+        ("&auth_t=" + auth_t) : "");
    
     poi_xhr = new XMLHttpRequest();
     poi_xhr.onreadystatechange = function () {
@@ -220,18 +237,18 @@ Example data (shortened and annotated):
       "pois": {
         "6be4752b-fe6f-4c3a-98c1-13e5ccf01721": {
           "fw_core": {
-            "category": "cafe",
-            "location": {&lt;location of Aulakahvila&gt;}, 
+            "categories": ["cafe"],
+            "location": {<location of Aulakahvila>}, 
             "name": {
-              "": "Aulakahvila"
+              "__": "Aulakahvila"
             },
-            &lt;more core data on Aulakahvila&gt;
+            <more core data on Aulakahvila>;
           },
-          &lt;more data components on Aulakahvila&gt;
+          <more data components on Aulakahvila>;
         }, 
-        "ae01d34a-d0c1-4134-9107-71814b4805af": {&lt;data on restaurant Julinia&gt;},
-        "1c022820-62dc-487b-95b4-6c344d6ba85e": {&lt;data on library Tiedekirjasto Pegasus&gt;},
-        &lt;more data on more POIs&gt;
+        "ae01d34a-d0c1-4134-9107-71814b4805af": {<data on restaurant Julinia>},
+        "1c022820-62dc-487b-95b4-6c344d6ba85e": {<data on library Tiedekirjasto Pegasus>},
+        <more data on more POIs>
       }
     }
 
@@ -288,13 +305,14 @@ Below is a JavaScript skeleton for adding a new POI to the POI-DP.
 
 
     BACKEND_ADDRESS_POI = "http://poi_dp.example.org/poi_dp/";
+    // auth_t - authorization token
  
     poi_data = {fw_core: {...},  -other components- };
  
     function addPOI( poi_data ) {
         var restQueryURL;
  
-        restQueryURL = BACKEND_ADDRESS_POI + "add_poi";
+        restQueryURL = BACKEND_ADDRESS_POI + "add_poi?auth_t=" + auth_t;
         miwi_poi_xhr = new XMLHttpRequest();
  
         miwi_poi_xhr.overrideMimeType("application/json");
@@ -326,6 +344,7 @@ Below is a JavaScript skeleton for updating POI data in the POI-DP.
 First, the data is fetched from the server.
 
     BACKEND_ADDRESS_POI = "http://poi_dp.example.org/poi_dp/";
+    // auth_t - authorization token
  
     var query_handle;
  
@@ -336,7 +355,7 @@ First, the data is fetched from the server.
         var restQueryURL, poi_data, poi_core;
         // get_for_update brings all language variants etc.
         restQueryURL = BACKEND_ADDRESS_POI + "get_pois?poi_id=" + uuid +
-            "&get_for_update=true";
+            "&get_for_update=true&auth_t=" + auth_t;
         
         console.log("3D restQueryURL: " + restQueryURL);
         query_handle = new XMLHttpRequest();
@@ -389,7 +408,7 @@ When editing is ready, the new version of data is sent to the server.
     */
       updating_data[uuid] = poi_data;
       
-      restQueryURL = BACKEND_ADDRESS_POI + "update_poi";
+      restQueryURL = BACKEND_ADDRESS_POI + "update_poi?auth_t=" + auth_t;
       query_handle = new XMLHttpRequest();
       
       query_handle.overrideMimeType("application/json");
@@ -425,7 +444,8 @@ Below is a JavaScript skeleton for deleting a POI from the POI-DP.
       if (cfm)
       {
         // build the URL for delete
-        restQueryURL = BACKEND_ADDRESS_POI + "delete_poi?poi_id=" + uuid;
+        restQueryURL = BACKEND_ADDRESS_POI + "delete_poi?poi_id=" + uuid + 
+            "&auth_t=" + auth_t;
         
         miwi_3d_xhr = new XMLHttpRequest();
         // populate the request with event handlers

@@ -265,11 +265,13 @@ Register the POI data provider to the authentication services suitable for your 
 ### Configuring authentication client
 * `authenticate.html` - update signin-client_id values for the authentication services
 ### Configuring the basic access rights
-* `poi_dp/auth_conf.json`
-** Set the user information for the POI root user.
-** Set `"open_data": true,` - if anybody can view the data
+1. Copy `poi_dp/auth_conf_t.json` to `poi_dp/auth_conf.json` . 
+1. Edit `poi_dp/auth_conf.json`
+ * `open_data` - Set `true`, if anybody can view the data
+ * `hard_auths` - These are authentications for the "root" users. These cannot be changed thru API.
+     * Keys of user authentications are of form &lt;authentication provider>:&lt;user_id> . E.g. `google:john_doe@gmail.com` . The user\_id is the one used by the authentication provider.
 
-To be continued...
+*** To be continued... ***
 ## Sanity check procedures
 
 The Sanity Check Procedures are the steps that a System Administrator will take to verify that an installation is ready to be tested. This is therefore a preliminary set of tests to ensure that obvious or basic malfunctioning is fixed before proceeding to unit tests, integration tests and user validation.
