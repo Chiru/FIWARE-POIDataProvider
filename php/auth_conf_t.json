@@ -11,12 +11,12 @@
   "open_data": false,
   "hard_auths": {
     "google:john_doe@gmail.com": {
-      "accounts:" {
+      "accounts": {
         "4d1a77c0-6cfb-4468-86fa-bff784012816": {"registration_time": 0}
       }
     },
     "fiware_lab:j_d": {
-      "accounts:" {
+      "accounts": {
         "4d1a77c0-6cfb-4468-86fa-bff784012816": {"registration_time": 0}
       }
     }
@@ -30,10 +30,10 @@
       "email": "john.doe@example.com",
       "additional_emails": [],
       "permissions": {
-        "admin": true,
-        "add": true,
-        "update": true,
-        "view": true
+        "admin": false,
+        "add": false,
+        "update": false,
+        "view": false
       },
       "identifications": {
         "google:john_doe@gmail.com": true,

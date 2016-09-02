@@ -1,0 +1,8 @@
+Nyt
+===
+
+
+* Merge POI Editor and POI Browser
+* In POI Editor hiding pop-up menu by clicking elsewhere on the map 
+  - remove Cancel
+

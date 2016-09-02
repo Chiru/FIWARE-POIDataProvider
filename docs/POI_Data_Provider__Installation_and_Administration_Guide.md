@@ -102,9 +102,15 @@ Add these lines to /etc/php5/apache2/php.ini:
     extension=propro.so
     extension=http.so
 
+_You may use e.g._
+
+    $ sudo nano /etc/php5/apache2/php.ini
+
+_or some other editor._
+
 **Enable access control in per-directory basis.** The POI DP uses <code>.htaccess</code> file to protect external access keys for dynamic POIs.
 
-Change the following line in the file <code>/etc/apache2/apache2.conf</code> within <code>&lt;Directory /var/www&gt;</code> section:
+Change the following line in the file <code>/etc/apache2/apache2.conf</code> within <code>&lt;Directory /var/www/&gt;</code> section:
 
     AllowOverride None
 
@@ -221,7 +227,13 @@ Rewrite is used to default the .php extension from service requests. E.g. http//
 
 ### Set site information
 1. Copy `poi_dp/site_info_t.json` to `poi_dp/site_info.json` .
-2. Edit `poi_dp/site_info.json` to show the correct data for your site.
+
+        $ cd /var/www/html/poi_dp
+        $ sudo cp site_info_t.json site_info.json
+        
+2. Edit `poi_dp/site_info.json` to show the correct data for your site. E.g.:
+
+        $ sudo nano site_info.json
 
 ## Enabling secure server (SSL)
 *Optional feature - for confidential or dependable information*
@@ -274,10 +286,19 @@ Register the POI data provider to the authentication services suitable for your 
 
 ### Configuring authentication client
 1. Copy `poi_dp/authenticate_t.html` to `poi_dp/authenticate.html` .
-2. Edit `poi_dp/authenticate.html` - update signin-client_id values for the authentication services. Search for the string "`*** REPLACE`" to find the right places.
+
+        $ sudo cp authenticate_t.html authenticate.html
+
+2. Edit `poi_dp/authenticate.html` - update signin-client_id values for the authentication services. Search for the string "`*** REPLACE`" to find the right places, and read comments for some hints. E.g.:
+
+        $ sudo nano authenticate.html
 
 ### Configuring the basic access rights
-1. Copy `poi_dp/auth_conf_t.json` to `poi_dp/auth_conf.json` . The template looks about the following:
+1. Copy `poi_dp/auth_conf_t.json` to `poi_dp/auth_conf.json` . 
+
+        $ sudo cp auth_conf_t.json auth_conf.json 
+
+    The template looks about the following:
 
         {
           "description": [
@@ -306,10 +327,10 @@ Register the POI data provider to the authentication services suitable for your 
               "email": "john.doe@example.com",
               "additional_emails": [],
               "permissions": {
-                "admin": true,
-                "add": true,
-                "update": true,
-                "view": true
+                "admin": false,
+                "add": false,
+                "update": false,
+                "view": false
               },
               "identifications": {
                 "google:john_doe@gmail.com": true,
@@ -319,9 +340,14 @@ Register the POI data provider to the authentication services suitable for your 
           }
         }
 
-    The template represents one user account that can be logged in by both Google and Fiware Lab. UUIDs are used as the internal user Ids.
+    The exemplary template represents one user account that can be logged in by both Google and Fiware Lab. UUIDs are used as the internal user Ids. Note that this example account has not been given any rights.
 
-1. Edit `poi_dp/auth_conf.json`. Replace the template data according to the following notes:
+1. Edit `poi_dp/auth_conf.json`. E.g.:
+
+        $ sudo nano auth_conf.json
+
+    Replace the template data according to the following notes:
+
  * `open_data` - Set `true`, if anybody can view the data
  * `hard_auths` - These are authentications for the "root" users. These cannot be changed thru the API.
      * Keys of user authentications are of form &lt;authentication provider>:&lt;authentication_id> . E.g. `google:john_doe@gmail.com` . The authentication\_id is the one used by the authentication provider.
@@ -427,7 +453,19 @@ To exit MongoDB use:
 
     > exit
 
+## Installing Demo Client
 
+_Demo Client is an optional feature._
+
+The demo client allows you to immediately utilize your POI data provider. It shows POIs of selected categories on Google Maps background. It also allows you to add, modify, and delete individual POIs, if you have proper credentials.
+
+**NOTE:** Google inc. requires you to obtain a license for Google Maps, if your application is not open for everybody.
+
+Copy the client:
+
+    $ sudo cp -r poi_mapper_client /var/www/html/pois
+
+Now, the POI browser can be accessed using a web browser at [_{your\\_poi\\_server}_/pois](#) . The POIs can be added, edited, and deleted at [_{your\\_poi\\_server}_/pois/edit_poi.html](#) .
 
 ## Diagnosis Procedures
 
