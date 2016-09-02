@@ -11,7 +11,7 @@ This document is associated to the latest release of the POI Data Provider. Link
 | **Release** | **Date** | **Description** |
 | ----------- |:--------:|:--------------- |
 | [r3.3](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/POI_Data_Provider_r3.3_-_Installation_and_Administration_Guide "POI Data Provider r3.3 - Installation and Administration Guide") | 2014-09-17 | Original release - a POI belongs to exactly one category |
-| **r5.1** | 2016-04-07 | Dynamic POIs & Quality Boost |
+| [r5.1](http://fiware-poidataprovider.readthedocs.io/en/r5.1/POI_Data_Provider__Installation_and_Administration_Guide/) | 2016-04-07 | Dynamic POIs & Quality Boost |
 | **r5.4** | 2016-09-09 | This release - Access Control |
 
 ## System Requirements
@@ -68,6 +68,7 @@ In order to have the POI Data Provider up and running, the following software is
  * pecl_http-1.7.6 module
 
 ## Software Installation and Configuration
+
 ### Update package lists
 
 Get up-to-date package lists from update servers:
@@ -221,6 +222,7 @@ Rewrite is used to default the .php extension from service requests. E.g. http//
 ### Set site information
 1. Copy `poi_dp/site_info_t.json` to `poi_dp/site_info.json` .
 2. Edit `poi_dp/site_info.json` to show the correct data for your site.
+
 ## Enabling secure server (SSL)
 *Optional feature - for confidential or dependable information*
 
@@ -269,9 +271,11 @@ Notes:
 * KeyRock does not support CORS and so does not reveal the identity of the user to the client program.
 
 Register the POI data provider to the authentication services suitable for your purposes. The redirect callback is {your\_poi\_server}`/poi_dp/redirect_callback.html` , if needed. When you register, you get a client id to be used in authentication requests.
+
 ### Configuring authentication client
 1. Copy `poi_dp/authenticate_t.html` to `poi_dp/authenticate.html` .
 2. Edit `poi_dp/authenticate.html` - update signin-client_id values for the authentication services. Search for the string "`*** REPLACE`" to find the right places.
+
 ### Configuring the basic access rights
 1. Copy `poi_dp/auth_conf_t.json` to `poi_dp/auth_conf.json` . The template looks about the following:
 
