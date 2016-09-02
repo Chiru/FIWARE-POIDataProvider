@@ -4,6 +4,8 @@
 
 The purpose of this document is to provide the required information for a system administrator in order to install and configure the POI (Points of Interest) Data Provider generic enabler reference implementation. The POI GE is implemented as a RESTful web service using PHP programming language. It is described in more detail in [FIWARE.OpenSpecification.MiWi.POIDataProvider](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE.OpenSpecification.MiWi.POIDataProvider).
 
+**NOTE:** If you are installing a secure POI server, use directory "`/var/www/ssl`" everywhere in stead of "`/var/www/html`".
+
 ## Document Releases
 
 This document is associated to the latest release of the POI Data Provider. Links to versions related to earlier software releases are in the table below.
@@ -465,7 +467,7 @@ Copy the client:
 
     $ sudo cp -r poi_mapper_client /var/www/html/pois
 
-Now, the POI browser can be accessed using a web browser at [_{your\\_poi\\_server}_/pois](#) . The POIs can be added, edited, and deleted at [_{your\\_poi\\_server}_/pois/edit_poi.html](#) .
+Now, the POI browser can be accessed using a web browser at [_{your\_poi\_server}_/pois](#) . The POIs can be added, edited, and deleted at [_{your\_poi\_server}_/pois/edit_poi.html](#) .
 
 ## Diagnosis Procedures
 
