@@ -1,10 +1,15 @@
 #POI Data Provider - Installation and Administration Guide
+by Ari Okkonen, Adminotech Oy
 
 ## Introduction
 
 The purpose of this document is to provide the required information for a system administrator in order to install and configure the POI (Points of Interest) Data Provider generic enabler reference implementation. The POI GE is implemented as a RESTful web service using PHP programming language. It is described in more detail in [FIWARE.OpenSpecification.MiWi.POIDataProvider](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE.OpenSpecification.MiWi.POIDataProvider).
 
-**NOTE:** If you are installing a secure POI server, use directory "`/var/www/ssl`" everywhere in stead of "`/var/www/html`".
+**NOTES:** 
+
+1. If you are installing a secure POI server, use directory "`/var/www/ssl`" everywhere in stead of "`/var/www/html`".
+
+1. All editor invocation commands in this document are for the Nano editor. `$ sudo nano ...` Of course, you are free to use your favorite editor to edit the files.
 
 ## Document Releases
 
@@ -271,6 +276,9 @@ User authentication is needed, if
 * the server will contain confidential data not for anyone's eyes, or
 * the REST interface will be used to add or update data.
 
+### Remove NGSI-10 support for confidential data
+NGSI-10 support does not contain access control. If not all the POIs in the server are open data, remove the directory `/var/www/html/poi_dp/ngsi10/` .
+
 ### Register the POI data provider to authentication services
 Currently supported authentication services are:
 
@@ -342,7 +350,7 @@ Register the POI data provider to the authentication services suitable for your 
           }
         }
 
-    The exemplary template represents one user account that can be logged in by both Google and Fiware Lab. UUIDs are used as the internal user Ids. Note that this example account has not been given any rights.
+    The exemplary template represents one user account that can be logged in by both Google and Fiware Lab. UUIDs are used as the internal user Ids. Note that in this example the account has not been given any rights.
 
 1. Edit `poi_dp/auth_conf.json`. E.g.:
 
@@ -383,7 +391,7 @@ For secure server use:
 
     https://hostname/poi_dp/radial_search?lat=1&lon=1&category=test_poi
 
-You should get a JSON structure representing a test POI as a response. 
+You should get a JSON structure representing a test POI as a response and possibly some general info about the site. 
 
 **NOTE:** *Authorization is not needeed in `radial_search` limited to category `test_poi`.*
 
@@ -484,10 +492,10 @@ The amount of available resources depends on the size of the database and the us
 The load value reported e.g. by the 'top' utility should not exceed the number of CPU cores in the system. If this happens, the performance of the system can dramatically drop.
 
 ### Remote Service Access
-Check that the HTTP port (80) is open and accessible from all the networks from which POI-DP will be used.
+Check that the HTTP port (80) [HTTPS port (443) in a secure server] is open and accessible from all the networks from which POI-DP will be used.
 
 ### I/O flows
-All the incoming and outgoing data of the POI Data Provider will go through TCP port 80. The size of the flow is entirely dependant on the usage of the service, e.g. number of users.
+All the incoming and outgoing data of the POI Data Provider will go through TCP port 80 [SSL port 443 in a secure server]. The size of the flow is entirely dependant on the usage of the service, e.g. number of users.
 
 ## Updating Database to R5.1
 The language key for the non-language-specific strings is changed from <code>""</code> to <code>"__"</code> (two underscore characters. The reason is that the MongoDB database does not like zero-length keys. The keys in databases that are created with earlier versions of the POI-DP can be updated using the following command:
