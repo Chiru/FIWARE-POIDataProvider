@@ -11,13 +11,15 @@ This document is associated to the latest release of the POI Data Provider. Link
 | **Release** | **Date** | **Description** |
 | ----------- |:--------:|:--------------- |
 | [r3.3](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/POI_Data_Provider_r3.3_-_Installation_and_Administration_Guide "POI Data Provider r3.3 - Installation and Administration Guide") | 2014-09-17 | Original release - a POI belongs to exactly one category |
-| **r5.1** | 2016-04-07 | This release - Dynamic POIs & Quality Boost |
+| **r5.1** | 2016-04-07 | Dynamic POIs & Quality Boost |
+| **r5.4** | 2016-09-09 | This release - Access Control |
 
 ## System Requirements
 
 ### Hardware Requirements
 
 The POI Data Provider should work on any modern PC computer that is capable of running Ubuntu Server 14.04. Therefore, the bare minimum requirements are:
+
 * 300 MHz x86 processor
 * 192 MiB of system memory (RAM) (256 MiB for a virtual installation)
 * 1.4 GB of disk space 
@@ -216,6 +218,9 @@ Rewrite is used to default the .php extension from service requests. E.g. http//
     $ sudo a2enmod rewrite
     $ sudo service apache2 restart
 
+### Set site information
+1. Copy `poi_dp/site_info_t.json` to `poi_dp/site_info.json` .
+2. Edit `poi_dp/site_info.json` to show the correct data for your site.
 ## Enabling secure server (SSL)
 *Optional feature - for confidential or dependable information*
 
@@ -256,6 +261,8 @@ Currently supported authentication services are:
 * Google
 * KeyRock
 
+`poi_dp/authenticate_t.html` contains some hints for  registering.
+
 Notes:
 
 * Google requires a name server entry for your server. A numeric IP address does not work.
@@ -263,15 +270,73 @@ Notes:
 
 Register the POI data provider to the authentication services suitable for your purposes. The redirect callback is {your\_poi\_server}`/poi_dp/redirect_callback.html` , if needed. When you register, you get a client id to be used in authentication requests.
 ### Configuring authentication client
-* `authenticate.html` - update signin-client_id values for the authentication services
+1. Copy `poi_dp/authenticate_t.html` to `poi_dp/authenticate.html` .
+2. Edit `poi_dp/authenticate.html` - update signin-client_id values for the authentication services. Search for the string "`*** REPLACE`" to find the right places.
 ### Configuring the basic access rights
-1. Copy `poi_dp/auth_conf_t.json` to `poi_dp/auth_conf.json` . 
-1. Edit `poi_dp/auth_conf.json`
- * `open_data` - Set `true`, if anybody can view the data
- * `hard_auths` - These are authentications for the "root" users. These cannot be changed thru API.
-     * Keys of user authentications are of form &lt;authentication provider>:&lt;user_id> . E.g. `google:john_doe@gmail.com` . The user\_id is the one used by the authentication provider.
+1. Copy `poi_dp/auth_conf_t.json` to `poi_dp/auth_conf.json` . The template looks about the following:
 
-*** To be continued... ***
+        {
+          "description": [
+            "These permissions override those in the database.",
+            "..."
+          ],
+          "open_data": false,
+          "hard_auths": {
+            "google:john_doe@gmail.com": {
+              "accounts:" {
+                "4d1a77c0-6cfb-4468-86fa-bff784012816": {"registration_time": 0}
+              }
+            },
+            "fiware_lab:j_d": {
+              "accounts:" {
+                "4d1a77c0-6cfb-4468-86fa-bff784012816": {"registration_time": 0}
+              }
+            }
+          },
+          "hard_users": {
+            "4d1a77c0-6cfb-4468-86fa-bff784012816": {
+              "name": "John Doe",
+              "photo": "http://www.example.com/johndoe.jpg",
+              "address": "Kotikatu 60 A 22, 90990 Oulu, Finland",
+              "phone": "+356 8 999 999",
+              "email": "john.doe@example.com",
+              "additional_emails": [],
+              "permissions": {
+                "admin": true,
+                "add": true,
+                "update": true,
+                "view": true
+              },
+              "identifications": {
+                "google:john_doe@gmail.com": true,
+                "fiware_lab:j_d": true
+              }
+            }
+          }
+        }
+
+    The template represents one user account that can be logged in by both Google and Fiware Lab. UUIDs are used as the internal user Ids.
+
+1. Edit `poi_dp/auth_conf.json`. Replace the template data according to the following notes:
+ * `open_data` - Set `true`, if anybody can view the data
+ * `hard_auths` - These are authentications for the "root" users. These cannot be changed thru the API.
+     * Keys of user authentications are of form &lt;authentication provider>:&lt;authentication_id> . E.g. `google:john_doe@gmail.com` . The authentication\_id is the one used by the authentication provider.
+     * **NOTE:** You can use only the authentication providers supported by the software.
+     * `accounts` - These are user accounts that can be logged in using the authentication.
+         * Keys of accounts are user Ids. These Ids are used to find user credentials and other user information under `hard_users`.
+         * The content of an account is the Unix time stamp of the registration time. You may use `{"registration_time": 0}` .
+ * `hard_users` - These are accounts for the "root" users. These cannot be changed thru the API.
+     * Keys of user accounts are user Ids. You may use e.g. [https://www.uuidgenerator.net/](https://www.uuidgenerator.net/) for new Ids.
+     * `name` must be unique.
+     * `email` is used to send the invitation to register.
+     * `permissions` specify, what the user can do. The boolean value `true` enables the permission.
+         * `admin` - can manage users.
+         * `add` - can add POIs.
+         * `update` - can modify and delete POI data.
+         * `view` - can view POI data.
+     * `identifications` links back to `hard_auths`. This section must exactly have the authentication keys that have this account as a choice. The content of a key is `true`.
+     * `photo`, `address`, `phone`, and `additional_emails` are for information only.
+
 ## Sanity check procedures
 
 The Sanity Check Procedures are the steps that a System Administrator will take to verify that an installation is ready to be tested. This is therefore a preliminary set of tests to ensure that obvious or basic malfunctioning is fixed before proceeding to unit tests, integration tests and user validation.

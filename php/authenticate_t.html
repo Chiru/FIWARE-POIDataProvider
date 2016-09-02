@@ -2,9 +2,10 @@
 <head>
   <title>POI DP Login</title>
   <!-- Google login parameters -->
+  <!-- Get your client Id from https://console.developers.google.com/ -->
   <meta name="google-signin-scope" content="profile email" />
   <meta name="google-signin-client_id" 
-      content="1032522970282-gtsgnea0phqlo86osef1jg1oo8dhficg.apps.googleusercontent.com"
+      content=" *** REPLACE with the client Id got from Google *** "
   />
   <script src="https://apis.google.com/js/platform.js" async="async" 
       defer="defer"></script>
@@ -12,8 +13,16 @@
   <meta name="keyrock-signin-callback" content="redirect_callback.html">
   <!-- KeyRock paramters for FIWARE Lab - Copy and edit for new KeyRock
        authentication services. See instructions in KeyRock button below -->
+  <!-- To obtain a client Id from Fiware Lab:
+    1. login to https://account.lab.fiware.org/
+    2. - > My Applications
+    3. - > Register
+        Fill the fields. The Callback URL must be 
+        {your site}/poi_dp/redirect_callback.html
+    4. After registering you'll find the Client ID in your new application
+       - > OAuth2 Credentials .
   <meta name="fiware_lab-signin-client_id"
-      content="ca1f7a4345c34d9e9235881f6795591e">
+      content=" *** REPLACE with the Client ID got from Fiware Lab *** ">
   <meta name="fiware_lab-signin-host" content="https://account.lab.fiware.org">
   
   
