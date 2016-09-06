@@ -318,12 +318,12 @@ Register the POI data provider to the authentication services suitable for your 
           "open_data": false,
           "hard_auths": {
             "google:john_doe@gmail.com": {
-              "accounts:" {
+              "accounts": {
                 "4d1a77c0-6cfb-4468-86fa-bff784012816": {"registration_time": 0}
               }
             },
             "fiware_lab:j_d": {
-              "accounts:" {
+              "accounts": {
                 "4d1a77c0-6cfb-4468-86fa-bff784012816": {"registration_time": 0}
               }
             }

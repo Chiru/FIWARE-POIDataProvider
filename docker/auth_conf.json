@@ -1,0 +1,42 @@
+{
+  "description": [
+    "These permissions override those in the database.",
+    "Mainly this is to define the root administrator for the POI database,",
+    "but this can be used generally to define hard-coded permissions.",
+    "Use e.g. https://www.uuidgenerator.net/ to get UUIDs for hard users.",
+    "open_data = true allows anyone to view data.",
+    "hard_auths - associations from authentications to user accounts:",
+    "* google - google:<email> is used as a key",
+    "* keyrock (fiware_lab) - fiware_lab:<id> is used as a key",
+    "hard_users - user accounts. Account Id is the key.",
+    "See POI_Data_Provider__Installation_and_Administration_Guide for ",
+    "instructions to edit this file."
+  ],
+  "open_data": true,
+  "hard_auths": {
+    "example_provider:example_id": {
+      "accounts": {
+        "4d1n67c0-6gfb-4422-86fa-bff332012816": {"registration_time": 0}
+      }
+    }
+  },
+  "hard_users": {
+    "4d1n67c0-6gfb-4422-86fa-bff332012816": {
+      "name": "John Doe",
+      "photo": "http://www.example.com/johndoe.jpg",
+      "address": "Kotikatu 60 A 22, 90990 Oulu, Finland",
+      "phone": "+356 8 999 999",
+      "email": "john.doe@example.com",
+      "additional_emails": [],
+      "permissions": {
+        "admin": false,
+        "add": false,
+        "update": false,
+        "view": false
+      },
+      "identifications": {
+        "example_provider:example_id": true
+      }
+    }
+  }
+}

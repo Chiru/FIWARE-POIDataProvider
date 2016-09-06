@@ -1,0 +1,22 @@
+{
+  "description": "Site identity configuration - not set",
+  "title": "POI Data Provider",
+  "name": "FIWARE POI Data Provider in Docker",
+  "owner": {
+    "name": "- no owner set -",
+    "website": {
+      "linkname": "FIWARE POI Data Provider",
+      "url": "http://catalogue.fiware.org/enablers/poi-data-provider"
+    },
+    "postal_address": [""],
+    "visiting_address": [""],
+    "phone": ""
+  },
+  "support": {
+    "browse": "http://stackoverflow.com/questions/tagged/fiware-poi",
+    "contact": {
+      "name": "- no contact set -",
+      "email": ""
+    }
+  }
+}

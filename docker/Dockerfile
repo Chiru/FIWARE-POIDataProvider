@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install mongo and pecl
 RUN printf "\n" | pecl install mongo && \
-    printf "\n" | pecl install pecl_http
+    printf "\n" | pecl install pecl_http-1.7.6
 
 # Edit php.ini
 RUN cp --backup=numbered /etc/php5/apache2/php.ini /etc/php5/apache2/php.ini.backup_by_poi_dp && \
@@ -63,6 +63,12 @@ RUN service apache2 start && \
     a2enmod rewrite && \
     service apache2 stop
 
+# Set initial site identity configuration
+RUN cd FIWARE-POIDataProvider && \
+    cp php/authenticate_t.html /var/www/html/poi_dp/authenticate.html && \
+    cp docker/auth_conf.json /var/www/html/poi_dp/ && \
+    cp docker/site_info.json /var/www/html/poi_dp/
+    
 EXPOSE 80
 
 CMD service postgresql start && service mongodb start && /usr/sbin/apache2ctl -D FOREGROUND
