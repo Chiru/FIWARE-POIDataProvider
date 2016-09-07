@@ -71,7 +71,8 @@ RUN cd FIWARE-POIDataProvider && \
     cp docker/site_info.json /var/www/html/poi_dp/
     
 # Install the demo client
-RUN sudo cp -r poi_mapper_client /var/www/html/pois
+RUN cd FIWARE-POIDataProvider && \
+    cp -r poi_mapper_client /var/www/html/pois
 
 EXPOSE 80
 
