@@ -1,0 +1,33 @@
+Building and Uploading the Docker Image
+=======================================
+
+First login to Docker Hub
+
+  $ docker login
+  
+It asks for username and password.
+
+Build the stuff. Go to the root of the software package and
+
+  $ docker build docker/
+
+Testing
+
+12345 is the external port.
+5a068871d6b3 is the image Id.
+
+  $ docker run -p 12345:80 -i -t 5a068871d6b3
+
+Test using Firefox of the VirtualBox
+
+  http://127.0.0.1:12345/poi_dp/radial_search?lat=1&lon=1&category=test_poi
+  
+Tag the image
+
+  $ docker tag 5a068871d6b3 ariokkon/fiware_poi_dataprovider
+  
+Push to the Docker Hub
+
+  $ docker push ariokkon/fiware_poi_dataprovider
+  
+  

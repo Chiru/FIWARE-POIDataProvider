@@ -66,9 +66,12 @@ RUN service apache2 start && \
 # Set initial site identity configuration
 RUN cd FIWARE-POIDataProvider && \
     cp php/authenticate_t.html /var/www/html/poi_dp/authenticate.html && \
-    cp docker/auth_conf.json /var/www/html/poi_dp/ && \
+    cp php/auth_conf_open.json /var/www/html/poi_dp/auth_conf.json && \
     cp docker/site_info.json /var/www/html/poi_dp/
     
+# Install the demo client
+RUN sudo cp -r poi_mapper_client /var/www/html/pois
+
 EXPOSE 80
 
 CMD service postgresql start && service mongodb start && /usr/sbin/apache2ctl -D FOREGROUND
