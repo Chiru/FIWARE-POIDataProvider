@@ -65,6 +65,10 @@ if platform?("ubuntu") and node[:platform_version] == "14.04"
 		action :install
 	end
 
+  package "nano" do
+		action :install
+	end
+
   
 	bash "install_and_configure_software" do
 		user "ubuntu"

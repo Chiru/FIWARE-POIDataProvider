@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y \
   gcc \
   make \
   libcurl3-openssl-dev \
-  wget
+  wget \
+  nano
 
 # Install mongo and pecl
 RUN printf "\n" | pecl install mongo && \
