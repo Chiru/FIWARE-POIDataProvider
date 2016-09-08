@@ -469,11 +469,29 @@ _Demo Client is an optional feature._
 
 The demo client allows you to immediately utilize your POI data provider. It shows POIs of selected categories on Google Maps background. It also allows you to add, modify, and delete individual POIs, if you have proper credentials.
 
-**NOTE:** Google inc. requires you to obtain a license for Google Maps, if your application is not open for everybody.
+**NOTE:** You need a Google Maps API key, because Google inc. requires you to obtain an API key for the application using Google Maps. You can obtain it from [Get a Key/Authentication](https://developers.google.com/maps/documentation/javascript/get-api-key).
 
 Copy the client:
 
     $ sudo cp -r poi_mapper_client /var/www/html/pois
+
+Edit the `pois/index.html` replacing the string "YOUR\_GOOGLE\_API\_KEY" with your actual API key.
+
+    $sudo nano /var/www/html/pois/index.html
+
+E.g.: from
+
+    <script type="text/javascript" 
+        src="https://maps.googleapis.com/maps/api/js?v=3.exp&key=YOUR_GOOGLE_API_KEY">
+    </script>
+
+to
+
+
+    <script type="text/javascript" 
+        src="https://maps.googleapis.com/maps/api/js?v=3.exp&key=MIzaSyBk59fRpyN4-PGl4UwfIfQ3sjxQwRm3pjl">
+    </script>
+
 
 Now, the POI browser can be accessed using a web browser at [_{your\_poi\_server}_/pois](#) . The POIs can be added, edited, and deleted at [_{your\_poi\_server}_/pois/edit_poi.html](#) .
 
