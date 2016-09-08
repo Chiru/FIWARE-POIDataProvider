@@ -16,7 +16,7 @@ Testing
 12345 is the external port.
 5a068871d6b3 is the image Id.
 
-  $ docker run -p 12345:80 -i -t 5a068871d6b3
+  $ docker run -d -p 12345:80 -i -t 5a068871d6b3
 
 Test using Firefox of the VirtualBox
 
@@ -24,7 +24,7 @@ Test using Firefox of the VirtualBox
   
 Tag the image
 
-  $ docker tag 5a068871d6b3 ariokkon/fiware_poi_dataprovider
+  $ docker tag 5a068871d6b3 ariokkon/fiware_poi_dataprovider:5.4
   
 Push to the Docker Hub
 
