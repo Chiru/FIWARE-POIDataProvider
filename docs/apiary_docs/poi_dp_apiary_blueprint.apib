@@ -5,7 +5,7 @@ DATE: 2016-08-15
 VERSION: v1.0
 APIARY_PROJECT: fiwarepoi
 
-# Fiware_POI_R5
+# Fiware\_POI\_R5
 
 **FIWARE Points of Interest Generic Enabler R5**
 
@@ -53,7 +53,7 @@ Final version of the FIWARE POI DP GE API R5
 Return the list of POI data components available from this server.
 
 + Parameters
-  + auth_t (string, required) - Authorization token. Not needed, if POI-DP is configured as open data.
+  + auth\_t (string, required) - Authorization token. Not needed, if POI-DP is configured as open data.
 
 + Response 200 (application/json)
 
@@ -72,14 +72,14 @@ Return the data of POIs within a given distance from a given location.
 + Parameters
   + lat (number, required) - Latitude of the center of the search circle [degrees]
   + lon (number, required) - Longitude of the center of the search circle [degrees]
-  + auth_t (string, required) - Authorization token. Not needed, if POI-DP is configured as open data.
+  + auth\_t (string, required) - Authorization token. Not needed, if POI-DP is configured as open data.
   + radius (number, optional) - Radius of the search circle [meters], default is implementation dependent
   + category (string, optional) - POI category/categories to be included to results. Several categories can be given by separating them with commas. If this parameter is not given, all categories are included.
   + component (string, optional) - POI data component names to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.
-  + max_results (number, optional) - Maximum number of POIs returned.
-  + begin_time (string, optional) - When time of interest begins. ISO 8601 adaptation format is used for times. However, it is allowed to leave the time zone definition out. If time zone is missing, the local time zone of the POI is used. 
-  + end_time (string, optional) - When time of interest ends. Format as for begin_time. Required, if begin_time is defined.
-  + min_minutes (number, optional) - Minimum time of availability in minutes. Optional. If begin_time is defined, default: a short time > 0.
+  + max\_results (number, optional) - Maximum number of POIs returned.
+  + begin\_time (string, optional) - When time of interest begins. ISO 8601 adaptation format is used for times. However, it is allowed to leave the time zone definition out. If time zone is missing, the local time zone of the POI is used. 
+  + end\_time (string, optional) - When time of interest ends. Format as for begin\_time. Required, if begin\_time is defined.
+  + min\_minutes (number, optional) - Minimum time of availability in minutes. Optional. If begin\_time is defined, default: a short time > 0.
 
 + Response 200 (application/json)
 
@@ -87,7 +87,7 @@ Return the data of POIs within a given distance from a given location.
           "pois": {
             "6be4752b-fe6f-4c3a-98c1-13e5ccf01721": {
               "fw_core": {
-                "category": "cafe", 
+                "categories": ["cafe"], 
                 "location": {
                   "wgs84": { 
                     "latitude": 65.059334, 
@@ -95,13 +95,13 @@ Return the data of POIs within a given distance from a given location.
                   }
                 }, 
                 "name": {
-                  "": "Aulakahvila"
+                  "__": "Aulakahvila"
                 }
               }
             }, 
             "4c6754d9-0bb1-4962-b604-6f3fcc08a9ec": {
               "fw_core": {
-                "category": "restaurant",
+                "categories": ["restaurant"],
                 "location": {
                   "wgs84": { 
                     "latitude": 65.0581807, 
@@ -109,7 +109,7 @@ Return the data of POIs within a given distance from a given location.
                   }
                 }, 
                 "name": {
-                  "": "Discus"
+                  "__": "Discus"
                 }
               }
             }
@@ -125,20 +125,20 @@ Return the data of POIs within a given bounding box.
   + south (number, required) - Latitude of the southern edge of the bounding box [degrees]
   + east (number, required) - Longitude of the eastern edge of the bounding box [degrees]
   + west (number, required) - Longitude of the western edge of the bounding box [degrees]
-  + auth_t (string, required) - Authorization token. Not needed, if POI-DP is configured as open data.
+  + auth\_t (string, required) - Authorization token. Not needed, if POI-DP is configured as open data.
   + category (string, optional) - POI category/categories to be included to results. Several categories can be given by separating them with commas. If this parameter is not given, all categories are included.
   + component (string, optional) - POI data component names to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.
-  + max_results (number, optional) - Maximum number of POIs returned.
-  + begin_time (string, optional) - When time of interest begins. ISO 8601 adaptation format is used for times. However, it is allowed to leave the time zone definition out. If time zone is missing, the local time zone of the POI is used. 
-  + end_time (string, optional) - When time of interest ends. Format as for begin_time. Required, if begin_time is defined.
-  + min_minutes (number, optional) - Minimum time of availability in minutes. Optional. If begin_time is defined, default: a short time > 0.
+  + max\_results (number, optional) - Maximum number of POIs returned.
+  + begin\_time (string, optional) - When time of interest begins. ISO 8601 adaptation format is used for times. However, it is allowed to leave the time zone definition out. If time zone is missing, the local time zone of the POI is used. 
+  + end\_time (string, optional) - When time of interest ends. Format as for begin\_time. Required, if begin\_time is defined.
+  + min\_minutes (number, optional) - Minimum time of availability in minutes. Optional. If begin\_time is defined, default: a short time > 0.
 + Response 200 (application/json)
 
         {
           "pois": {
             "6be4752b-fe6f-4c3a-98c1-13e5ccf01721": {
               "fw_core": {
-                "category": "cafe", 
+                "categories": ["cafe"], 
                 "location": {
                   "wgs84": { 
                     "latitude": 65.059334, 
@@ -146,13 +146,13 @@ Return the data of POIs within a given bounding box.
                   }
                 }, 
                 "name": {
-                  "": "Aulakahvila"
+                  "__": "Aulakahvila"
                 }
               }
             }, 
             "4c6754d9-0bb1-4962-b604-6f3fcc08a9ec": {
               "fw_core": {
-                "category": "restaurant",
+                "categories": ["restaurant"],
                 "location": {
                   "wgs84": { 
                     "latitude": 65.0581807, 
@@ -160,7 +160,7 @@ Return the data of POIs within a given bounding box.
                   }
                 }, 
                 "name": {
-                  "": "Discus"
+                  "__": "Discus"
                 }
               }
             }
@@ -172,18 +172,18 @@ Return the data of POIs within a given bounding box.
 Return the data of POIs listed in the query. This is intended to get additional information - other components - about interesting POIs.
 
 + Parameters
-  + poi_id (string, required) - UUID of the POI. Several UUIDs can be given by separating them with commas.
-  + auth_t (string, required) - Authorization token. Not needed, if POI-DP is configured as open data.
+  + poi\_id (string, required) - UUID of the POI. Several UUIDs can be given by separating them with commas.
+  + auth\_t (string, required) - Authorization token. Not needed, if POI-DP is configured as open data.
   + component (string, optional) - POI data component names to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.
-  + get_for_update (boolean, optional) - The components requested are returned with all language and other variants and possible metadata for inspection and edit.
+  + get\_for\_update (boolean, optional) - The components requested are returned with all language and other variants and possible metadata for inspection and edit. Moreover a `last_update.timestamp` is included to reveal a possible update conflict.
 
 + Response 200 (application/json)
 
         {
           "pois": {
-            "30ddf703-59f5-4448-8918-0f625a7e1122": {
+            "6be4752b-fe6f-4c3a-98c1-13e5ccf01721": {
               "fw_core": {
-                "category": "cafe", 
+                "categories": ["cafe"], 
                 "location": {
                   "wgs84" { 
                     "latitude": 65.059334, 
@@ -191,7 +191,7 @@ Return the data of POIs listed in the query. This is intended to get additional 
                   }
                 }, 
                 "name": {
-                  "": "Aulakahvila"
+                  "__": "Aulakahvila"
                 }
               }
             } 
@@ -208,22 +208,22 @@ This function is used for adding a new POI entity into a database. The POI data 
 The POSTed JSON must include only the content of a single POI, i.e. it must not contain a UUID as key as it is automatically generated by the server.
 
 + Parameters
-  + auth_t (string, required) - Authorization token.
+  + auth\_t (string, required) - Authorization token.
   
 + Request (application/json)
 
         {
           "fw_core": {
-          "category": "cafe", 
-          "location": {
-            "wgs84" { 
-            "latitude": 65.059334, 
-            "longitude": 25.4664775
+            "categories": ["cafe"], 
+            "location": {
+              "wgs84" { 
+                "latitude": 65.059334, 
+                "longitude": 25.4664775
+              }
+            }, 
+            "name": {
+              "__": "Aulakahvila"
             }
-          }, 
-          "name": {
-            "": "Aulakahvila"
-          }
           }
         }
 
@@ -231,8 +231,8 @@ The POSTed JSON must include only the content of a single POI, i.e. it must not 
 
         {
           "created_poi": {
-            "uuid": "30ddf703-59f5-4448-8918-0f625a7e1122",
-          "timestamp": 1394525977
+            "uuid": "6be4752b-fe6f-4c3a-98c1-13e5ccf01721",
+            "timestamp": 1394525977
           }
         }
         
@@ -242,25 +242,28 @@ This function is used for updating data of an existing POI entity. Existing data
 The updated POI data is given as JSON in HTTP POST request. The server responds with HTTP status messages indicating the success or failure of the operation.
 
 + Parameters
-  + auth_t (string, required) - Authorization token.
+  + auth\_t (string, required) - Authorization token.
   
 + Request (application/json)
 
         { 
-          "30ddf703-59f5-4448-8918-0f625a7e1122": {
+          "6be4752b-fe6f-4c3a-98c1-13e5ccf01721": {
             "fw_core": {
-            "category": "cafe", 
-            "location": {
-              "wgs84" { 
-              "latitude": 65.059334, 
-              "longitude": 25.4664775
-              }
+              "categories": ["cafe"], 
+              "location": {
+                "wgs84" { 
+                  "latitude": 65.059334, 
+                  "longitude": 25.4664775
+                }
               }, 
-            "name": {
-              "": "Aulakahvila"
-            },
-            "description": {
-              "": "Cafe at the Univesity of Oulu"
+              "name": {
+                "__": "Aulakahvila"
+              },
+              "description": {
+                "__": "Cafe at the Univesity of Oulu"
+              },
+              "last_update": {
+                "timestamp": 1394525977
               }
             }
           }
@@ -276,7 +279,7 @@ Delete existing POI using HTTP DELETE request. The UUID of the POI to be deleted
 
 + Parameters
   + id (string, required) - The UUID of the POI to be deleted
-  + auth_t (string, required) - Authorization token.
+  + auth\_t (string, required) - Authorization token.
   
 
 + Response 200 (text/plain)
@@ -286,17 +289,18 @@ Delete existing POI using HTTP DELETE request. The UUID of the POI to be deleted
 ## Log In [POST /login]
 This function is used for logging in to a POI data provider and obtaining the authorization token for further use. 
 
-The <code>auth_p</code> parameter specifies the authentication provider that is used to obtain the identity of the user. The possible values are implementation dependent, e.g.:
-* <code>google</code> - for Google authentication
-* <code>fiware_lab</code> - for FIWARE Lab authentication
+The <code>auth\_p</code> parameter specifies the authentication provider that is used to obtain the identity of the user. The possible values are implementation dependent, e.g.:
 
-The <code>user_id</code> parameter specifies the user_id for the selected account, if multiple user accounts are associated to the authentication.
+* <code>google</code> - for Google authentication
+* <code>fiware\_lab</code> - for FIWARE Lab authentication
+
+The <code>user\_id</code> parameter specifies the user\_id for the selected account, if multiple user accounts are associated to the authentication.
 
 The content is the authentication token got from the authentication provider.
 
 + Parameters
-  + auth_p (string, required) - Authorization provider.
-  + user_id (string, optional) - Needed, if multiple user accounts are associated to the authentication.
+  + auth\_p (string, required) - Authorization provider.
+  + user\_id (string, optional) - Needed, if multiple user accounts are associated to the authentication.
   
 + Request (text/plain)
 
@@ -313,7 +317,7 @@ The content is the authentication token got from the authentication provider.
 This function is used for finishing the session and to invalidate the authorization token.
 
 + Parameters
-  + auth_t (string, required) - Authorization token.
+  + auth\_t (string, required) - Authorization token.
 
 + Response 200 (text/plain)
 
