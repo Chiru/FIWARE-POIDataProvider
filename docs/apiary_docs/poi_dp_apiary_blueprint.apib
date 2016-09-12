@@ -72,14 +72,14 @@ Return the data of POIs within a given distance from a given location.
 + Parameters
   + lat (number, required) - Latitude of the center of the search circle [degrees]
   + lon (number, required) - Longitude of the center of the search circle [degrees]
-  + auth\_t (string, required) - Authorization token. Not needed, if POI-DP is configured as open data.
+  + auth_t (string, required) - Authorization token. Not needed, if POI-DP is configured as open data.
   + radius (number, optional) - Radius of the search circle [meters], default is implementation dependent
   + category (string, optional) - POI category/categories to be included to results. Several categories can be given by separating them with commas. If this parameter is not given, all categories are included.
   + component (string, optional) - POI data component names to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.
-  + max\_results (number, optional) - Maximum number of POIs returned.
-  + begin\_time (string, optional) - When time of interest begins. ISO 8601 adaptation format is used for times. However, it is allowed to leave the time zone definition out. If time zone is missing, the local time zone of the POI is used. 
-  + end\_time (string, optional) - When time of interest ends. Format as for begin\_time. Required, if begin\_time is defined.
-  + min\_minutes (number, optional) - Minimum time of availability in minutes. Optional. If begin\_time is defined, default: a short time > 0.
+  + max_results (number, optional) - Maximum number of POIs returned.
+  + begin_time (string, optional) - When time of interest begins. ISO 8601 adaptation format is used for times. However, it is allowed to leave the time zone definition out. If time zone is missing, the local time zone of the POI is used. 
+  + end_time (string, optional) - When time of interest ends. Format as for begin&lowbar;time. Required, if begin&lowbar;time is defined.
+  + min_minutes (number, optional) - Minimum time of availability in minutes. Optional. If begin&lowbar;time is defined, default: a short time > 0.
 
 + Response 200 (application/json)
 
@@ -125,13 +125,13 @@ Return the data of POIs within a given bounding box.
   + south (number, required) - Latitude of the southern edge of the bounding box [degrees]
   + east (number, required) - Longitude of the eastern edge of the bounding box [degrees]
   + west (number, required) - Longitude of the western edge of the bounding box [degrees]
-  + auth\_t (string, required) - Authorization token. Not needed, if POI-DP is configured as open data.
+  + auth_t (string, required) - Authorization token. Not needed, if POI-DP is configured as open data.
   + category (string, optional) - POI category/categories to be included to results. Several categories can be given by separating them with commas. If this parameter is not given, all categories are included.
   + component (string, optional) - POI data component names to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.
-  + max\_results (number, optional) - Maximum number of POIs returned.
-  + begin\_time (string, optional) - When time of interest begins. ISO 8601 adaptation format is used for times. However, it is allowed to leave the time zone definition out. If time zone is missing, the local time zone of the POI is used. 
-  + end\_time (string, optional) - When time of interest ends. Format as for begin\_time. Required, if begin\_time is defined.
-  + min\_minutes (number, optional) - Minimum time of availability in minutes. Optional. If begin\_time is defined, default: a short time > 0.
+  + max_results (number, optional) - Maximum number of POIs returned.
+  + begin_time (string, optional) - When time of interest begins. ISO 8601 adaptation format is used for times. However, it is allowed to leave the time zone definition out. If time zone is missing, the local time zone of the POI is used. 
+  + end_time (string, optional) - When time of interest ends. Format as for begin&lowbar;time. Required, if begin&lowbar;time is defined.
+  + min_minutes (number, optional) - Minimum time of availability in minutes. Optional. If begin&lowbar;time is defined, default: a short time > 0.
 + Response 200 (application/json)
 
         {
@@ -172,10 +172,10 @@ Return the data of POIs within a given bounding box.
 Return the data of POIs listed in the query. This is intended to get additional information - other components - about interesting POIs.
 
 + Parameters
-  + poi\_id (string, required) - UUID of the POI. Several UUIDs can be given by separating them with commas.
-  + auth\_t (string, required) - Authorization token. Not needed, if POI-DP is configured as open data.
+  + poi_id (string, required) - UUID of the POI. Several UUIDs can be given by separating them with commas.
+  + auth_t (string, required) - Authorization token. Not needed, if POI-DP is configured as open data.
   + component (string, optional) - POI data component names to be included to results. Several component names can be given by separating them with commas. If this parameter is not given, all components are included.
-  + get\_for\_update (boolean, optional) - The components requested are returned with all language and other variants and possible metadata for inspection and edit. Moreover a `last_update.timestamp` is included to reveal a possible update conflict.
+  + get_for_update (boolean, optional) - The components requested are returned with all language and other variants and possible metadata for inspection and edit. Moreover a `last_update.timestamp` is included to reveal a possible update conflict.
 
 + Response 200 (application/json)
 
@@ -208,7 +208,7 @@ This function is used for adding a new POI entity into a database. The POI data 
 The POSTed JSON must include only the content of a single POI, i.e. it must not contain a UUID as key as it is automatically generated by the server.
 
 + Parameters
-  + auth\_t (string, required) - Authorization token.
+  + auth_t (string, required) - Authorization token.
   
 + Request (application/json)
 
@@ -237,12 +237,12 @@ The POSTed JSON must include only the content of a single POI, i.e. it must not 
         }
         
 ## Update POI [POST /update_poi]
-This function is used for updating data of an existing POI entity. Existing data components can be modified or new ones can be added. Each data component contains a ‘last modified’ timestamp in order to prevent concurrency issues.
+This function is used for updating data of an existing POI entity. Existing data components can be modified or new ones can be added. Each data component contains a `last_update.timestamp` in order to prevent concurrency issues.
 
 The updated POI data is given as JSON in HTTP POST request. The server responds with HTTP status messages indicating the success or failure of the operation.
 
 + Parameters
-  + auth\_t (string, required) - Authorization token.
+  + auth_t (string, required) - Authorization token.
   
 + Request (application/json)
 
@@ -279,13 +279,15 @@ Delete existing POI using HTTP DELETE request. The UUID of the POI to be deleted
 
 + Parameters
   + id (string, required) - The UUID of the POI to be deleted
-  + auth\_t (string, required) - Authorization token.
+  + auth_t (string, required) - Authorization token.
   
 
 + Response 200 (text/plain)
 
         POI entity deleted succesfully
  
+# Group Access Control
+
 ## Log In [POST /login]
 This function is used for logging in to a POI data provider and obtaining the authorization token for further use. 
 
@@ -299,8 +301,8 @@ The <code>user\_id</code> parameter specifies the user\_id for the selected acco
 The content is the authentication token got from the authentication provider.
 
 + Parameters
-  + auth\_p (string, required) - Authorization provider.
-  + user\_id (string, optional) - Needed, if multiple user accounts are associated to the authentication.
+  + auth_p (string, required) - Authorization provider.
+  + user_id (string, optional) - Needed, if multiple user accounts are associated to the authentication.
   
 + Request (text/plain)
 
@@ -317,7 +319,7 @@ The content is the authentication token got from the authentication provider.
 This function is used for finishing the session and to invalidate the authorization token.
 
 + Parameters
-  + auth\_t (string, required) - Authorization token.
+  + auth_t (string, required) - Authorization token.
 
 + Response 200 (text/plain)
 
