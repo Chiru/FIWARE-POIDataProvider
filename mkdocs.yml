@@ -8,6 +8,7 @@ markdown_extensions: [toc,fenced_code]
 use_directory_urls: false
 theme: readthedocs
 extra_css: ["https://fiware.org/style/fiware_readthedocs.css"]
+google_analytics: ['UA-84156157-1', 'fiware-poidataprovider.readthedocs.io']
 pages:
   - Home: index.md
   - 'Installation & Administration Manual': 'POI_Data_Provider__Installation_and_Administration_Guide.md'
