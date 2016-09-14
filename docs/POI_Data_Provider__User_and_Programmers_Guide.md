@@ -1,4 +1,5 @@
 # POI Data Provider - User and Programmers Guide
+Version 5.4 by [Ari Okkonen](https://github.com/ariokkon), [Adminotech Oy](http://www.adminotech.com)
 ## Introduction 
 This document describes how to design and implement a distributed system utilizing the [POI Data Provider Open Specification](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE.OpenSpecification.MiWi.POIDataProvider).
 
@@ -11,7 +12,7 @@ Server design principles are covered in [Server programming guide](#Server_progr
 Client design and implementation is covered in [Client programming guide](#Client_programming_guide).
 
 #### Background and Detail 
-This User and Programmers Guide relates to the POI Data Provider GE which is part of the [Advanced Middleware and Web User Interfaces chapter](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Advanced_Middleware_and_Web_UI_Architecture). Please find more information about this Generic Enabler in the related [Open Specification](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE.OpenSpecification.MiWi.POIDataProvider) and [Architecture Description](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE.ArchitectureDescription.MiWi.POIDataProvider).
+This User and Programmers Guide relates to the POI Data Provider GE which is part of the [Advanced Middleware and Web User Interfaces chapter](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Advanced_Middleware_and_Web_UI_Architecture). Please find more information about this Generic Enabler in the related [Open Specification](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE.OpenSpecification.MiWi.POIDataProvider) and [Architecture Description](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE.ArchitectureDescription.MiWi.POIDataProvider). The [Reference Implementation](https://github.com/Chiru/FIWARE-POIDataProvider) can be found at GitHub.
 
 ## User guide 
 
@@ -80,7 +81,19 @@ Interfacing between client and server is defined in [POI Data Provider Open API 
 
 Internet servers are prone to all kinds of haphazard and malicious queries. In order to keep server data in useful condition, it is necessary to require enough secret data to authenticate the queries that change data in the server.
 
-The POI DP API uses the `auth_t` parameter for the authorization token to positively identify the client. The protocol to assign an authorization token to a client is outside of the scope of this manual. However, the reference implementation contains a full mechanism to manage user accounts and logins. You can use it or improve it according to your needs.
+The POI DP API uses the `auth_t` parameter for the authorization token to positively identify the client. The reference implementation contains a full mechanism to manage user accounts and logins. You can use it or improve it according to your needs.
+
+#### Authentication
+
+**NOTE:** Since the release 5.3 user authentication is **mandatory** for _add\_poi_, _update\_poi_, and _delete\_poi_ requests. Authentication is **optional** for _get\_components_, _radial\_search_, _bbox\_search_, and _get\_pois_.
+
+The **reason** is to diminish accidental and malicious garbling of POI data as well as support storing and viewing of confidential data.
+
+User authentication is left to external service providers. User management and support of authentication services are implementation dependent.
+
+An _authentication_ token from an authentication service is used to get an _authorization_ token from the POI data provider using the **login** request. The client uses the authorization token as the **auth_t** parameterin the subsequent requests to the POI data provider. The authorization token is invalidated using the **logout** request.
+
+POI data providers configured to provide _open\_data_ assume <code>view</code> permission to everyone without authorization.
 
 ### <a name="Server_programming_guide" id="Server_programming_guide"></a>Server programming guide 
 
@@ -134,9 +147,63 @@ The common parts used in queries are described in separate section.
 
 #### Obtaining the authorization token
 
-The `php/login_lib.js` of the reference implementation contains programs and detailed instructions for login and logout operations to obtain and invalidate an authorization token.
+The `php/login_lib.js` of the reference implementation contains programs and detailed instructions for login and logout operations to obtain and invalidate an authorization token `auth_t`.
 
+##### `login_lib.js`
+    /*
+    A short JavaScript library to help utilizing the FIWARE POI Access Control
+    in application web pages.
 
+    NOTE: This library reserves several global names beginning LOGIN_, login_, 
+          and logout_.
+    
+    Usage
+    =====
+
+    1.  Copy following user interface elements and the library link to a proper
+        location of your application page. You may have to edit the library
+        link, if located separately from your application.
+        ----
+          <!-- Begin access control elements: buttons, name, and image -->
+          <button id="login_b" style="" type="button" 
+              onclick="login_click();"><b>Log In</b></button>
+          <button id="logout_b" style="display:none" type="button" 
+              onclick="logout_click();"><b>Log Out</b></button>
+          <span id="login_user_name"></span>&nbsp;
+          <img id="login_user_image" 
+              src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" 
+              width="32" height="32"><br>
+          <!-- End access control elements -->
+          <!-- Include login library -->
+          <script type="text/javascript" src="login_lib.js"></script>
+        ----
+      
+    2.  Copy the following code template to the script part of your application. 
+        Edit as needed. You may rename those my_logged_in and my_logged_out.
+        ----
+          // var LOGIN_SERVER = "http://www.example.org/poi_dp/"; // Note 
+                                                             // trailing slash!
+          var LOGIN_SERVER = ""; // can be left blank if in the same location 
+
+          var auth_t = ""; // to be used in subsequent requests
+                                     // as the auth_t parameter
+          var login_user_info = {}; // {name: string, image: url_string}
+
+          var login_completed = my_logged_in; // called when login completed
+          var logout_completed = my_logged_out; // called when logout completed
+
+          function my_logged_in() {
+            // Here comes your code that is executed on login
+          }
+
+          function my_logged_out() {  
+            // Here comes your code that is executed on logout
+          }
+
+          // Ensure that the login button is enabled if the page is reloaded.
+          document.getElementById("login_b").disabled = false;
+        ----
+    */
 
 #### Querying available data formats
 

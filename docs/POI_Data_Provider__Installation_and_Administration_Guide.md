@@ -1,5 +1,5 @@
 #POI Data Provider - Installation and Administration Guide
-by Ari Okkonen, Adminotech Oy
+Version 5.4 by [Ari Okkonen](https://github.com/ariokkon), [Adminotech Oy](http://www.adminotech.com)
 
 ## Introduction
 
@@ -303,7 +303,7 @@ Register the POI data provider to the authentication services suitable for your 
 
         $ sudo nano authenticate.html
 
-### Configuring the basic access rights
+### <a name="configuring_hard_users" id="configuring_hard_users"></a>Configuring the basic access rights
 1. Copy `poi_dp/auth_conf_t.json` to `poi_dp/auth_conf.json` . 
 
         $ sudo cp auth_conf_t.json auth_conf.json 
@@ -494,6 +494,68 @@ to
 
 
 Now, the POI browser can be accessed using a web browser at [_{your\_poi\_server}_/pois](#) . The POIs can be added, edited, and deleted at [_{your\_poi\_server}_/pois/edit_poi.html](#) .
+
+## Site Administration
+
+### User management
+
+Configuring the basic access rights for _hard users (those cannot be configured via web interface)_ is explained in the section <a href="#configuring_hard_users">Configuring the basic access rights</a>.
+
+To manage users log in (admin rights needed) to &lt;your\_poi\_server>/poi_dp/user_management.html . Remember to log out when you are done.
+
+#### <a id="adding_a_user" name="adding_a_user"></a>Adding a user
+
+* Press "New user"
+* Press a plus sign to add a data field.
+* Add and fill at least the fields name, email, and permissions.
+ * name must be unique
+ * email is a default address for sending the invitation to register
+ * permissions - _check the boxes to grant permissions_
+     * admin - can add, modify, and delete users
+     * add - can add POIs
+     * update - can modify and delete POIs
+     * view - can view POIs. Not needed for open data servers.
+* Press Save - Note allow a pop-up, if prevented opening
+* If the server cannot send the invitation mail, a pop-up email form appears. Check the subject and the message, and edit if needed. If automatic filling of an email is not available, you may copy the data from under the text "User added.". The registration URL is important. Send to the user.
+
+#### Editing user information
+
+* Right-click the user entry: _User Name, email_ . 
+* Select **Edit**
+* Edit data and Save.
+
+You may remove accepted login authentications by unchecking entries under identifications. Keys of the identifications are of form &lt;provider>:&lt;id> .
+
+#### Disable a user
+
+Disabling removes all access rights and login authentications of the user.
+A disabled user cannot log in to the system. It is also impossible to re-register using an old invitation. This is the recommended method to remove users from the system. 
+
+* Right-click the user entry: _User Name, email_ . 
+* Select **Disable**
+
+#### Delete a user
+
+**Note:** Deleting user data causes loss of historical "who updated this" information. Consider hitting _Cancel_ and disabling the user instead.
+
+Deleting a user is intended for removing erroneously created users who have not entered any data to the site.
+
+* Right-click the user entry: _User Name, email_ . 
+* Select **DELETE!**
+
+#### New registration call
+
+This is intended for 
+
+* enabling a disabled user
+* enabling another authentication for the user
+
+Do this:
+
+* Right-click the user entry: _User Name, email_ . 
+* Select **New Call to Register**
+
+Send the mail manually, if needed - just as in <a href="#adding_a_user">Adding a User</a>.
 
 ## Diagnosis Procedures
 
