@@ -64,6 +64,6 @@ sudo service apache2 restart
 cd FIWARE-POIDataProvider
 sudo cp php/authenticate_t.html /var/www/html/poi_dp/authenticate.html
 sudo cp php/auth_conf_open.json /var/www/html/poi_dp/auth_conf.json
-sudo cp blueprint/site_info.json /var/www/html/poi_dp/
+sudo cp image_setup/site_info.json /var/www/html/poi_dp/
 # Install the demo client
 sudo cp -r poi_mapper_client /var/www/html/pois
