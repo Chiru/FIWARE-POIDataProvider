@@ -15,10 +15,16 @@ sudo apt-get install mongodb -q -y
 sudo apt-get install apache2 -q -y
 sudo apt-get install php5 php5-pgsql -q -y
 sudo apt-get install git -q -y
+sudo apt-get install nano -q -y
+sudo apt-get install wget -q -y
+sudo apt-get install gcc -q -y
+sudo apt-get install make -q -y
+sudo apt-get install libcurl3-openssl-dev -q -y
 
 # The installation of the MongoDB module for PHP5
 sudo apt-get install php-pear php5-dev gcc make -q -y
 yes '' | sudo pecl install -f mongo
+yes '' | sudo pecl install -f pecl_http-1.7.6
 
 # Edit php.ini
 sudo cp --backup=numbered /etc/php5/apache2/php.ini /etc/php5/apache2/php.ini.backup_by_poi_dp
@@ -54,3 +60,10 @@ sudo cp -r vendor /var/www/html/poi_dp/
 sudo a2enmod headers
 sudo a2enmod rewrite
 sudo service apache2 restart
+# Set initial site identity configuration
+cd FIWARE-POIDataProvider
+sudo cp php/authenticate_t.html /var/www/html/poi_dp/authenticate.html
+sudo cp php/auth_conf_open.json /var/www/html/poi_dp/auth_conf.json
+sudo cp blueprint/site_info.json /var/www/html/poi_dp/
+# Install the demo client
+sudo cp -r poi_mapper_client /var/www/html/pois
