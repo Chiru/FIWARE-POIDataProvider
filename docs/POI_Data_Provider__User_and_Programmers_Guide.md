@@ -1,5 +1,5 @@
 # POI Data Provider - User and Programmers Guide
-Version 5.4 by [Ari Okkonen](https://github.com/ariokkon), [Adminotech Oy](http://www.adminotech.com)
+Version 5.4.a by [Ari Okkonen](https://github.com/ariokkon), [Adminotech Oy](http://www.adminotech.com)
 ## Introduction 
 This document describes how to design and implement a distributed system utilizing the [POI Data Provider Open Specification](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE.OpenSpecification.MiWi.POIDataProvider).
 
@@ -368,18 +368,25 @@ For the detailed structure of the response data see [Interface reference](#Inter
 
 #### Adding a new POI 
 
-Below is a JavaScript skeleton for adding a new POI to the POI-DP.
+Below is a JavaScript skeleton for adding a new POI to the POI-DP. For new POIs use `poi_id = null`.
+
+**Mirroring or storing auxiliary information for POIs:**
+When you store copies or extra information of POIs to _another server_, set `poi_id` to the UUID of the POI. For auxiliary information databases you still need the `fw_core` components at least with fields `location`, `name`, and `category`.
 
 
     BACKEND_ADDRESS_POI = "http://poi_dp.example.org/poi_dp/";
     // auth_t - authorization token
+    // poi_id - optional - UUID of the new POI. Used e.g. when storing
+    //          extra data components to another server for a known POI.
+    //          null, if not used.
  
     poi_data = {fw_core: {...},  -other components- };
  
     function addPOI( poi_data ) {
         var restQueryURL;
  
-        restQueryURL = BACKEND_ADDRESS_POI + "add_poi?auth_t=" + auth_t;
+        restQueryURL = BACKEND_ADDRESS_POI + "add_poi?auth_t=" + auth_t +
+          (poi_id ? ("&poi_id=" + poi_id) : "");
         miwi_poi_xhr = new XMLHttpRequest();
  
         miwi_poi_xhr.overrideMimeType("application/json");

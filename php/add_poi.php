@@ -1,4 +1,4 @@
-<?php // add_poi.php v.5.1.3.1 ariokkon 2016-01-29
+<?php // add_poi.php v.5.4.3.2 ariokkon 2016-09-20
 
 /*
 * Project: FI-WARE
@@ -22,7 +22,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     header("HTTP/1.0 401 Unauthorized");
     die("Permission denied.");
   }
-
+  // If poi_id is given, the new POI will get this Id.
+  $poi_id = '';
+  if (isset($_GET['poi_id'])) {
+    $poi_id = pg_escape_string($_GET['poi_id']);
+  }
+  
   $request_body = file_get_contents('php://input');
 //     print $request_body;
   
@@ -41,18 +46,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' )
     
     $db_opts = get_db_options();
     $pgcon = connectPostgreSQL($db_opts["sql_db_name"]);
-    $uuid_generate_query = "SELECT uuid_generate_v4()";
-    $uuid_result = pg_query($uuid_generate_query);
+
+    if ($poi_id != '') {
+      $uuid = $poi_id; // Id given in the request
+    } else { // New Id needed
+      $uuid_generate_query = "SELECT uuid_generate_v4()";
+      $uuid_result = pg_query($uuid_generate_query);
     
-    if (!$uuid_result)
-    {
-      header("HTTP/1.0 500 Internal Server Error");
-      $error = pg_last_error();
-      die($error);
-    }
-    $row = pg_fetch_row($uuid_result);
-    $uuid = $row[0];
+      if (!$uuid_result)
+      {
+        header("HTTP/1.0 500 Internal Server Error");
+        $error = pg_last_error();
+        die($error);
+      }
+      $row = pg_fetch_row($uuid_result);
+      $uuid = $row[0];
 //         print "Generated UUID: ". $uuid;
+    }
     
     $supported_components = get_supported_components();
     $timestamp = time();

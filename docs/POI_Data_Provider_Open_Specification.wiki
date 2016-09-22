@@ -1,0 +1,36 @@
+{{Open spec brief 
+|Name= FIWARE.OpenSpecification.MiWi.POIDataProvider
+|Owner= [[UOULU | University of Oulu]] 
+
+|Owner contact= [[Ari Okkonen]] 
+
+|Name of FI-WARE GE Reference Implementation (GEI)= POI Data Provider 
+
+|Link to catalogue of FI-WARE GEI= http://catalogue.fi-ware.org/enablers/poi-data-provider
+
+|Chapter= Advanced Middleware and Web UI }}
+
+
+{{TOCright}}
+
+{{:FIWARE General Intro to Open Specifications}}
+
+
+{{:FIWARE.ArchitectureDescription.MiWi.POIDataProvider}}
+
+
+{{:FIWARE.OpenSpecification.Details.MiWi.POIDataProvider}}
+
+
+= Re-utilised Technologies/Specifications =
+
+# [http://www.postgresql.org/ PostgreSQL] PostgreSQL is an open source object-relational database system.
+# [http://postgis.net/source PostGIS] Spatial and Geographic objects for PostgreSQL.
+# [http://www.mongodb.org MongoDB] MongoDB is an open-source document database with JSON-style documents.
+# [http://www.w3.org/TR/poi-core/ W3C POI Core] Points of Interest Core, W3C Working Draft.
+# [https://github.com/opengeospatial/poi OGC POI] OGC Points of Interest Encoding Specification.
+
+= Terms and definitions  =
+
+This section comprises a summary of terms and definitions introduced during the previous sections. It intends to establish a vocabulary that will be help to carry out discussions internally and with third parties (e.g., Use Case projects in the EU FP7 Future Internet PPP).  For a summary of terms and definitions managed at overall FI-WARE level, please refer to [[FIWARE.Glossary.Global | FIWARE Global Terms and Definitions]]
+{{:FIWARE.Glossary.MiWi}}
