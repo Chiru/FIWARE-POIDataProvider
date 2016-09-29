@@ -1,0 +1,34 @@
+<html> 
+<head> 
+<TITLE>IPOCM</TITLE>
+</head> 
+
+<script language = "JavaScript">
+
+function net(){
+if (parseInt(navigator.appVersion.charAt(0)) >= 4) {
+   if (navigator.appName == "Netscape")  return 1; else return 0;
+}
+}
+
+function ie(){
+if (parseInt(navigator.appVersion.charAt(0)) >= 4) {
+   if (navigator.appName.indexOf("Microsoft") != -1)  return 1; else return 0;
+}
+}
+
+function resize_flash()
+{
+ if (net())
+   {
+     history.go(0);
+   }
+}
+</script> 
+
+<frameset rows="100%,0"  framespacing="0" frameborder="no" border="0" id="wbt" name="wbt" onResize="resize_flash()"> 
+	<frame src="object.htm" name="object" id="object" frameborder="0" border="no" marginwidth="0" marginheight="0" scrolling="no"> 
+<frame src="../motore/void.htm"></frameset>
+<noframes></noframes> 
+ 
+</html> 

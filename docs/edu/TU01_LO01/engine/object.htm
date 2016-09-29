@@ -1,0 +1,590 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<script type="text/javascript" language="JavaScript" name="fsIeVbscript" encoding="UTF-8">
+/*
++-----------------------------------+
+| Definire nome del Learning Object |
++-----------------------------------+
+*/
+function idLezione(){
+	var url = top.document.location.href;
+	var LOini = url.indexOf("UD");
+	var idLez = url.substring(LOini, LOini+9);
+	var idLez = "§ID_LEX§";
+	
+	return idLez;
+}
+var show_debug = 0; // 1 debug del motore attivo, 0 disattivo
+</script>
+<script language="JavaScript" src="../motore/function.js"></script>
+<SCRIPT LANGUAGE="JavaScript"> 
+<!--  
+
+/*function chiudiFin_DoFSCommand(command, args){ 
+	if (command == "chiudiFin"){ 		
+		top.window.close();
+	}
+	if (command == "stampa") {
+		stampa(args);
+	}
+	if (command == "stampaE") {
+		stampaE(args);
+	}
+	if (command == "prendicookie") { 
+		prendicookie(args);
+	}
+	if (command == "creacookie2")	{ 
+		creacookie2(args);
+	}
+	if (command == "pippo"){ 
+		pippo(args);
+	}
+	if (command == "messagebox"){ 
+		messagebox(args);
+	}
+	if (command == "minimizza"){ 		
+		minimizza();
+	}
+	if (command == "passaLO") {
+		passaLO();
+	}
+	if (command == "geogebra") {
+		esercitazione(args);
+	}
+}*/
+
+//--> 
+</SCRIPT> 
+<title>IPOCM</title>
+<style type="text/css">
+<!--
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+}
+-->
+</style>
+</head>
+<script type="text/javascript" language="JavaScript" name="cmifrag" encoding="UTF-8">
+function getAPI()
+{ 
+	var miaWin = trovaTop(window)
+	var theAPI = findAPI(miaWin);
+	if ((theAPI == null) && (miaWin.opener != null) && (typeof(miaWin.opener) != "undefined"))
+	{
+		var miaWin2 = trovaTop(miaWin.opener)
+		theAPI = findAPI(miaWin2); 
+	} 
+	return theAPI
+}
+
+function findAPI(win)
+{  
+	if (win.API != null)
+	{ 
+		return win.API; 
+	}
+	for (var i=0;i<win.length;i++) 
+	{ 
+		var theAPI = findAPI(win.frames[i]); 
+		if (theAPI != null) 
+		{ 
+			return theAPI; 
+		} 
+	}
+}
+
+function trovaTop(win2)
+{
+	if (win2.location==win2.parent.location)
+	{
+		return win2
+	}
+	else
+	{
+		var win2 = trovaTop(win2.parent)
+		return win2
+	}
+}
+<!--
+// SCORM Wrapper for ADL SCORM 1.2.
+// version 1.0	02/16/2006
+// Modified by Steven Hancock, Rapid Intake, Inc. www.rapidintake.com
+//
+// Based on FS SCORM - fscommand adapter for ADL SCORM 1.2 and Flash MX 2004 Learning Interactions 
+// Original produced by publishing Flash Movie using the SCORM template.  
+// Also based on ADL recommendations
+// -----------------------------------------------------------------
+// Change these preset values to suit your taste and requirements.
+// Way to search for API object (0 - starts with bottom up; 1 - starts top down)
+var g_intAPIOrder = 1;
+var g_bShowApiErrors = false; 	// change to true to show error messages
+// Translate these strings if g_bShowApiErrors is true
+// and you need to localize the application
+var g_strAPISetError = "Trying to set value but API not available.";
+var g_strDisableErrorMsgs = "Select cancel to disable future warnings.";
+var g_APIinitError = "API Init was unsuccessful.";
+/////////// API INTERFACE INITIALIZATION AND CATCHER FUNCTIONS ////////
+
+var g_objAPI = null;
+var g_bInitDone = false;
+var g_bFinishDone = false;
+var g_dtmInitialized = new Date(); // will be adjusted after initialize
+var g_varInterval = "";			// global interval
+var g_strAPIVersion = -1;
+var g_strAPIInitialized = false; //Added by Rapid Intake. Use to determine if API initialized.
+var g_initAPIcnt = 0;			//Count API init attempts
+var g_showErrors = false;		//Show errors?
+
+function AlertUserOfAPIError(strText) {
+	if (g_bShowApiErrors) {
+		var s = strText + "\n\n" + g_strDisableErrorMsgs;
+		if (!confirm(s)){
+			g_bShowApiErrors = false
+		}
+	}
+}
+function ExpandString(s){
+	var re = new RegExp("%","g")
+	for (i = arguments.length-1; i > 0; i--){
+		s2 = "%" + i;
+		if (s.indexOf(s2) > -1){
+			re.compile(s2,"g")
+			s = s.replace(re, arguments[i]);
+		}
+	}
+	return s
+}
+
+function findTheAPI(win)
+{
+	// Search the window hierarchy for an object named "API" for SCORM 1.2
+	// Look in the current window (win) and recursively look in any child frames
+	if(win.API != null){
+		return win.API;
+	}
+	if (win.length > 0)  // check frames
+	{
+		for (var i=0;i<win.length;i++)
+		{
+			var objAPI = findTheAPI(win.frames[i]);
+			if (objAPI != null)
+			{
+				return objAPI;
+			}
+		}
+	}
+	return null;
+}
+
+// AGGIUNTA CHRISTIAN BRANCHI 26.01.2007 PER LA RICERCA DELL'API NELL OPENER
+var aperturaDaDocent=false; // da cambiare nel caso di fruizione da piattaforma che non apre una nuova finestra in automatico
+//FINE AGGIUNTA CHRISTIAN BRANCHI 26.01.2007 PER LA RICERCA DELL'API NELL OPENER
+function getAPI(intAPISearchOrder)
+{
+	var objAPI = null;
+// AGGIUNTA CHRISTIAN BRANCHI 26.01.2007 PER LA RICERCA DELL'API NELL OPENER
+	if (aperturaDaDocent){
+		//objAPI = window.opener.getAPI();
+		objAPI = getAPI();
+		//alert (objAPI)
+		//window.opener.chiudiFinestra();
+		return objAPI;
+	//FINE AGGIUNTA CHRISTIAN BRANCHI 26.01.2007 PER LA RICERCA DELL'API NELL OPENER
+
+
+	} else{
+	
+		// intAPISearchOrder is 0 - start at current window and work way up; 1 - start at top window and work way down.
+		intAPISearchOrder=((typeof(intAPISearchOrder)=='undefined')?0:intAPISearchOrder);
+		if(intAPISearchOrder==0)
+		{
+			// start and the current window and recurse up through parent windows/frames
+			/*objAPI = findTheAPI(window);
+			if((objAPI==null) && (window.opener != null) && (typeof(window.opener) != "undefined"))
+			{
+				objAPI = findTheAPI(window.opener);
+			} else if((objAPI==null) && (window.parent != null) && (typeof(window.parent) != "undefined")) {
+				objAPI = findTheAPI(window.parent);
+			}*/
+			objAPI = findTheAPI(window);
+			if((objAPI==null) && (window.parent != null) && (typeof(window.parent) != "undefined"))
+			{
+				objAPI = findTheAPI(window.parent);
+			} 
+		} else {
+			// start at the top window and recurse down through child frames
+			objAPI = findTheAPI(this.top);
+			if (objAPI == null)
+			{
+				// the API wasn't found in the current window's hierarchy.  If the
+				// current window has an opener (was launched by another window),
+				// check the opener's window hierarchy.
+				objTopWindow=window.top;
+				objTopWindow = objTopWindow.opener;
+				while (objTopWindow && !objAPI)
+				{
+					//checking window opener
+					objAPI = findTheAPI(objTopWindow.top);
+					if (objAPI==null) objTopWindow = objTopWindow.opener;
+				}
+			}
+		}
+		if(objAPI==null)
+		{
+			// can't find API
+		} else if(objAPI != null && g_strAPIVersion == -1) {
+			g_strAPIVersion = objAPI.version;
+		}
+		return objAPI;
+	}
+}
+function initAPI() {
+	//alert(APIOK());
+	if (g_initAPIcnt < 10 && !g_bInitDone) {
+		if(APIOK()) {
+			var err = initializeSCO();
+			clearInterval(g_varInterval);
+		} else {
+			g_objAPI = getAPI(g_intAPIOrder);
+		}
+	} else {
+		g_objAPI = null;
+		clearInterval(g_varInterval);
+		if (g_showErrors) {
+			alert(g_APIinitError);
+		}
+	}
+	g_initAPIcnt++;
+}
+
+function APIOK() {
+	return ((typeof(g_objAPI)!= "undefined") && (g_objAPI != null))
+}
+function isSCOInitialized() {
+	return g_strAPIInitialized;
+}
+function initializeSCO() {
+	var err = true;
+	if (!g_bInitDone) {
+		g_strAPIInitialized = g_objAPI.LMSInitialize("");
+		g_dtmInitialized = new Date();
+	}
+	if (g_strAPIInitialized) {
+		g_bInitDone = true;
+		//var playerObj = g_bIsInternetExplorer ? player : document.chiudiFin;
+		var playerObj = document.chiudiFin;
+		playerObj.setVariable("LMSInitialized","found");
+		return (err + "") // Force type to string
+	} else {
+		return ("false");
+	}
+}
+function SCOFinish() {
+	if ((APIOK()) && (g_bFinishDone == false)) {
+		SCOReportSessionTime()
+		g_bFinishDone = (g_objAPI.LMSFinish("") == "true");
+	}
+	return (g_bFinishDone + "" ) // Force type to string
+}
+// Call these catcher functions rather than trying to call the API adapter directly
+function SCOGetValue(nam)		{return ((APIOK())?g_objAPI.LMSGetValue(nam.toString()):"")}
+function SCOCommit()			{return ((APIOK())?g_objAPI.LMSCommit(""):"false")}
+function SCOGetLastError()		{return ((APIOK())?g_objAPI.LMSGetLastError():"-1")}
+function SCOGetErrorString(n)	{return ((APIOK())?g_objAPI.LMSGetErrorString(n):"No API")}
+function SCOGetDiagnostic(p)	{return ((APIOK())?g_objAPI.LMSGetDiagnostic(p):"No API")}
+//LMSSetValue is implemented with more complex data
+//management logic below
+// Special logic begins here
+function SCOSetValue(nam,val){
+	var err = "";
+	if (!APIOK()){
+			AlertUserOfAPIError(g_strAPISetError + "\n" + nam + "\n" + val);
+			err = "false"
+	}
+	if (err == ""){
+			err = g_objAPI.LMSSetValue(nam,val.toString() + "");
+			if (err != "true") return err
+	}
+	return err
+}
+function MillisecondsToCMIDuration(n) {
+//Convert duration from milliseconds to 0000:00:00.00 format
+	var hms = "";
+	var dtm = new Date();	dtm.setTime(n);
+	var h = "000" + Math.floor(n / 3600000);
+	var m = "0" + dtm.getMinutes();
+	var s = "0" + dtm.getSeconds();
+	var cs = "0" + Math.round(dtm.getMilliseconds() / 10);
+	hms = h.substr(h.length-4)+":"+m.substr(m.length-2)+":";
+	hms += s.substr(s.length-2)+"."+cs.substr(cs.length-2);
+	return hms
+}
+// SCOReportSessionTime is called automatically by this script,
+// but you may call it at any time also from the SCO
+function SCOReportSessionTime() {
+	var dtm = new Date();
+	var n = dtm.getTime() - g_dtmInitialized.getTime();
+	return SCOSetValue("cmi.core.session_time",MillisecondsToCMIDuration(n))
+}
+// Since only the designer of a SCO knows what completed means, another
+// script of the SCO may call this function to set completed status.
+// The function checks that the SCO is not in browse mode, and
+// avoids clobbering a "passed" or "failed" status since they imply "completed".
+function SCOSetStatusCompleted(){
+	var stat = SCOGetValue("cmi.core.lesson_status");
+	if (SCOGetValue("cmi.core.lesson_mode") != "browse"){
+		if ((stat!="completed") && (stat != "passed") && (stat != "failed")){
+			return SCOSetValue("cmi.core.lesson_status","completed")
+		}
+	} else return "false"
+}
+function AICCTokenToSCORMToken(strList,strTest){
+	var a = strList.split(",");
+	var c = strTest.substr(0,1).toLowerCase();
+	for (i=0;i<a.length;i++){
+			if (c == a[i].substr(0,1)) return a[i]
+	}
+	return strTest
+}
+function normalizeStatus(status){
+	return AICCTokenToSCORMToken("completed,incomplete,not attempted,failed,passed", status)
+}
+function normalizeInteractionType(theType){
+	return AICCTokenToSCORMToken("true-false,choice,fill-in,matching,performance,sequencing,likert,numeric", theType)
+}
+function normalizeInteractionResult(result){
+	return AICCTokenToSCORMToken("correct,wrong,unanticipated,neutral", result)
+}
+// Detect Internet Explorer
+var g_bIsInternetExplorer = navigator.appName.indexOf("Microsoft") != -1;
+// Handle fscommand messages from a Flash movie, remapping
+// any AICC Flash template commands to SCORM if necessary
+function chiudiFin_DoFSCommand(command, args){
+	if (command=="alert") {
+		alert(args);
+	}
+	if (command == "chiudiFin"){ 		
+		top.window.close();
+		return
+	}
+	if (command == "appro") {
+		approfondimento(args);
+		return
+	}
+	if (command == "stampa") {
+		stampa(args);
+		return
+	}
+	if (command == "stampaE") {
+		stampaE(args);
+		return
+	}
+	if (command == "prendicookie") { 
+		prendicookie(args);
+		return
+	}
+	if (command == "creacookie2")	{ 
+		creacookie2(args);
+		return
+	}
+	if (command == "pippo"){ 
+		pippo(args);
+		return
+	}
+	if (command == "messagebox"){ 
+		messagebox(args);
+		return
+	}
+	if (command == "minimizza"){ 		
+		minimizza();
+		return
+	}
+	if (command == "passaLO") {
+		passaLO();
+		return
+	}
+	if (command == "geogebra") {
+		esercitazione(args);
+		return
+	}
+	if (command == "dispensa"){ 		
+		window.open("dispensa.pdf","Dispensa","scrollbars=1,resizable=1,left=0,top=0");
+		return
+	}
+
+
+	//var playerObj = g_bIsInternetExplorer ? player : document.chiudiFin;
+	var playerObj = document.chiudiFin;
+	// no-op if no SCORM API is available
+	var myArgs = new String(args);
+	var cmd = new String(command);
+	var v = "";
+	var err = "true";
+	var arg1, arg2, n, s, i;
+	var sep = myArgs.indexOf(",");
+	if (sep > -1){
+		arg1 = myArgs.substr(0, sep); // Name of data element to get from API
+		arg2 = myArgs.substr(sep+1) 	// Name of Flash movie variable to set
+	} else {
+		arg1 = myArgs
+	}
+	if (!APIOK()) return;
+	if (cmd.substring(0,3) == "LMS"){
+		// Handle "LMSxxx" FScommands (compatible with fsSCORM html template)
+		if ( cmd == "LMSInitialize" ){
+			err = (APIOK() + "")
+			// The actual LMSInitialize is called automatically by the template
+		}	else if ( cmd == "LMSSetValue" ){
+			err = SCOSetValue(arg1,arg2)
+		} else if ( cmd == "LMSFinish" ){
+			err = SCOFinish()
+			// Handled automatically by the template, but the movie
+			// may call it earlier.
+		}	else if ( cmd == "LMSCommit" ){
+			err = SCOCommit()
+		}	else if ((arg2) && (arg2.length > 0)){
+			if (cmd == "LMSGetValue") {
+				playerObj.setVariable(arg2, SCOGetValue(arg1));
+			}	else if ( cmd == "LMSGetLastError") {
+				playerObj.setVariable(arg2, SCOGetLastError(arg1));
+			}	else if ( cmd == "LMSGetErrorString") {
+				playerObj.setVariable(arg2, SCOGetLastError(arg1));
+			}	else if ( cmd == "LMSGetDiagnostic") {
+				playerObj.setVariable(arg2, SCOGetDiagnostic(arg1));
+			}	else {
+				// for unknown LMSGetxxxx extension
+				v = eval('g_objAPI.' + cmd + '(\"' + arg1 + '\")');
+				playerObj.setVariable(arg2,v);
+			}
+		} else if (cmd.substring(0,3) == "LMSGet") {
+			err = "-2: No Flash variable specified"
+		}
+		// end of handling "LMSxxx" cmds
+	} else if ((cmd.substring(0,6) == "MM_cmi")||(cmd.substring(0,6) == "CMISet")) {
+		// Handle a Macromedia Learning Components FScommands.
+		// These are using AICC HACP data model conventions,
+		// so remap data from AICC to SCORM as necessary.
+		var F_intData = myArgs.split(";");
+		if (cmd == "MM_cmiSendInteractionInfo") {
+			n = SCOGetValue("cmi.interactions._count");
+			s = "cmi.interactions." + n + ".";
+			// Catch gross errors to avoid SCORM compliance test failure
+			// If no ID is provided for this interaction, we cannot record it
+			v = F_intData[2]
+			if ((v == null) || (v == "")) err = 201; // If no ID, makes no sense to record
+			if (err =="true"){
+				err = SCOSetValue(s + "id", v)
+			}
+			if (err =="true"){
+				var re = new RegExp("[{}]","g")
+				for (i=1; (i<=9) && (err=="true"); i++){
+					v = F_intData[i];
+					if ((v == null) || (v == "")) continue
+					if (i == 1){
+						err = SCOSetValue(s + "time", v)
+					} else if (i == 3){
+						err = SCOSetValue(s + "objectives.0.id", v)
+					} else if (i == 4){
+						err = SCOSetValue(s + "type", normalizeInteractionType(v))
+					} else if (i == 5){
+						// strip out "{" and "}" from response
+						v = v.replace(re, "");
+						err = SCOSetValue(s + "correct_responses.0.pattern", v)
+					} else if (i == 6){
+						// strip out "{" and "}" from response
+						v = v.replace(re, "");
+						err = SCOSetValue(s + "student_response", v)
+					} else if (i == 7){
+						err = SCOSetValue(s + "result", normalizeInteractionResult(v))
+					} else if (i == 8){
+						err = SCOSetValue(s + "weighting", v)
+					} else if (i == 9){
+						err = SCOSetValue(s + "latency", v)
+					}
+				}
+			}
+		} else if (cmd == "MM_cmiSendObjectiveInfo"){
+			err = SCOSetObjectiveData(F_intData[1], ".score.raw", F_intData[2])
+			if (err=="true"){
+				SCOSetObjectiveData(F_intData[1], ".status", normalizeStatus(F_intData[3]))
+			}
+		} else if ((cmd=="CMISetScore") ||(cmd=="MM_cmiSendScore")){
+			err = SCOSetValue("cmi.core.score.raw", F_intData[0]);
+		} else if ((cmd=="CMISetStatus") || (cmd=="MM_cmiSetLessonStatus")){
+			err = SCOSetValue("cmi.core.lesson_status", normalizeStatus(F_intData[0]))
+		} else if (cmd=="CMISetTime"){
+			err = SCOSetValue("cmi.core.session_time", F_intData[0])
+		} else if (cmd=="CMISetCompleted"){
+			err = SCOSetStatusCompleted()
+		} else if (cmd=="CMISetStarted"){
+			err = SCOSetValue("cmi.core.lesson_status", "incomplete")
+		} else if (cmd=="CMISetPassed"){
+			err = SCOSetValue("cmi.core.lesson_status", "passed")
+		} else if (cmd=="CMISetFailed"){
+			err = SCOSetValue("cmi.core.lesson_status", "failed")
+		} else if (cmd=="CMISetData"){
+			err = SCOSetValue("cmi.suspend_data", F_intData[0])
+		} else if (cmd=="CMISetLocation"){
+			err = SCOSetValue("cmi.core.lesson_location", F_intData[0])
+		} else if (cmd=="CMISetTimedOut"){
+			err = SCOSetValue("cmi.core.exit", "time-out")
+		} // Other Learning Component FScommands are no-ops in this context
+	} else {
+		if (cmd=="CMIFinish" || cmd=="CMIExitAU"){
+			err = SCOFinish()
+		} else if (cmd=="CMIInitialize" || cmd=="MM_StartSession"){
+			err = SCOInitialize()
+		} else {
+			// Unknown command; may be invoking an API extension
+			// If commands comes with a 2nd argument, assume a value is expected
+			// otherwise assume it is just a cmd
+			if (eval('g_objAPI.' + cmd)) {
+				v = eval('g_objAPI.' + cmd + '(\"' + arg1 + '\")');
+				if ((arg2) && (arg2.length > 0)){
+					playerObj.SetVariable(arg2,v)
+				} else {
+					err = v
+				}
+			} else {
+				err = "false"
+			}
+		}
+	}
+	// End of command translation and processing
+	// handle detected errors, such LMS error returns
+	if ((g_bShowApiErrors) && (err != "true")) {
+		AlertUserOfAPIError(ExpandString(g_strFSAPIError, err, cmd, args))
+	}
+	return err
+}
+//-->
+</script>
+<SCRIPT LANGUAGE="VBScript">
+<!-- 
+//  Per IE.
+
+Sub chiudiFin_FSCommand(ByVal command, ByVal args)
+    call chiudiFin_DoFSCommand(command, args)
+end sub
+
+//-->
+</SCRIPT>
+<body bgcolor="#000000" scroll="no" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" onLoad="setBrowser()" onunload="SCOFinish()">
+<table width="100%" height="100%" border="0" cellpadding="0" cellspacing="0"> 
+<tr> 
+<td align="center" valign="middle">
+<script type="text/javascript" encoding="UTF-8">writeFlashContent(idLezione());</script>
+<script type="text/javascript" language="JavaScript" name="earlyInit" encoding="UTF-8">
+<!--
+
+// Look for SCORM API
+g_varInterval = setInterval('initAPI()', 300);
+//window.opener.chiudiFinestra();
+//-->
+</script>
+</td> 
+</tr></table>
+</body>
+</html>

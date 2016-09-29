@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<coursestructure tracking="SCORM1.2">
+<module>
+<num_m>1</num_m>
+<name_m>Points of Interest GE</name_m>
+<num_u>1</num_u>
+<unit>
+<name_u>Why & How</name_u>
+<num_s>1</num_s>
+<screenshoot>
+<name_s>Web seminar</name_s>
+</screenshoot>
+</unit>
+</module>
+</coursestructure>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2" xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" identifier="fiware01" version="01" xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd http://www.imsglobal.org/xsd/imsmd_rootv1p2p1 imsmd_rootv1p2p1.xsd http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
+	<organizations default="FI-WARE">
+		<organization identifier="FI-WARE" structure="heirarchical">
+			<title>POI Data Provider</title>
+			<item identifier="TU01" isvisible="true">
+				<title>Introduction</title>
+				<item identifier="TU01_LO01" identifierref="TU01_LO01_IDREF" isvisible="true">
+					<title>Why and How</title>
+				</item>
+			</item>
+		</organization>
+	</organizations>
+	<resources>
+		<resource identifier="TU01_LO01_IDREF" type="webcontent" href="TU01_LO01.htm" adlcp:scormtype="sco">
+			<file href="TU01_LO01.htm" />
+		</resource>
+	</resources>
+</manifest>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="iso-8859-1" ?> 
+<variabili>
+	<!-- Fruizione -->
+	<variabile name="conf_fruizione" 		descrizione="Prima fruizione bloccata (1=si 0=no)"	 			value="0" 		/>
+	<variabile name="conf_bookmark" 		descrizione="Riparte dall'ultima schermata vista (1=sì 0=no)"	value="1" 		/>
+	<variabile name="conf_bloccanaviga"		descrizione="Navigazione bloccata (1=sì 0=no)"					value="0" 		/>
+	<variabile name="conf_sceltadispensa"	descrizione="Scelta modalità navigazione all'avvio (1=sì 0=no)"	value="0" 		/>
+	<variabile name="conf_sceltabookmark"	descrizione="Scelta se usare o meno il bookmark (1=sì 0=no)"	value="1" 		/>
+		
+
+	
+	<!-- Configurazione ambiente Indice delle schermate -->
+	<variabile name="conf_schermataY" 		descrizione="Coordinata Y del template" 						value="100" 	/>
+	<variabile name="conf_schermataX" 		descrizione="Coordinata X del template" 						value="30" 		/>
+	<variabile name="conf_indiceMargine" 	descrizione="Distanza verticale tra i pulsanti dell'indice" 	value="35" 		/>
+	<variabile name="conf_indiceTipo" 		descrizione="Tipologia indice (1=colonne 2=scroll 3=spalla)"	value="3" 		/>
+	<variabile name="conf_indiceColonne" 	descrizione="Numero dei pulsanti da mostrare nell'indice" 		value="13" 		/>
+
+		
+</variabili>

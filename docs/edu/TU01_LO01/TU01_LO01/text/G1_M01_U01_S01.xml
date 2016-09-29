@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<texts>
+<text cuepoint="0.01" name="POI Data Provider - Why and How"></text>
+<text cuepoint="10.0" name="Points of Interest - POI"></text>
+<text cuepoint="50.0" name="Contents of this Presentation"></text>
+<text cuepoint="75.0" name="Where a POI System Might be Useful"></text>
+<text cuepoint="107.0" name="What does a POI Data Provider do"></text>
+<text cuepoint="134.0" name="Why to use FI-WARE POI Data Provider"></text>
+<text cuepoint="207.0" name="Using POI Information - Map"></text>
+<text cuepoint="236.0" name="Using POI Information - Augmented Reality"></text>
+<text cuepoint="275.0" name="Using POI Information - Your own needs"></text>
+<text cuepoint="330.0" name="Developing a POI system using FI-WARE POI GE"></text>
+<text cuepoint="393.0" name="Development prerequisites"></text>
+<text cuepoint="443.0" name="Modular and Distributed Data"></text>
+<text cuepoint="597.0" name="Components in JSON Format"></text>
+<text cuepoint="629.0" name="Multilingual Data Items"></text>
+<text cuepoint="670.0" name="Default language in Multilingual Data"></text>
+<text cuepoint="718.0" name="Spatial Searches"></text>
+<text cuepoint="791.0" name="Additional Data Retrieval"></text>
+<text cuepoint="832.0" name="Creating a New POI"></text>
+<text cuepoint="880.0" name="Updating POI Data"></text>
+<text cuepoint="977.0" name="Deleting a POI"></text>
+<text cuepoint="995.0" name="The End"></text>
+</texts>
