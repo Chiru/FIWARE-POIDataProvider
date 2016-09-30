@@ -94,14 +94,17 @@ var user_schema = {
       "description": "DO NOT EDIT! Information to identify the version of the data component.",
       "$ref": "#/definitions/update_stamp"
     },
-    "identifications": {
-      "description": "key is <auth_provider>:<auth_id>",
-      "type": "object",
-      "additionalProperties": {
-        "type": "boolean"
-      }
+    "categories": {
+      "title": "Categories",
+      "description": "Descriptive tags for narrowing the search: cafe, museum, etc.",
+      "type": "array",
+      "items": {
+        "type": "string"/*,
+        "fw_type": "poi_category"*/
+      },
+      "minItems": 1
     }
-  },
+},
   "required": [
     "name",
     "email"

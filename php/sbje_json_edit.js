@@ -1,4 +1,4 @@
-/* sbje_json_edit.js 0.3 2016-08-16 Ari Okkonen
+/* sbje_json_edit.js 1.0 2016-09-30 Ari Okkonen
 
   Schema Based JSON Edit
   
@@ -45,6 +45,8 @@
     Only minimum functionality is currently available.
     
   Author: Ari Okkonen, University of Oulu, CIE
+  
+  Change log at the end of the file.
 */
 
 "use strict"; // to find undeclared variables etc.
@@ -92,14 +94,28 @@ sbje.key_encode = function (key) {
   var keyc = sbje.symbols.encode[key];
   var next = sbje.symbols.next;
   
-  if (!keyc) {  // new one to the symbol table
-    next = sbje.symbols.next;
-    sbje.symbols.next = next + 1; // next will be different
-    keyc = "sbje_" + next;
-    sbje.symbols.encode[key] = keyc;
-    sbje.symbols.decode[keyc] = key;
+  if (isNaN(key)) {
+    if (!keyc) {  // new one to the symbol table
+      next = sbje.symbols.next;
+      sbje.symbols.next = next + 1; // next will be different
+      keyc = "sbje_" + next;
+      sbje.symbols.encode[key] = keyc;
+      sbje.symbols.decode[keyc] = key;
+    }
+  } else { // numeric index for an array
+    keyc = key;
   }
   return keyc;
+}
+
+sbje.key_decode = function (keyc) {
+  var key = sbje.symbols.decode[keyc];
+  
+  if (!key) { // numeric or something strange
+    key = keyc;
+  }
+  
+  return key;
 }
 
 sbje.section_open = {}; // indicates open sections by "path": true
@@ -182,7 +198,7 @@ sbje.analyze_id = function (id) {
   /* find the correct field */
   sbje.split_path(head_tail.tail, head_tail);
   keyc = head_tail.head;
-  key = sbje.symbols.decode[keyc];
+  key = sbje.key_decode(keyc);
   while (head_tail.tail != null) {
     parent_path = parent_path + "." + keyc;
     parent_node = cur_node;
@@ -192,7 +208,7 @@ sbje.analyze_id = function (id) {
     parent_key = head_tail.head;
     sbje.split_path(head_tail.tail, head_tail);
     keyc = head_tail.head;
-    key = sbje.symbols.decode[keyc];
+    key = sbje.key_decode(keyc);
   }
   cur_schema = sbje.get_effective_schema(cur_schema, binding.schema);
   parent_type = sbje.get_schema_type(cur_schema);
@@ -216,7 +232,7 @@ sbje.analyze_id = function (id) {
   result.target = {
     node: cur_node,
     path: path,
-    key: sbje.symbols.decode[head_tail.head],
+    key: sbje.key_decode(head_tail.head),
     schema: cur_schema,
     type: node_type
   };
@@ -224,7 +240,7 @@ sbje.analyze_id = function (id) {
   result.parent = {
     node: parent_node,
     path: parent_path,
-    key: sbje.symbols.decode[parent_key],
+    key: sbje.key_decode(parent_key),
     schema: parent_schema,
     type: parent_type
   }
@@ -263,7 +279,7 @@ sbje.get_sub_schema = function(schema, keyc) {
   var type;
   var key;
   
-  if(keyc) key = sbje.symbols.decode[keyc];
+  if(keyc) key = sbje.key_decode(keyc);
 */
 sbje.get_sub_schema = function(schema, key) {
   var result = null;
@@ -974,6 +990,7 @@ sbje.remove_form = function (id) {
 /*
   0.2  2014-09-18  aok  delete_field does not delete required data.
   0.3  2016-08-16  aok  Dots allowed in data keys
+  1.0  2016-09-30  aok  Array index key mapping error corrected.
   
 */
 
